@@ -9,8 +9,8 @@ export default function Home() {
       {/* <UserButton 
         afterSignOutUrl="/"
       /> */}
-      <SignIn></SignIn>
-      {/* <SignInButton></SignInButton> */}
+      {/* <SignIn></SignIn> */}
+      <SignInButton></SignInButton>
 
     </div>
   );
