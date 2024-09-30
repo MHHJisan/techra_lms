@@ -25,9 +25,12 @@ import { cn } from "@/lib/utils";
 import { Course } from "@prisma/client";
 
 const formSchema = z.object({
-  description: z.string().min(1, {
-    message: "Description is required",
-  }),
+  description: z
+    .string()
+    .min(1, {
+      message: "Description is required",
+    })
+    .nullable(), // Allows null values but ensures non-null values are valid
 });
 
 interface DescriptionFormProps {
