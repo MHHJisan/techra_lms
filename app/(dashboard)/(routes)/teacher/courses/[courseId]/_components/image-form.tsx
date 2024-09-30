@@ -17,12 +17,14 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
 import { title } from "process";
-import { Pencil, Save } from "lucide-react";
+import { ImageIcon, Pencil, PlusCircle, Save } from "lucide-react";
 import { useState } from "react";
 import toast from "react-hot-toast";
 import { useRouter } from "next/navigation";
 import { cn } from "@/lib/utils";
 import { Course } from "@prisma/client";
+import Image from "next/image";
+import { FileUpload } from "@/components/file-upload";
 
 const formSchema = z.object({
   imageUrl: z.string().min(1, {
@@ -60,57 +62,44 @@ export const ImageForm = ({ initialData, courseId }: ImageFormProps) => {
   };
 
   return (
-    <div className="mt-6 border border-slate-100 rounded-md p-4">
+    <div className="mt-6 border border-slate-100 rounded-md p-4 px-5">
       <div className="font-medium flex items-center justify-between">
         Course Image
         <Button onClick={toggleEdit} variant="ghost">
-          {isEditing ? (
-            <>Cancel</>
-          ) : (
+          {isEditing && <>Cancel</>}
+          {!isEditing && !initialData.imageUrl && (
             <>
-              <Pencil className="h-4 w-4 mr-2" />
-              Edit Image
+              <PlusCircle className="h-4 w-4 mr-2" />
+              Add an image
             </>
           )}
+          {!isEditing && initialData.imageUrl && <>Edit Image</>}
         </Button>
       </div>
-      {!isEditing && (
-        <p
-          className={cn(
-            "text-sm mt-2",
-            !initialData.description && "text-slate-500 italic"
-          )}
-        >
-          {initialData.description || "No description"}
-        </p>
-      )}
+      {!isEditing &&
+        (!initialData.imageUrl ? (
+          <div className="flex items-center justify-center h-60 bg-slate-200 rounded-md">
+            <ImageIcon className="h-10 w-10" text-slate-500 />
+          </div>
+        ) : (
+          <div className="relative aspect-video mt-2">
+            <Image alt="Upload" fill className="" src={initialData.imageUrl} />
+          </div>
+        ))}
       {isEditing && (
-        <Form {...form}>
-          <form
-            onSubmit={form.handleSubmit(onSubmit)}
-            className="space-y-4 mt-4"
-          >
-            <FormField
-              control={form.control}
-              name="imageUrl"
-              render={(field) => (
-                <FormItem>
-                  <FormControl>
-                    <Textarea
-                      disabled={isSubmitting}
-                      placeholder="e.g 'This course is about ...'"
-                      {...field}
-                    />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-            <div className="flex items-center gap-x-2">
-              <Button type="submit">Save</Button>
-            </div>
-          </form>
-        </Form>
+        <div>
+          <FileUpload
+            endPoint="courseImage"
+            onChange={(url) => {
+              if (url) {
+                onSubmit({ imageUrl: url });
+              }
+            }}
+          />
+          <div className="text-xs text-muted-foreground mt-4">
+            16:9 aspect ratio recommended
+          </div>
+        </div>
       )}
     </div>
   );
