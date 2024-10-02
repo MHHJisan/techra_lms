@@ -25,12 +25,6 @@ export async function PATCH(
     });
 
 
-if (!course) {
-  console.log("No course found with the given id:", courseId);
-} else {
-  console.log("Course found:", course);
-}
-
     console.log("Course:", course);
 
     if (!course) {
