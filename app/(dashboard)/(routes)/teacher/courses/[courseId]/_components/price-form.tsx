@@ -23,6 +23,7 @@ import toast from "react-hot-toast";
 import { useRouter } from "next/navigation";
 import { cn } from "@/lib/utils";
 import { Course } from "@prisma/client";
+import { formatPrice } from "@/lib/fomat";
 
 const formSchema = z.object({
   price: z.preprocess(
@@ -84,7 +85,9 @@ export const PriceForm = ({ initialData, courseId }: PriceFormProps) => {
             !initialData.price && "text-slate-500 italic"
           )}
         >
-          {initialData.price || "No Price is given"}
+          {initialData.price
+            ? formatPrice(initialData.price)
+            : "No price given "}
         </p>
       )}
       {isEditing && (

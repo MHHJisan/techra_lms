@@ -30,6 +30,7 @@ const formSchema = z.object({
     .min(1, {
       message: "Description is required",
     })
+    .trim() // Ensure spaces aren't counted as valid input
     .nullable(), // Allows null values but ensures non-null values are valid
 });
 
@@ -61,7 +62,7 @@ export const DescriptionForm = ({
       await axios.patch(`/api/courses/${courseId}`, values);
       toast.success("Cours Updated");
       toggleEdit();
-      router;
+      router.refresh();
     } catch {
       toast.error("Something went wrong");
     }
@@ -107,7 +108,8 @@ export const DescriptionForm = ({
                     <Textarea
                       disabled={isSubmitting}
                       placeholder="e.g 'This course is about ...'"
-                      {...field}
+                      value={field.value ?? ""} // Default to empty string if value is null
+                      onChange={(e) => field.onChange(e.target.value)} // Handle changes
                     />
                   </FormControl>
                   <FormMessage />

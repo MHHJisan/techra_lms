@@ -25,14 +25,11 @@ export async function PATCH(
     });
 
 
-    console.log("Course:", course);
-
     if (!course) {
         console.log("Course-2", course);
       return new NextResponse("Course not found", { status: 404 });
     }
 
-    console.log("UserId", userId);
     console.log("course.userId=", course.userId);
     if (course.userId !== userId) {
       return new NextResponse("Forbidden", { status: 403 });
