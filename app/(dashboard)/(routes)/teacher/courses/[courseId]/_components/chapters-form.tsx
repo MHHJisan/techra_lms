@@ -23,6 +23,7 @@ import toast from "react-hot-toast";
 import { useRouter } from "next/navigation";
 import { cn } from "@/lib/utils";
 import { Chapter, Course } from "@prisma/client";
+import { ChaptersList } from "./chapters-list";
 
 const formSchema = z.object({
   title: z.string().min(1),
@@ -111,7 +112,11 @@ export const ChaptersForm = ({ initialData, courseId }: ChaptersFormProps) => {
           )}
         >
           {!initialData.chapters.length && "No chapters"}
-          {/* {TODO: Add a list of chapters} */}
+          <ChaptersList
+            onEdit={() => {}}
+            onReorder={() => {}}
+            items={initialData.chapters || []}
+          />
         </div>
       )}
       {!isCreating && (
