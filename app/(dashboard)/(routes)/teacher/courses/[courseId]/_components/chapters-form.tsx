@@ -18,7 +18,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
 import { title } from "process";
 import { PlusCircle, Save } from "lucide-react";
-import { use, useState } from "react";
+import { use, useEffect, useState } from "react";
 import toast from "react-hot-toast";
 import { useRouter } from "next/navigation";
 import { cn } from "@/lib/utils";
@@ -26,7 +26,7 @@ import { Chapter, Course } from "@prisma/client";
 import { ChaptersList } from "./chapters-list";
 
 const formSchema = z.object({
-  title: z.string().min(1),
+  title: z.string().min(1, "Title is required"),
 });
 
 interface ChaptersFormProps {
@@ -49,8 +49,15 @@ export const ChaptersForm = ({ initialData, courseId }: ChaptersFormProps) => {
     },
   });
 
-  const { isSubmitting, isValid } = form.formState;
+  const { isSubmitting, isValid, errors } = form.formState;
+
+  useEffect(() => {
+    console.log("Form validity:", isValid);
+    console.log("Form errors:", errors);
+  }, [isValid, errors]);
+
   const onSubmit = async (values: z.infer<typeof formSchema>) => {
+    console.log("Form values:", values);
     try {
       await axios.post(`/api/courses/${courseId}/chapters`, values);
       toast.success("Chapter Created");
@@ -58,6 +65,23 @@ export const ChaptersForm = ({ initialData, courseId }: ChaptersFormProps) => {
       router.refresh();
     } catch {
       toast.error("Something went wrong");
+      console.error("Error while creating chapter:", Error);
+    }
+  };
+
+  const onReorder = async (updateData: { id: string; position: number }[]) => {
+    try {
+      setIsUpdating(true);
+
+      await axios.put(`/api/courses/${courseId}/chapters/reorder`, {
+        list: updateData,
+      });
+      toast.success("Chapters reordered");
+      router.refresh();
+    } catch {
+      toast.error("Something went wrong here");
+    } finally {
+      setIsUpdating(false);
     }
   };
 
@@ -91,7 +115,7 @@ export const ChaptersForm = ({ initialData, courseId }: ChaptersFormProps) => {
                     <Input
                       disabled={isSubmitting}
                       placeholder="e.g 'Introduction to the course ...'"
-                      {...field}
+                      {...field.field}
                       // value={field.value ?? ""} // Default to empty string if value is null
                       // onChange={(e) => field.onChange(e.target.value)} // Handle changes
                     />
@@ -114,7 +138,7 @@ export const ChaptersForm = ({ initialData, courseId }: ChaptersFormProps) => {
           {!initialData.chapters.length && "No chapters"}
           <ChaptersList
             onEdit={() => {}}
-            onReorder={() => {}}
+            onReorder={onReorder}
             items={initialData.chapters || []}
           />
         </div>
