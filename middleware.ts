@@ -11,6 +11,8 @@ export const config = {
     // Apply Clerk middleware to the /teacher/courses routes
     '/teacher/courses/:path*',  // Protect all routes under /teacher/courses
     '/api/:path*',  
-    '/teacher/courses/:courseId/chapters/:chapterId',            // Also protect API routes if needed
+    
   ],
 };
+
+//'/teacher/courses/:courseId/chapters/:chapterId',            // Also protect API routes if needed
