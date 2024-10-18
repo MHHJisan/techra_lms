@@ -10,6 +10,7 @@ export const config = {
     '/(api|trpc)(.*)',
     // Apply Clerk middleware to the /teacher/courses routes
     '/teacher/courses/:path*',  // Protect all routes under /teacher/courses
-    '/api/:path*',              // Also protect API routes if needed
+    '/api/:path*',  
+    '/teacher/courses/:courseId/chapters/:chapterId',            // Also protect API routes if needed
   ],
 };
