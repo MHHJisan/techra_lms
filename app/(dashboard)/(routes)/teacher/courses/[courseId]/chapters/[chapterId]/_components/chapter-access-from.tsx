@@ -76,14 +76,14 @@ export const ChapterAccessForm = ({
   return (
     <div className="mt-6 border border-slate-100 rounded-md p-4">
       <div className="font-medium flex items-center justify-between">
-        Chapter Description
+        Chapter Access Settings
         <Button onClick={toggleEdit} variant="ghost">
           {isEditing ? (
             <>Cancel</>
           ) : (
             <>
               <Pencil className="h-4 w-4 mr-2" />
-              Edit Description
+              Edit Access
             </>
           )}
         </Button>
@@ -95,9 +95,10 @@ export const ChapterAccessForm = ({
             !initialData.description && "text-slate-500 italic"
           )}
         >
-          {!initialData.description && "No description"}
-          {initialData.description && (
-            <Preview value={initialData.description} />
+          {initialData.isFree ? (
+            <>This Chapter is Free for Preview</>
+          ) : (
+            <>This Chapter is not Free for Preview</>
           )}
         </div>
       )}
@@ -115,7 +116,7 @@ export const ChapterAccessForm = ({
                   <FormControl>
                     <Checkbox
                       checked={field.value}
-                      onCheckedChange={field.onChange}
+                      onCheckedChange={(checked) => field.onChange(checked)}
                     />
                   </FormControl>
                   <div className="spacy-y-1 leading-none">

@@ -1,7 +1,7 @@
 import { IconBadge } from "@/components/icon-badge";
 import { db } from "@/lib/db";
 import { auth } from "@clerk/nextjs/server";
-import { ArrowLeft, Eye, LayoutDashboard } from "lucide-react";
+import { ArrowLeft, Eye, LayoutDashboard, Video } from "lucide-react";
 import Link from "next/link";
 import { redirect } from "next/navigation";
 import { ChapterTitleForm } from "./_components/chapter-title-from";
@@ -60,13 +60,11 @@ const ChapterIdPage = async ({
           </div>
         </div>
       </div>
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-16">
-        <div className="space-y-4">
-          <div>
-            <div className="flex items-center gap-x-2">
-              <IconBadge icon={LayoutDashboard} variant="success" size="sm" />
-              <h2 className="text-xl">Customise your chapter</h2>
-            </div>
+      <div className="grid grid-cols-12 gap-x-6 mt-16">
+        <div className="col-span-6 space-y-4">
+          <div className="flex items-center gap-x-2">
+            <IconBadge icon={LayoutDashboard} variant="success" size="sm" />
+            <h2 className="text-xl">Customise your chapter</h2>
           </div>
           <ChapterTitleForm
             initialData={chapter}
@@ -89,6 +87,13 @@ const ChapterIdPage = async ({
             courseId={params.courseId}
             chapterId={params.chapterId}
           />
+        </div>
+        {/* Right Section - Add a video */}
+        <div className="col-span-6">
+          <div className="flex items-center gap-x-2">
+            <IconBadge icon={Video} />
+            <h2 className="text-xl">Add a video</h2>
+          </div>
         </div>
       </div>
     </div>
