@@ -6,6 +6,8 @@ import React, { useMemo } from "react";
 
 import "react-quill/dist/quill.bubble.css";
 
+import "@/components/editor";
+
 interface PreviewProps {
   onChange: (value: string) => void;
   value: string;
