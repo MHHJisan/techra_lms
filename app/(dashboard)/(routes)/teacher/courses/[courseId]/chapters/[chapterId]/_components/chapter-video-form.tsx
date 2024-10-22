@@ -2,16 +2,16 @@
 
 import * as z from "zod";
 import axios from "axios";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { useForm } from "react-hook-form";
-
-import {
-  Form,
-  FormControl,
-  FormField,
-  FormItem,
-  FormMessage,
-} from "@/components/ui/form";
+// import { zodResolver } from "@hookform/resolvers/zod";
+// import { useForm } from "react-hook-form";
+import MuxPlayer from "@mux/mux-player-react";
+// import {
+//   Form,
+//   FormControl,
+//   FormField,
+//   FormItem,
+//   FormMessage,
+// } from "@/components/ui/form";
 
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -53,11 +53,11 @@ export const ChapterVideoForm = ({
         `/api/courses/${courseId}/chapters/${chapterId}`,
         values
       );
-      toast.success("Cours Updated");
+      toast.success("Course Updated");
       toggleEdit();
-      router;
+      router.refresh();
     } catch {
-      toast.error("Something went wrong");
+      toast.error("Something went wrong in video Upload");
     }
   };
 
@@ -82,7 +82,9 @@ export const ChapterVideoForm = ({
             <VideoIcon className="h-10 w-10" text-slate-500 />
           </div>
         ) : (
-          <div className="relative aspect-video mt-2">Video Uploaded</div>
+          <div className="relative aspect-video mt-2">
+            <MuxPlayer playbackId={initialData?.muxData?.playbackId || ""} />
+          </div>
         ))}
       {isEditing && (
         <div>
