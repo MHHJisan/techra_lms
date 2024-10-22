@@ -13,10 +13,8 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 
-import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
-import { title } from "process";
+
 import { Pencil, Save } from "lucide-react";
 import { useState } from "react";
 import toast from "react-hot-toast";
@@ -24,7 +22,6 @@ import { useRouter } from "next/navigation";
 import { cn } from "@/lib/utils";
 import { Chapter, Course } from "@prisma/client";
 import { Editor } from "@/components/editor";
-import { init } from "next/dist/compiled/webpack/webpack";
 import { Preview } from "@/components/preview";
 
 const formSchema = z.object({

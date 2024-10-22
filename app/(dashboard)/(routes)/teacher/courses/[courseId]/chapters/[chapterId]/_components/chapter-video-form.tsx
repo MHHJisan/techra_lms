@@ -2,28 +2,15 @@
 
 import * as z from "zod";
 import axios from "axios";
-// import { zodResolver } from "@hookform/resolvers/zod";
-// import { useForm } from "react-hook-form";
-import MuxPlayer from "@mux/mux-player-react";
-// import {
-//   Form,
-//   FormControl,
-//   FormField,
-//   FormItem,
-//   FormMessage,
-// } from "@/components/ui/form";
 
-import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";
+import MuxPlayer from "@mux/mux-player-react";
+
 import { Button } from "@/components/ui/button";
-import { title } from "process";
-import { ImageIcon, Pencil, PlusCircle, Save, VideoIcon } from "lucide-react";
+import { PlusCircle, VideoIcon } from "lucide-react";
 import { useState } from "react";
 import toast from "react-hot-toast";
 import { useRouter } from "next/navigation";
-import { cn } from "@/lib/utils";
 import { Chapter, Course, MuxData } from "@prisma/client";
-import Image from "next/image";
 import { FileUpload } from "@/components/file-upload";
 
 const formSchema = z.object({
