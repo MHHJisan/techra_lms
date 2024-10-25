@@ -24,20 +24,15 @@ import { useRouter } from "next/navigation";
 import { cn } from "@/lib/utils";
 import { Course } from "@prisma/client";
 
-const formSchema = z.object({
-  description: z
-    .string()
-    .min(1, {
-      message: "Description is required",
-    })
-    .trim() // Ensure spaces aren't counted as valid input
-    .nullable(), // Allows null values but ensures non-null values are valid
-});
-
 interface DescriptionFormProps {
   initialData: Course;
   courseId: String;
 }
+
+// Include description in the schema
+const formSchema = z.object({
+  description: z.string().optional(), // Make description optional
+});
 
 export const DescriptionForm = ({
   initialData,
@@ -52,15 +47,16 @@ export const DescriptionForm = ({
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
-      description: initialData?.description || "",
+      description: initialData?.description || "", // Add description here to match the schema
     },
   });
 
   const { isSubmitting, isValid } = form.formState;
+
   const onSubmit = async (values: z.infer<typeof formSchema>) => {
     try {
       await axios.patch(`/api/courses/${courseId}`, values);
-      toast.success("Cours Updated");
+      toast.success("Course Updated");
       toggleEdit();
       router.refresh();
     } catch {
@@ -102,10 +98,11 @@ export const DescriptionForm = ({
             <FormField
               control={form.control}
               name="description"
-              render={(field) => (
+              render={({ field }) => (
                 <FormItem>
                   <FormControl>
                     <Textarea
+                      {...field} // Use field props here for binding
                       disabled={isSubmitting}
                       placeholder="e.g 'This course is about ...'"
                     />
