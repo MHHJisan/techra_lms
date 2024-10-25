@@ -39,20 +39,20 @@ export const Combobox = ({ options, value, onChange }: ComboboxProps) => {
         >
           {value
             ? options.find((option) => option.value === value)?.label
-            : "Select option..."}
+            : "Select a option..."}
           <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
         </Button>
       </PopoverTrigger>
       <PopoverContent className="w-full p-0">
         <Command>
-          <CommandInput placeholder="Search framework..." />
+          <CommandInput placeholder="Search a framework..." />
           <CommandList>
             <CommandEmpty>No Option found.</CommandEmpty>
             <CommandGroup>
               {options.map((option) => (
                 <CommandItem
                   key={option.value}
-                  value={option.value}
+                  // value={option.value}
                   onSelect={() => {
                     onChange(option.value === value ? "" : option.value);
                     setOpen(false);

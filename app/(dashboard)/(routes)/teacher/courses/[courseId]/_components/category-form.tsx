@@ -27,7 +27,7 @@ import { Course } from "@prisma/client";
 import { Combobox } from "@/components/ui/combobox";
 
 const formSchema = z.object({
-  categoryId: z.string().min(1), // Allows null values but ensures non-null values are valid
+  categoryId: z.string().optional(), // Allows null values but ensures non-null values are valid
 });
 
 interface CategoryFormProps {
