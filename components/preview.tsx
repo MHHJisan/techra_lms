@@ -9,11 +9,10 @@ import "react-quill/dist/quill.bubble.css";
 import "@/components/editor";
 
 interface PreviewProps {
-  onChange: (value: string) => void;
   value: string;
 }
 
-export const Preview = ({ onChange, value }: EditorProps) => {
+export const Preview = ({ value }: PreviewProps) => {
   const ReactQuill = useMemo(
     () => dynamic(() => import("react-quill"), { ssr: false }),
     []

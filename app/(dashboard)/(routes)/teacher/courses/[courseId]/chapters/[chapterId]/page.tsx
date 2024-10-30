@@ -36,6 +36,7 @@ const ChapterIdPage = async ({
     return redirect("/");
   }
 
+  
   const requiredFields = [chapter.title, chapter.description, chapter.videoUrl];
 
   const totalFields = requiredFields.length;
@@ -47,6 +48,7 @@ const ChapterIdPage = async ({
 
   return (
     <>
+    
       {!chapter.isPublished && (
         <Banner
           variant="warning"
