@@ -13,6 +13,8 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 
+
+
 import { Button } from "@/components/ui/button";
 
 import { Pencil, Save } from "lucide-react";
@@ -24,15 +26,17 @@ import { Chapter, Course } from "@prisma/client";
 import { Editor } from "@/components/editor";
 import { Preview } from "@/components/preview";
 
-const formSchema = z.object({
-  description: z.string().min(1),
-});
-
 interface ChapterDescriptionFormProps {
   initialData: Chapter;
   courseId: string;
   chapterId: string;
+
 }
+
+// Include description in the schema
+const formSchema = z.object({
+  description: z.string().optional(), // Make description optional
+});
 
 export const ChapterDescriptionForm = ({
   initialData,
@@ -48,17 +52,15 @@ export const ChapterDescriptionForm = ({
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
-      description: initialData?.description || "",
+      description: initialData?.description || "", // Add description here to match the schema
     },
   });
 
-  const { isSubmitting, isValid } = form.formState;
+  // const { isSubmitting, isValid } = form.formState;
+
   const onSubmit = async (values: z.infer<typeof formSchema>) => {
     try {
-      await axios.patch(
-        `/api/courses/${courseId}/chapters/${chapterId}`,
-        values
-      );
+      await axios.patch(`/api/courses/${courseId}/chapters/${chapterId}`, values);
       toast.success("Chapter Updated");
       toggleEdit();
       router.refresh();
@@ -89,7 +91,7 @@ export const ChapterDescriptionForm = ({
             !initialData.description && "text-slate-500 italic"
           )}
         >
-          {!initialData.description && "No description"}
+          {!initialData.description  && "No description"}
           {initialData.description && (
             <Preview value={initialData.description} />
           )}
@@ -104,10 +106,13 @@ export const ChapterDescriptionForm = ({
             <FormField
               control={form.control}
               name="description"
-              render={(field) => (
+              render={({ field }) => (
                 <FormItem>
                   <FormControl>
-                    <Editor {...field.field} />
+                  <Editor 
+          {...field} 
+          value={field.value || ""} // Ensure value is a string
+        />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
