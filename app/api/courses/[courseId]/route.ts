@@ -51,8 +51,10 @@ export async function  DELETE(req: Request, {params}: {params: {courseId: string
     const deletedCourse = await db.course.delete({
       where: {
         id: params.courseId,
-      }
+      },
     })
+
+    return NextResponse.json(deletedCourse);
 
   }catch(error) {
     console.log("[COURSE_ID_DELETE]", error)
