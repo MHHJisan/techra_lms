@@ -38,7 +38,6 @@ const iconMap: Record<Category["name"], IconType> = {
   "Electric and Electronics Engineering": FcEngineering,
   "Industrial and Production Engineering": FcEngineering,
   Mathematics: FcAutomatic,
-  Physics: FcCopyright,
   "Art & Design": FcCameraAddon,
   Astronomy: FcBiohazard,
   "Data Science": FcDatabase,

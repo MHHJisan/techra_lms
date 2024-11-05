@@ -14,11 +14,11 @@ type coureWithProgressWithCategory = Course & {
 
 type GetCourses = {
   userId: string;
-  title: string;
-  categoryId: string;
+  title?: string;
+  categoryId?: string;
 };
 
-export const GetCouses = async ({
+export const getCourses = async ({
   userId,
   title,
   categoryId,
