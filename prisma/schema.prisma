@@ -5,7 +5,7 @@
 // Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
 
 generator client {
-  provider = "prisma-client-js"
+  provider        = "prisma-client-js"
   previewFeatures = ["fullTextSearch", "fullTextIndex"]
 }
 
@@ -16,8 +16,10 @@ datasource db {
 }
 
 model Course {
-  id          String  @id @default(uuid())
-  userId      String
+  id     String @id @default(uuid())
+  userId String
+  user   User   @relation("UserCourses", fields: [userId], references: [id], onDelete: Cascade)
+
   title       String  @db.Text
   description String? @db.Text
   imageUrl    String? @db.Text
@@ -89,8 +91,10 @@ model MuxData {
 }
 
 model UserProgress {
-  id          String  @id @default(uuid())
-  userId      String
+  id     String @id @default(uuid())
+  userId String
+  user   User   @relation("UserProgress", fields: [userId], references: [id])
+
   chapterId   String
   chapter     Chapter @relation(fields: [chapterId], references: [id], onDelete: Cascade)
   isCompleted Boolean @default(false)
@@ -105,6 +109,7 @@ model UserProgress {
 model Purchase {
   id     String @id @default(uuid())
   userId String
+  user   User   @relation("UserPurchases", fields: [userId], references: [id])
 
   courseId String
   course   Course @relation(fields: [courseId], references: [id], onDelete: Cascade)
@@ -112,16 +117,35 @@ model Purchase {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-
-  @@index([courseId])
   @@unique([userId, courseId])
+  @@index([courseId])
 }
 
 model StripeCustomer {
-  id               String @id @default(uuid())
-  userId           String @unique
+  id     String @id @default(uuid())
+  userId String @unique
+  user   User   @relation(fields: [userId], references: [id])
+
   stripeCustomerId String @unique
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt()
+}
+
+model User {
+  id        String  @id @default(uuid()) // Primary key
+  clerkId   String  @unique // Clerk's user ID
+  email     String  @unique
+  firstName String?
+  lastName  String?
+  imageUrl  String? @db.Text
+  role      String? @default("user") // Optional role
+
+  courses        Course[]        @relation("UserCourses")
+  purchases      Purchase[]      @relation("UserPurchases")
+  userProgress   UserProgress[]  @relation("UserProgress")
+  stripeCustomer StripeCustomer?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 }
