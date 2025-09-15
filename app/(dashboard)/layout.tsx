@@ -4,7 +4,7 @@ import { Sidebar } from "./_components/sidebar";
 import type { Metadata } from "next";
 
 export const metadata: Metadata = {
-  title: "Octagon Learning",
+  title: "Techra Learning Center",
   description: "A description of your website",
 };
 

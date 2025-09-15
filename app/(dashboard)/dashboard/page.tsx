@@ -27,7 +27,7 @@ export default async function DashboardPage() {
 
   return (
     <div>
-      <h1>
+      <h1 className="p-6 text-xl">
         Welcome to your dashboard,{" "}
         <span className="text-xl font-bold text-green-500">{username}!</span>
       </h1>
