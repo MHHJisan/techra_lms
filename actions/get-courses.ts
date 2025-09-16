@@ -3,8 +3,6 @@ import { Category, Course } from "@prisma/client";
 import { getProgress } from "@/actions/get-progress";
 
 import { db } from "@/lib/db";
-import { title } from "process";
-import { tuple } from "zod";
 
 type coureWithProgressWithCategory = Course & {
   category: Category | null;
@@ -13,7 +11,7 @@ type coureWithProgressWithCategory = Course & {
 };
 
 type GetCourses = {
-  userId: string;
+  userId?: string;
   title?: string;
   categoryId?: string;
 };
@@ -27,9 +25,7 @@ export const getCourses = async ({
     const courses = await db.course.findMany({
       where: {
         isPublished: true,
-        title: {
-          contains: title,
-        },
+        title: title ? { contains: title } : undefined,
         categoryId,
       },
       include: {
@@ -42,11 +38,13 @@ export const getCourses = async ({
             id: true,
           },
         },
-        purchases: {
-          where: {
-            userId,
-          },
-        },
+        purchases: userId
+          ? {
+              where: {
+                userId,
+              },
+            }
+          : false,
       },
       orderBy: {
         createdAt: "desc",
@@ -56,18 +54,23 @@ export const getCourses = async ({
     const couresesWithProgress: coureWithProgressWithCategory[] =
       await Promise.all(
         courses.map(async (course) => {
-          if (course.purchases.length === 0) {
+          // If no userId or no purchases for this user, no progress
+          if (
+            !userId ||
+            ("purchases" in course && course.purchases.length === 0)
+          ) {
             return {
               ...course,
               progress: null,
-            };
+            } as coureWithProgressWithCategory;
           }
+
           const progressPercentage = await getProgress(userId, course.id);
 
           return {
             ...course,
             progress: progressPercentage,
-          };
+          } as coureWithProgressWithCategory;
         })
       );
     return couresesWithProgress;

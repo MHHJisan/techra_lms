@@ -1,15 +1,9 @@
 "use client";
 
-import axios from "axios";
 import MuxPlayer from "@mux/mux-player-react";
 import { Loader2, Lock } from "lucide-react";
 import { useState } from "react";
-import { toast } from "react-hot-toast";
-import { useRouter } from "next/navigation";
-
-import { cn } from "@/lib/utils";
-
-import { useConfettiStore } from "@/hooks/use-confetti";
+import clsx from "clsx";
 
 interface VideoPlayerProps {
   playbackId: string;
@@ -19,41 +13,48 @@ interface VideoPlayerProps {
   isLocked: boolean;
   completeOnEnd: boolean;
   title: string;
+  className?: string;
 }
 
 export const VideoPlayer = ({
   playbackId,
-  courseId,
-  chapterId,
-  nextChapterId,
   isLocked,
-  completeOnEnd,
   title,
+  className,
 }: VideoPlayerProps) => {
   const [isReady, setIsReady] = useState(false);
+
   return (
-    <div className="relative aspect-video w-full md:w-auto">
+    // 16:9 responsive box (zero dependency)
+    <div
+      className="relative w-full rounded-md overflow-hidden bg-black"
+      style={{ paddingTop: "56.25%" }} // 9 / 16 = 0.5625
+    >
+      {/* Loading overlay */}
       {!isReady && !isLocked && (
-        <div className="absolute inset-0 flex items-center justify-center bg-slate-800">
-          <Loader2 className="h-full w-full animate-spin text-secondary" />
+        <div className="absolute inset-0 z-10 flex items-center justify-center bg-slate-800/60">
+          <Loader2 className="h-10 w-10 animate-spin text-secondary" />
         </div>
       )}
+
+      {/* Locked overlay */}
       {isLocked && (
-        <div className="absolute inset-0 flex items-center justify-center bg-slate-800 flex-col gap-y-2 text-secondary">
-          <Lock className="h-8 w-8 " />
+        <div className="absolute inset-0 z-10 flex flex-col items-center justify-center gap-y-2 bg-slate-800 text-secondary">
+          <Lock className="h-8 w-8" />
           <p className="text-sm">This chapter is locked</p>
         </div>
       )}
+
+      {/* Player fills the box */}
       {!isLocked && (
         <MuxPlayer
           title={title}
-          //   className={cn(!isReady && "hidden")}
-          className="w-full h-full"
-          onCanPlay={() => setIsReady(true)}
-          onError={(error) => console.error("Mux Player Error:", error)} // Debugging line
-          onEnded={() => {}}
-          autoPlay
           playbackId={playbackId}
+          autoPlay
+          onCanPlay={() => setIsReady(true)}
+          onError={(e) => console.error("Mux Player Error:", e)}
+          className={clsx("absolute inset-0 w-full h-full", className)}
+          style={{ width: "100%", height: "100%" }}
         />
       )}
     </div>

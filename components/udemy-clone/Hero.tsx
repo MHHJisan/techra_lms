@@ -5,7 +5,7 @@ import Link from "next/link";
 const Hero = () => {
   return (
     <section className="relative bg-gray-100 h-[30vh] flex items-center justify-center text-center overflow-hidden">
-      <div className="relative h-full w-full z-0">
+      <div className="absolute inset-0 z-0 pointer-events-none">
         <Image
           src="/techra.png" // ensure this file exists in the public directory
           alt="Hero Background"
@@ -16,7 +16,7 @@ const Hero = () => {
         />
       </div>
 
-      <div className="max-w-3xl px-4">
+      <div className="relative z-10 max-w-3xl px-4">
         <h1 className="text-4xl md:text-6xl font-bold text-gray-800">
           Learn Anytime, Anywhere
         </h1>

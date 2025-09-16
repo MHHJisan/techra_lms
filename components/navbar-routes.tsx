@@ -1,16 +1,14 @@
 "use client";
 
-import { ClerkProvider, UserButton } from "@clerk/nextjs";
-import { usePathname, useRouter } from "next/navigation";
+import { UserButton, SignedIn, SignedOut } from "@clerk/nextjs";
+import { usePathname } from "next/navigation";
 import { Button } from "./ui/button";
-import { LogOut } from "lucide-react";
+import { Home, LogIn } from "lucide-react";
 import Link from "next/link";
-import path from "path";
 import { SearchInput } from "./search-input";
 
 export const NavbarRoutes = () => {
   const pathname = usePathname();
-  const router = useRouter();
 
   const isTeacherPage = pathname?.startsWith("/teacher");
   const isPlayerPage = pathname?.includes("/courses");
@@ -27,8 +25,9 @@ export const NavbarRoutes = () => {
         {isTeacherPage || isPlayerPage ? (
           <Link href="/">
             <Button size="sm" variant="ghost">
-              <LogOut className="h-4 w-4 mr-2" />
-              Exit
+              <Home className="h-4 w-4 mr-2" />
+              <SignedIn>Dashboard</SignedIn>
+              <SignedOut>Home</SignedOut>
             </Button>
           </Link>
         ) : (
@@ -36,10 +35,17 @@ export const NavbarRoutes = () => {
             <Button>Teacher Mode</Button>
           </Link>
         )}
-        <UserButton
-          // @ts-ignore: Deprecated API usage
-          afterSignOutUrl="/"
-        />
+        <SignedIn>
+          <UserButton afterSignOutUrl="/" />
+        </SignedIn>
+        <SignedOut>
+          <Link href="/sign-in">
+            <Button size="sm" variant="outline">
+              <LogIn className="h-4 w-4 mr-2" />
+              Login
+            </Button>
+          </Link>
+        </SignedOut>
       </div>
     </>
   );

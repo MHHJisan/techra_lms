@@ -1,0 +1,146 @@
+// prisma/schema.mysql.prisma
+generator client {
+  provider = "prisma-client-js"
+  // generate to a separate local folder so we can import it side-by-side
+  output   = "../prisma/mysql-client"
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("MYSQL_DATABASE_URL")
+}
+
+// ---- Models (copy from your original MySQL schema) ----
+
+model Course {
+  id     String @id @default(uuid())
+  userId String
+  user   User   @relation("UserCourses", fields: [userId], references: [id], onDelete: Cascade)
+
+  title       String  @db.Text
+  description String? @db.Text
+  imageUrl    String? @db.Text
+  price       Float? // we'll convert to Decimal on write to PG
+  isPublished Boolean @default(false)
+
+  categoryId String?
+  category   Category? @relation(fields: [categoryId], references: [id])
+
+  chapters    Chapter[]
+  attachments Attachment[]
+  purchases   Purchase[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([categoryId])
+  @@fulltext([title]) // ok here (MySQL); we won’t use it during ETL.
+}
+
+model Category {
+  id      String   @id @default(uuid())
+  name    String   @unique
+  courses Course[]
+}
+
+model Attachment {
+  id   String @id @default(uuid())
+  name String
+  url  String @db.Text
+
+  courseId String
+  course   Course @relation(fields: [courseId], references: [id], onDelete: Cascade)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([courseId])
+}
+
+model Chapter {
+  id          String  @id @default(uuid())
+  title       String
+  description String? @db.Text
+  videoUrl    String? @db.Text
+  position    Int
+  isPublished Boolean @default(false)
+  isFree      Boolean @default(false)
+
+  muxData  MuxData?
+  courseId String
+  course   Course   @relation(fields: [courseId], references: [id], onDelete: Cascade)
+
+  userProgress UserProgress[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([courseId])
+}
+
+model MuxData {
+  id         String @id @default(uuid())
+  assetId    String
+  playbackId String
+
+  chapterId String  @unique
+  chapter   Chapter @relation(fields: [chapterId], references: [id], onDelete: Cascade)
+}
+
+model UserProgress {
+  id     String @id @default(uuid())
+  userId String
+  user   User   @relation("UserProgress", fields: [userId], references: [id])
+
+  chapterId   String
+  chapter     Chapter @relation(fields: [chapterId], references: [id], onDelete: Cascade)
+  isCompleted Boolean @default(false)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([userId, chapterId])
+  @@index([chapterId])
+}
+
+model Purchase {
+  id     String @id @default(uuid())
+  userId String
+  user   User   @relation("UserPurchases", fields: [userId], references: [id])
+
+  courseId String
+  course   Course @relation(fields: [courseId], references: [id], onDelete: Cascade)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([userId, courseId])
+  @@index([courseId])
+}
+
+model StripeCustomer {
+  id               String   @id @default(uuid())
+  userId           String   @unique
+  user             User     @relation(fields: [userId], references: [id])
+  stripeCustomerId String   @unique
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt()
+}
+
+model User {
+  id        String  @id @default(uuid())
+  clerkId   String  @unique
+  email     String  @unique
+  firstName String?
+  lastName  String?
+  imageUrl  String? @db.Text
+  role      String? @default("user")
+
+  courses        Course[]        @relation("UserCourses")
+  purchases      Purchase[]      @relation("UserPurchases")
+  userProgress   UserProgress[]  @relation("UserProgress")
+  stripeCustomer StripeCustomer?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}

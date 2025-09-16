@@ -28,8 +28,9 @@ export default async function DashboardPage() {
   return (
     <div>
       <h1 className="p-6 text-xl">
-        Welcome to your dashboard,{" "}
+        How u doing... ,{" "}
         <span className="text-xl font-bold text-green-500">{username}!</span>
+        <span className="pl-2">this is your Dashboard...</span>
       </h1>
       <div className="p-6 space-y-4">
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
