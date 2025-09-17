@@ -45,6 +45,11 @@ const teacherRoutes = [
 
 const adminRoutes = [
   {
+    icon: Layout,
+    label: "All Users",
+    href: "/admin/users",
+  },
+  {
     icon: Users,
     label: "Teachers",
     href: "/admin/teachers",

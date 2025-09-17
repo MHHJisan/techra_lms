@@ -1,6 +1,7 @@
 import { db } from "@/lib/db";
 import { clerkClient } from "@clerk/nextjs/server";
 import AdminUserActions from "@/components/admin/AdminUserActions";
+// import { any } from "zod";
 
 function pickDisplayEmail(
   cu: any,
@@ -29,9 +30,8 @@ function pickDisplayEmail(
   );
 }
 
-export default async function AdminStudentsPage() {
-  const students = await db.user.findMany({
-    where: { OR: [{ role: null }, { role: "student" }] },
+export default async function AdminUsersPage() {
+  const users = await db.user.findMany({
     orderBy: { createdAt: "desc" },
     select: {
       id: true,
@@ -46,7 +46,7 @@ export default async function AdminStudentsPage() {
   });
 
   const rows = await Promise.all(
-    students.map(async (u) => {
+    users.map(async (u) => {
       let displayEmail = u.email || "";
       try {
         if (u.clerkId) {
@@ -60,7 +60,7 @@ export default async function AdminStudentsPage() {
 
   return (
     <div className="px-6 py-8">
-      <h1 className="text-2xl font-semibold mb-6">Students</h1>
+      <h1 className="text-2xl font-semibold mb-6">All Users</h1>
       <div className="overflow-x-auto border rounded-lg bg-white">
         <table className="min-w-full text-sm">
           <thead className="bg-slate-50">
@@ -93,7 +93,7 @@ export default async function AdminStudentsPage() {
             {rows.length === 0 && (
               <tr>
                 <td className="p-4 text-slate-500" colSpan={4}>
-                  No students found.
+                  No Users found.
                 </td>
               </tr>
             )}
