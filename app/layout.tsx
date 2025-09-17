@@ -3,6 +3,7 @@ import localFont from "next/font/local";
 import { ClerkProvider } from "@clerk/nextjs";
 import "./globals.css";
 import { ToastProvider } from "@/components/providers/toast-provider";
+import Footer from "@/components/udemy-clone/Footer";
 
 const geistSans = localFont({
   src: "./fonts/GeistVF.woff",
@@ -32,7 +33,12 @@ export default function RootLayout({
           className={`${geistSans.variable} ${geistMono.variable} antialiased`}
         >
           <ToastProvider />
-          {children}
+          <div className="min-h-screen flex flex-col">
+            <div className="flex-1">
+              {children}
+            </div>
+            <Footer />
+          </div>
         </body>
       </html>
     </ClerkProvider>

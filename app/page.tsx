@@ -4,7 +4,6 @@ import { auth, clerkClient } from "@clerk/nextjs/server";
 import Hero from "@/components/udemy-clone/Hero";
 import CategorySection from "@/components/udemy-clone/CategorySection";
 import FeaturedCourses from "@/components/udemy-clone/FeaturedCourses";
-import Footer from "@/components/udemy-clone/Footer";
 import LoginPageClient from "./_components/LoginPageClient";
 import { db } from "@/lib/db";
 
@@ -108,7 +107,6 @@ export default async function Page({ loginParams, searchParams }: LoginPageProps
           categoryId={searchParams?.categoryId}
           q={searchParams?.q}
         />
-        <Footer />
       </div>
     </div>
   );
