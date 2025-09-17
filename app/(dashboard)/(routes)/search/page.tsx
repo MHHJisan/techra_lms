@@ -25,10 +25,14 @@ const SearchPage = async ({ searchParams }: SearchPageProps) => {
     },
   });
 
+  const dbUser = await db.user.findUnique({ where: { clerkId: userId } });
+  const createdByUserId = dbUser?.role === "teacher" ? dbUser.id : undefined;
+
   const courses = await getCourses({
     userId,
     title: searchParams.title,
     categoryId: searchParams.categoryId,
+    createdByUserId,
   });
 
   return (
