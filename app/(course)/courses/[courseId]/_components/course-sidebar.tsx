@@ -1,15 +1,13 @@
 import { db } from "@/lib/db";
 import { auth } from "@clerk/nextjs/server";
 import { Chapter, Course, UserProgress } from "@prisma/client";
-import { redirect } from "next/navigation";
-import { use } from "react";
 import { CourseSidebarItem } from "./course-sidebar-item";
 import { CourseProgress } from "@/components/course-progress";
 
 interface CourseSidebarProps {
   course: Course & {
     chapters: (Chapter & {
-      userProgress: UserProgress[] | null;
+      userProgress?: UserProgress[] | null;
     })[];
   };
   progressCount: number;
@@ -21,22 +19,20 @@ export const CourseSidebar = async ({
 }: CourseSidebarProps) => {
   const { userId } = auth();
 
-  if (!userId) {
-    return redirect("/");
-  }
-
   if (!course) {
     return <p>Course data not available.</p>;
   }
 
-  const purchase = await db.purchase.findUnique({
-    where: {
-      userId_courseId: {
-        userId,
-        courseId: course.id,
-      },
-    },
-  });
+  const purchase = userId
+    ? await db.purchase.findUnique({
+        where: {
+          userId_courseId: {
+            userId,
+            courseId: course.id,
+          },
+        },
+      })
+    : null;
   return (
     <div className="h-full border-r flex flex-col overflow-y-auto shadow-sm">
       <div className="p-8 flex flex-col border-b">

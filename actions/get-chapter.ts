@@ -1,11 +1,8 @@
 import { db } from "@/lib/db";
 import { Attachment, Chapter } from "@prisma/client";
-import { Award } from "lucide-react";
-import next from "next";
-import { use } from "react";
 
 interface GetChapterProps {
-  userId: string;
+  userId?: string;
   courseId: string;
   chapterId: string;
 }
@@ -16,14 +13,14 @@ export const getChapter = async ({
   chapterId,
 }: GetChapterProps) => {
   try {
-    const purchase = await db.purchase.findUnique({
+    const purchase = userId ? await db.purchase.findUnique({
       where: {
         userId_courseId: {
           userId,
           courseId,
         },
       },
-    });
+    }) : null;
 
     const course = await db.course.findUnique({
       where: {
@@ -78,14 +75,14 @@ export const getChapter = async ({
       });
     }
 
-    const userProgress = await db.userProgress.findUnique({
+    const userProgress = userId ? await db.userProgress.findUnique({
       where: {
         userId_chapterId: {
           userId,
           chapterId,
         },
       },
-    });
+    }) : null;
     return {
       chapter,
       course,
@@ -96,7 +93,7 @@ export const getChapter = async ({
       purchase,
     };
   } catch (error) {
-    console.log("[GET_CHAPTER", error);
+    console.log("[GET_CHAPTER]", error);
     return {
       chapter: null,
       course: null,
