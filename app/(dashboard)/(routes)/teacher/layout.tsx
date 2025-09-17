@@ -11,6 +11,8 @@ export default async function TeacherLayout({
   const { userId } = auth();
   if (!userId) return redirect("/");
   const user = await db.user.findUnique({ where: { clerkId: userId } });
-  if (!user || user.role !== "teacher") return redirect("/");
+  if (!user || !["teacher", "admin"].includes(user.role)) {
+    redirect("/");
+  }
   return <>{children}</>;
 }

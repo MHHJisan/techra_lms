@@ -1,25 +1,28 @@
 "use client";
 
-import { UploadDropzone } from "@/lib/uploadthing";
-import { ourFileRouter } from "@/app/api/uploadthing/core";
-import { error } from "console";
+import { UploadDropzone } from "@uploadthing/react";
+import type { OurFileRouter } from "@/app/api/uploadthing/core";
 import toast from "react-hot-toast";
 
-interface FileUploadProps {
-  onChange: (url?: string) => void;
-  endPoint: keyof typeof ourFileRouter;
-}
+type Props = {
+  endPoint: keyof OurFileRouter; // "courseAttachment"
+  onChange?: (url: string) => void; // gets the uploaded file URL
+};
 
-export const FileUpload = ({ onChange, endPoint }: FileUploadProps) => {
+export function FileUpload({ endPoint, onChange }: Props) {
   return (
-    <UploadDropzone
+    <UploadDropzone<OurFileRouter>
       endpoint={endPoint}
+      // Do NOT pass any config/file types/size here; they must be defined on the server only.
       onClientUploadComplete={(res) => {
-        onChange(res?.[0].url);
+        const url = res?.[0]?.url;
+        if (url) onChange?.(url);
+        toast.success("Uploaded");
       }}
-      onUploadError={(error: Error) => {
-        toast.error(`${error?.message}`);
+      onUploadError={(err) => {
+        // This will now surface server errors properly
+        toast.error(err?.message || "Upload failed");
       }}
     />
   );
-};
+}

@@ -1,11 +1,11 @@
-import { createRouteHandler } from "uploadthing/next";
-
+import { createNextRouteHandler } from "uploadthing/next";
 import { ourFileRouter } from "./core";
 
-// Export routes for Next App Router
-export const { GET, POST } = createRouteHandler({
+/**
+ * This exposes the GET/POST handlers UploadThing's client talks to.
+ * If this route is blocked by auth middleware or crashes,
+ * the client will show “Failed to parse response…”.
+ */
+export const { GET, POST } = createNextRouteHandler({
   router: ourFileRouter,
-
-  // Apply an (optional) custom config:
-  // config: { ... },
 });

@@ -1,25 +1,20 @@
-import { auth } from "@clerk/nextjs/server";
 import { createUploadthing, type FileRouter } from "uploadthing/next";
-import { UploadThingError } from "uploadthing/server";
 
 const f = createUploadthing();
 
-const handleAuth = () => {
-    const { userId } = auth();
-    if(!userId) throw new Error("Unauthorized")
-    return { userId }
-} 
-
+/**
+ * Define your endpoint once on the server.
+ * Do NOT copy sizes/types to the client—let the client use this by name only.
+ */
 export const ourFileRouter = {
-  courseImage: f({ image: { maxFileSize: "4MB" , maxFileCount:1 } })
-                .middleware(() => handleAuth())
-                .onUploadComplete(() => {}),
-    courseAttachment: f(["text", "image", "video", "audio", "pdf"])
-                .middleware(() => handleAuth())
-                .onUploadComplete(() => {}),
-    chapterVideo: f({video: {maxFileCount:1, maxFileSize: "512GB"}})
-                .middleware(() => handleAuth())
-                .onUploadComplete(() => { })
+  // Must match the client endpoint name exactly ("courseAttachment")
+  courseAttachment: f({
+    image: { maxFileSize: "4MB" }, // png/jpg/webp, etc.
+    pdf: { maxFileSize: "16MB" }, // optional: allow PDFs too
+  }).onUploadComplete(async ({ file }) => {
+    // `file.url` is the public URL.
+    // You can persist metadata here if you want, but your form already POSTs it later.
+  }),
 } satisfies FileRouter;
 
 export type OurFileRouter = typeof ourFileRouter;
