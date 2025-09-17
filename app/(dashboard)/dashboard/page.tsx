@@ -25,15 +25,15 @@ export default async function DashboardPage() {
   const dbUser = await db.user.findUnique({ where: { clerkId: userId } });
 
   // Server-side logs (visible in server console)
-  console.log("[DASHBOARD_USER_CLERK]", {
-    id: user.id,
-    email: user.emailAddresses?.[0]?.emailAddress,
-    firstName: user.firstName,
-    lastName: user.lastName,
-    username: user.username,
-    publicMetadata: user.publicMetadata,
-  });
-  console.log("[DASHBOARD_USER_DB]", dbUser);
+  // console.log("[DASHBOARD_USER_CLERK]", {
+  //   id: user.id,
+  //   email: user.emailAddresses?.[0]?.emailAddress,
+  //   firstName: user.firstName,
+  //   lastName: user.lastName,
+  //   username: user.username,
+  //   publicMetadata: user.publicMetadata,
+  // });
+  // console.log("[DASHBOARD_USER_DB]", dbUser);
 
   const isStudent = !dbUser?.role || dbUser.role === "user";
 

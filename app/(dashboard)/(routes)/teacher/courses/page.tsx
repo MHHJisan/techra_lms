@@ -6,31 +6,20 @@ import { auth } from "@clerk/nextjs/server";
 import { redirect } from "next/navigation";
 import { db } from "@/lib/db";
 
-
-
-
 const CoursePage = async () => {
-
   const { userId } = auth();
-
-  if(!userId) {
-     return (redirect("/"))
-  }
+  if (!userId) redirect("/");
 
   const courses = await db.course.findMany({
-      where: {
-        userId,
-      }, 
-      orderBy: {
-        createdAt: "desc"
-      }
-  })
+    where: {
+      user: { clerkId: userId }, // ← filter by related User.clerkId
+    },
+    orderBy: { createdAt: "desc" },
+  });
 
   return (
     <div className="pl-4 pt-4">
-      {/* <Link href="/teacher/create">
-        <Button className="p-6">New Course</Button>
-      </Link> */}
+      {/* <Link href="/teacher/create"><Button className="p-6">New Course</Button></Link> */}
       <DataTable columns={columns} data={courses} />
     </div>
   );

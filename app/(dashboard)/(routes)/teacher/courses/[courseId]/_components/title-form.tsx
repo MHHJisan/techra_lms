@@ -4,6 +4,9 @@ import * as z from "zod";
 import axios from "axios";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
+import { useRouter } from "next/navigation";
+import { useState } from "react";
+import toast from "react-hot-toast";
 
 import {
   Form,
@@ -12,38 +15,27 @@ import {
   FormItem,
   FormMessage,
 } from "@/components/ui/form";
-
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { title } from "process";
-import { Pencil, Save } from "lucide-react";
-import { useState } from "react";
-import toast from "react-hot-toast";
-import { useRouter } from "next/navigation";
+import { Pencil } from "lucide-react";
 
 const formSchema = z.object({
-  title: z.string().min(1, {
-    message: "Title is required",
-  }),
+  title: z.string().min(1, { message: "Title is required" }),
 });
 
 interface TitleFormProps {
-  initialData: {
-    title: string;
-  };
-  courseId: String;
+  initialData: { title: string };
+  courseId: string; // ← use primitive string
 }
 
 export const TitleForm = ({ initialData, courseId }: TitleFormProps) => {
   const [isEditing, setIsEditing] = useState(false);
-
-  const toggleEdit = () => setIsEditing((current) => !current);
-
   const router = useRouter();
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: initialData,
+    mode: "onChange",
   });
 
   const { isSubmitting, isValid } = form.formState;
@@ -51,12 +43,15 @@ export const TitleForm = ({ initialData, courseId }: TitleFormProps) => {
   const onSubmit = async (values: z.infer<typeof formSchema>) => {
     try {
       await axios.patch(`/api/courses/${courseId}`, values);
-      toast.success("Cours Updated");
+      toast.success("Course updated");
       form.reset(values);
-      toggleEdit();
+      setIsEditing(false);
       router.refresh();
-    } catch {
-      toast.error("Something went wrong");
+    } catch (err) {
+      toast.error(
+        (axios.isAxiosError(err) && (err.response?.data as any)?.error) ||
+          "Something went wrong"
+      );
     }
   };
 
@@ -64,9 +59,13 @@ export const TitleForm = ({ initialData, courseId }: TitleFormProps) => {
     <div className="mt-6 border border-slate-100 rounded-md p-4">
       <div className="font-medium flex items-center justify-between">
         Course Title
-        <Button onClick={toggleEdit} variant="ghost">
+        <Button
+          type="button"
+          onClick={() => !isSubmitting && setIsEditing((v) => !v)}
+          variant="ghost"
+        >
           {isEditing ? (
-            <>Cancel</>
+            "Cancel"
           ) : (
             <>
               <Pencil className="h-4 w-4 mr-2" />
@@ -75,7 +74,11 @@ export const TitleForm = ({ initialData, courseId }: TitleFormProps) => {
           )}
         </Button>
       </div>
-      {!isEditing && <p className="text-sm mt-2">{initialData.title}</p>}
+
+      {!isEditing && (
+        <p className="text-sm mt-2">{initialData.title || "Untitled course"}</p>
+      )}
+
       {isEditing && (
         <Form {...form}>
           <form
@@ -85,13 +88,13 @@ export const TitleForm = ({ initialData, courseId }: TitleFormProps) => {
             <FormField
               control={form.control}
               name="title"
-              render={(field) => (
+              render={({ field }) => (
                 <FormItem>
                   <FormControl>
                     <Input
+                      {...field} // ← correct RHF binding
                       disabled={isSubmitting}
-                      placeholder="e.g 'Advanced Web Development'"
-                      {...field.field}
+                      placeholder="e.g. 'Advanced Web Development'"
                     />
                   </FormControl>
                   <FormMessage />
@@ -99,8 +102,16 @@ export const TitleForm = ({ initialData, courseId }: TitleFormProps) => {
               )}
             />
             <div className="flex items-center gap-x-2">
-              <Button disabled={!isValid || isSubmitting} type="submit">
-                Save
+              <Button type="submit" disabled={!isValid || isSubmitting}>
+                {isSubmitting ? "Saving..." : "Save"}
+              </Button>
+              <Button
+                type="button"
+                variant="ghost"
+                onClick={() => setIsEditing(false)}
+                disabled={isSubmitting}
+              >
+                Cancel
               </Button>
             </div>
           </form>

@@ -8,8 +8,6 @@ import Footer from "@/components/udemy-clone/Footer";
 import LoginPageClient from "./_components/LoginPageClient";
 import { db } from "@/lib/db";
 
-// Optional: if you plan to show courses only to signed-in users, fetch them after auth,
-// or skip fetching entirely for guests. Here we redirect signed-in users immediately.
 interface LoginPageProps {
   loginParams?: {
     title?: string;
@@ -20,34 +18,52 @@ interface LoginPageProps {
 export default async function Page({ loginParams }: LoginPageProps) {
   const { userId } = auth();
 
-  // If the user is signed in, route admins to admin panel, others to dashboard
   if (userId) {
+    // 1) Pull DB user
     const user = await db.user.findUnique({ where: { clerkId: userId } });
 
-    // Admin by DB role or ADMIN_EMAILS
+    // 2) Prepare admin email allow-list
     const adminEmails = (process.env.ADMIN_EMAILS || "")
       .split(",")
       .map((e) => e.trim().toLowerCase())
       .filter(Boolean);
 
-    let isAdmin =
-      user?.role === "admin" ||
-      (!!user?.email && adminEmails.includes(user.email.toLowerCase()));
-
-    if (!isAdmin) {
-      try {
-        const cu = await clerkClient.users.getUser(userId);
-        const emails = (cu.emailAddresses || [])
-          .map((e) => e.emailAddress?.toLowerCase())
-          .filter(Boolean) as string[];
-        isAdmin = emails.some((e) => adminEmails.includes(e));
-      } catch {}
+    // 3) Fetch Clerk user once; reuse for admin + role fallback
+    let clerkUser: Awaited<
+      ReturnType<typeof clerkClient.users.getUser>
+    > | null = null;
+    try {
+      clerkUser = await clerkClient.users.getUser(userId);
+    } catch {
+      // ignore
     }
 
+    // 4) Determine admin
+    const dbEmail = user?.email?.toLowerCase();
+    const clerkEmails =
+      clerkUser?.emailAddresses
+        ?.map((e) => e.emailAddress?.toLowerCase())
+        .filter(Boolean) ?? [];
+    const isAdminFromDbRole = user?.role === "admin";
+    const isAdminFromEmails =
+      (!!dbEmail && adminEmails.includes(dbEmail)) ||
+      clerkEmails.some((e) => adminEmails.includes(e!));
+    const isAdmin = isAdminFromDbRole || isAdminFromEmails;
+
+    // 5) Determine teacher (DB first, then Clerk publicMetadata.role)
+    const metaRole = (
+      clerkUser?.publicMetadata?.role as string | undefined
+    )?.toLowerCase();
+    const role = (user?.role ?? metaRole ?? "").toLowerCase();
+    const isTeacher = role === "teacher" || role === "instructor";
+
+    // 6) Redirect precedence: admin → teacher → dashboard
     if (isAdmin) {
       redirect("/admin/teachers");
     }
-
+    if (isTeacher) {
+      redirect("/teacher/courses");
+    }
     redirect("/dashboard");
   }
 
@@ -57,8 +73,6 @@ export default async function Page({ loginParams }: LoginPageProps) {
       <div className="w-full">
         <Hero />
         <CategorySection />
-        {/* If you really need courses for guests, fetch them via a server action here
-            and pass to a client child for rendering. Otherwise, keep it simple. */}
         <LoginPageClient />
         <FeaturedCourses />
         <Footer />

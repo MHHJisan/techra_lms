@@ -4,6 +4,9 @@ import * as z from "zod";
 import axios from "axios";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
+import { useState } from "react";
+import { useRouter } from "next/navigation";
+import toast from "react-hot-toast";
 
 import {
   Form,
@@ -12,15 +15,9 @@ import {
   FormItem,
   FormMessage,
 } from "@/components/ui/form";
-
 import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
-import { title } from "process";
-import { Loader2, PlusCircle, Save } from "lucide-react";
-import { use, useEffect, useState } from "react";
-import toast from "react-hot-toast";
-import { useRouter } from "next/navigation";
+import { PlusCircle, Loader2 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Chapter, Course } from "@prisma/client";
 import { ChaptersList } from "./chapters-list";
@@ -31,55 +28,54 @@ const formSchema = z.object({
 
 interface ChaptersFormProps {
   initialData: Course & { chapters: Chapter[] };
-  courseId: String;
+  courseId: string; // use primitive
 }
 
 export const ChaptersForm = ({ initialData, courseId }: ChaptersFormProps) => {
   const [isCreating, setIsCreating] = useState(false);
   const [isUpdating, setIsUpdating] = useState(false);
-
-  const toggleCreating = () => setIsCreating((current) => !current);
-
   const router = useRouter();
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
-    defaultValues: {
-      title: "",
-    },
+    defaultValues: { title: "" },
+    mode: "onChange",
   });
+  const { isSubmitting, isValid } = form.formState;
 
-  const { isSubmitting, isValid, errors } = form.formState;
-
-  useEffect(() => {
-    console.log("Form validity:", isValid);
-    console.log("Form errors:", errors);
-  }, [isValid, errors]);
+  // Always clear the input when opening the create form
+  const toggleCreating = () => {
+    setIsCreating((prev) => {
+      const next = !prev;
+      if (next) form.reset({ title: "" });
+      return next;
+    });
+  };
 
   const onSubmit = async (values: z.infer<typeof formSchema>) => {
-    console.log("Form values:", values);
     try {
       await axios.post(`/api/courses/${courseId}/chapters`, values);
-      toast.success("Chapter Created");
-      toggleCreating();
+      toast.success("Chapter created");
+      form.reset({ title: "" }); // clear for next time
+      setIsCreating(false); // close form (optional)
       router.refresh();
-    } catch {
+    } catch (err) {
+      console.error("Error while creating chapter:", err);
       toast.error("Something went wrong");
-      console.error("Error while creating chapter:", Error);
     }
   };
 
   const onReorder = async (updateData: { id: string; position: number }[]) => {
     try {
       setIsUpdating(true);
-
       await axios.put(`/api/courses/${courseId}/chapters/reorder`, {
         list: updateData,
       });
       toast.success("Chapters reordered");
       router.refresh();
-    } catch {
-      toast.error("Something went wrong here");
+    } catch (err) {
+      console.error("Reorder error:", err);
+      toast.error("Something went wrong");
     } finally {
       setIsUpdating(false);
     }
@@ -87,21 +83,21 @@ export const ChaptersForm = ({ initialData, courseId }: ChaptersFormProps) => {
 
   const onEdit = (id: string) => {
     router.push(`/teacher/courses/${courseId}/chapters/${id}`);
-    console.log(id);
   };
 
   return (
-    <div className="mt-6 border border-slate-100 rounded-md p-4">
+    <div className="mt-6 border border-slate-100 rounded-md p-4 relative">
       {isUpdating && (
-        <div className="absolute h-full w-full bg-slate-500/20 top-0 right-0 rounded-m flex items-center">
+        <div className="absolute inset-0 bg-slate-500/20 rounded-md flex items-center justify-center">
           <Loader2 className="animate-spin h-6 w-6 text-sky-700" />
         </div>
       )}
+
       <div className="font-medium flex items-center justify-between">
         Course Chapters
-        <Button onClick={toggleCreating} variant="ghost">
+        <Button onClick={toggleCreating} type="button" variant="ghost">
           {isCreating ? (
-            <>Cancel</>
+            "Cancel"
           ) : (
             <>
               <PlusCircle className="h-4 w-4 mr-2" />
@@ -110,6 +106,7 @@ export const ChaptersForm = ({ initialData, courseId }: ChaptersFormProps) => {
           )}
         </Button>
       </div>
+
       {isCreating && (
         <Form {...form}>
           <form
@@ -119,25 +116,28 @@ export const ChaptersForm = ({ initialData, courseId }: ChaptersFormProps) => {
             <FormField
               control={form.control}
               name="title"
-              render={(field) => (
+              render={(
+                { field } // ✅ correct signature
+              ) => (
                 <FormItem>
                   <FormControl>
                     <Input
+                      {...field} // ✅ correct binding
                       disabled={isSubmitting}
-                      placeholder="e.g 'Introduction to the course ...'"
-                      {...field.field}
-                      // value={field.value ?? ""} // Default to empty string if value is null
-                      // onChange={(e) => field.onChange(e.target.value)} // Handle changes
+                      placeholder="e.g. 'Introduction to the course...'"
                     />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
               )}
             />
-            <Button type="submit">Create</Button>
+            <Button type="submit" disabled={!isValid || isSubmitting}>
+              {isSubmitting ? "Creating..." : "Create"}
+            </Button>
           </form>
         </Form>
       )}
+
       {!isCreating && (
         <div
           className={cn(
@@ -153,9 +153,10 @@ export const ChaptersForm = ({ initialData, courseId }: ChaptersFormProps) => {
           />
         </div>
       )}
+
       {!isCreating && (
         <p className="text-xs text-muted-foreground mt-4">
-          Drag and drop to reopen the chapters
+          Drag and drop to reorder the chapters
         </p>
       )}
     </div>
