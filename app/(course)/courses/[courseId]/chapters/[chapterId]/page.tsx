@@ -7,6 +7,7 @@ import { CourseEnrollButton } from "./_components/course-enroll-button";
 import { Separator } from "@/components/ui/separator";
 import { Preview } from "@/components/preview";
 import { File } from "lucide-react";
+import Image from "next/image";
 
 const ChapterIdPage = async ({
   params,
@@ -26,6 +27,7 @@ const ChapterIdPage = async ({
     nextChapter,
     userProgress,
     purchase,
+    author,
   } = await getChapter({
     userId: userId || undefined,
     chapterId: params.chapterId,
@@ -40,7 +42,7 @@ const ChapterIdPage = async ({
   const playbackId = muxData?.playbackId;
 
   return (
-    <div className="w-full ">
+    <div className="w-full p-6 px-6">
       {userProgress?.isCompleted && (
         <Banner
           variant="success"
@@ -50,11 +52,10 @@ const ChapterIdPage = async ({
       {isLocked && (
         <Banner variant="warning" label="You need to purchase this chapter" />
       )}
-      {/* <div className="flex flex-col w-full mx-auto pb-20"> */}
-      <div className="w-[100vw] max-w-none mx-[calc(50%-50vw)] px-0">
-        <div className="px-4">
+      <div className="w-full p-6">
+        <div className="-mx-4 md:-mx-6">
           {playbackId ? (
-            <div className="relative w-full max-w-7xl mx-auto aspect-video rounded-md overflow-hidden bg-black">
+            <div className="relative w-full aspect-video rounded-md overflow-hidden bg-black">
               <VideoPlayer
                 chapterId={params.chapterId}
                 title={chapter.title}
@@ -63,7 +64,7 @@ const ChapterIdPage = async ({
                 playbackId={playbackId}
                 isLocked={isLocked}
                 completeOnEnd={completeOnEnd}
-                className="absolute inset-0 w-full h-full" // <-- fill container
+                className="absolute inset-0 w-full h-full"
               />
             </div>
           ) : (
@@ -71,7 +72,7 @@ const ChapterIdPage = async ({
           )}
         </div>
 
-        <div>
+        <div className="mt-4">
           <div className="p-4 flex flex-col md:flex-row items-center justify-between">
             <h2 className="text-2xl font-semibold mg-2">{chapter.title}</h2>
             {purchase ? (
@@ -82,6 +83,19 @@ const ChapterIdPage = async ({
                 price={course.price!.toNumber()}
               />
             )}
+          </div>
+          {/* Instructor Info */}
+          <div className="px-4 -mt-2 mb-2 flex items-center gap-3 text-sm text-slate-600">
+            {author?.imageUrl && (
+              <Image
+                src={author.imageUrl}
+                alt={author.name || "Instructor"}
+                width={32}
+                height={32}
+                className="rounded-full object-cover"
+              />
+            )}
+            <span>Instructor: {author?.name || "Instructor"}</span>
           </div>
           <Separator />
           <div>

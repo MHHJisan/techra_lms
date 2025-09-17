@@ -29,6 +29,15 @@ export const getChapter = async ({
       },
       select: {
         price: true,
+        user: {
+          select: {
+            firstName: true,
+            lastName: true,
+            imageUrl: true,
+            email: true,
+            clerkId: true,
+          },
+        },
       },
     });
     const chapter = await db.chapter.findUnique({
@@ -40,6 +49,35 @@ export const getChapter = async ({
 
     if (!chapter || !course) {
       throw new Error("Chapter or Course not found");
+    }
+
+    // Build author object from local DB, fallback to Clerk if missing
+    let authorName = [course.user?.firstName, course.user?.lastName]
+      .filter(Boolean)
+      .join(" ")
+      .trim();
+    let authorImageUrl = course.user?.imageUrl ?? null;
+
+    if (!authorName && course.user?.clerkId) {
+      try {
+        const { clerkClient } = await import("@clerk/nextjs/server");
+        const clerkUser = await clerkClient.users.getUser(course.user.clerkId);
+        const cFirst = (clerkUser.firstName as string | null) ?? undefined;
+        const cLast = (clerkUser.lastName as string | null) ?? undefined;
+        const cImage = (clerkUser.imageUrl as string | null) ?? undefined;
+        authorName = [cFirst, cLast].filter(Boolean).join(" ").trim();
+        authorImageUrl = authorImageUrl || cImage || null;
+      } catch (e) {
+        // ignore clerk fallback errors; leave defaults
+      }
+    }
+
+    if (!authorName) {
+      // Try sanitized email local-part (avoid unknown+user_* patterns)
+      const email = course.user?.email || "";
+      const local = email.includes("@") ? email.split("@")[0] : "";
+      const sanitized = local.replace(/^unknown\+user_.+$/, "").trim();
+      authorName = sanitized || "Instructor";
     }
 
     let muxData = null;
@@ -91,6 +129,10 @@ export const getChapter = async ({
       nextChapter,
       userProgress,
       purchase,
+      author: {
+        name: authorName,
+        imageUrl: authorImageUrl,
+      },
     };
   } catch (error) {
     console.log("[GET_CHAPTER]", error);
@@ -102,6 +144,7 @@ export const getChapter = async ({
       nextChapter: null,
       userProgress: null,
       purchase: null,
+      author: null,
     };
   }
 };

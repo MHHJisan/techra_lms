@@ -27,7 +27,7 @@ export const VideoPlayer = ({
   return (
     // 16:9 responsive box (zero dependency)
     <div
-      className="relative w-full rounded-md overflow-hidden bg-black"
+      className="relative z-0 w-full rounded-md overflow-hidden bg-black"
       style={{ paddingTop: "56.25%" }} // 9 / 16 = 0.5625
     >
       {/* Loading overlay */}
@@ -53,7 +53,7 @@ export const VideoPlayer = ({
           autoPlay
           onCanPlay={() => setIsReady(true)}
           onError={(e) => console.error("Mux Player Error:", e)}
-          className={clsx("absolute inset-0 w-full h-full", className)}
+          className={clsx("absolute inset-0 w-full h-full z-0", className)}
           style={{ width: "100%", height: "100%" }}
         />
       )}

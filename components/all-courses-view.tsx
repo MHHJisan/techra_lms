@@ -3,6 +3,9 @@ import { ReactNode } from "react";
 import { CoursesList } from "@/components/courses-list";
 import { Categories } from "./general/categories";
 import { db } from "@/lib/db";
+import { TogglePublishButton } from "@/components/admin/toggle-publish-button";
+import { auth } from "@clerk/nextjs/server";
+import { clerkClient } from "@clerk/nextjs/server";
 
 type AllCoursesViewProps = {
   courses: any[]; // shape returned by your getCourses()
@@ -34,6 +37,32 @@ export default async function AllCoursesView({
     },
   });
 
+  // Admin check (role OR allowlist)
+  const { userId } = auth();
+  let isAdmin = false;
+  if (userId) {
+    const me = await db.user.findUnique({ where: { clerkId: userId } });
+    // Role-based admin (preferred if set)
+    if (me?.role?.toLowerCase() === "admin") {
+      isAdmin = true;
+    } else {
+      // Email allowlist fallback
+      const adminEmails = (process.env.ADMIN_EMAILS || "")
+        .split(",")
+        .map((e) => e.trim().toLowerCase())
+        .filter(Boolean);
+      let emails: string[] = [];
+      try {
+        const cu = await clerkClient.users.getUser(userId);
+        emails = cu.emailAddresses.map((e) => e.emailAddress?.toLowerCase()).filter(Boolean) as string[];
+      } catch {}
+      if (me?.email) emails.push(me.email.toLowerCase());
+      if (emails.some((e) => adminEmails.includes(e))) {
+        isAdmin = true;
+      }
+    }
+  }
+
   return (
     <div className={["px-6", className].filter(Boolean).join(" ")}>
       <div className="p-6">
@@ -53,7 +82,16 @@ export default async function AllCoursesView({
       </div>
 
       {count > 0 ? (
-        <CoursesList items={courses} />
+        <CoursesList
+          items={courses}
+          renderActions={isAdmin ? (c) => (
+            <TogglePublishButton
+              courseId={c.id}
+              isPublished={c.isPublished}
+            />
+          ) : undefined}
+          showStatusBadge={isAdmin}
+        />
       ) : (
         <div className="rounded-lg border bg-white p-8 text-center text-slate-600">
           No courses found.

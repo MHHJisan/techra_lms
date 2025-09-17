@@ -16,6 +16,7 @@ type GetCourses = {
   title?: string;
   categoryId?: string;
   createdByUserId?: string;
+  includeUnpublished?: boolean; // admin scope: include drafts
 };
 
 export const getCourses = async ({
@@ -23,11 +24,12 @@ export const getCourses = async ({
   title,
   categoryId,
   createdByUserId,
+  includeUnpublished,
 }: GetCourses): Promise<coureWithProgressWithCategory[]> => {
   try {
     const courses = await db.course.findMany({
       where: {
-        isPublished: true,
+        isPublished: includeUnpublished ? undefined : true,
         title: title ? { contains: title } : undefined,
         categoryId,
         userId: createdByUserId || undefined,

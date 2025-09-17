@@ -13,9 +13,13 @@ interface LoginPageProps {
     title?: string;
     categoryId?: string;
   };
+  searchParams?: {
+    categoryId?: string;
+    q?: string;
+  };
 }
 
-export default async function Page({ loginParams }: LoginPageProps) {
+export default async function Page({ loginParams, searchParams }: LoginPageProps) {
   const { userId } = auth();
 
   if (userId) {
@@ -36,6 +40,32 @@ export default async function Page({ loginParams }: LoginPageProps) {
       clerkUser = await clerkClient.users.getUser(userId);
     } catch {
       // ignore
+    }
+
+    // 3.5) Ensure local User profile is up-to-date with Clerk (no migration approach)
+    if (clerkUser) {
+      const primaryEmail =
+        user?.email ||
+        clerkUser.emailAddresses.find((e) => e.id === clerkUser.primaryEmailAddressId)?.emailAddress ||
+        clerkUser.emailAddresses[0]?.emailAddress ||
+        undefined;
+
+      await db.user.upsert({
+        where: { clerkId: userId },
+        update: {
+          email: primaryEmail ?? user?.email ?? undefined,
+          firstName: clerkUser.firstName ?? user?.firstName ?? undefined,
+          lastName: clerkUser.lastName ?? user?.lastName ?? undefined,
+          imageUrl: clerkUser.imageUrl ?? user?.imageUrl ?? undefined,
+        },
+        create: {
+          clerkId: userId,
+          email: primaryEmail || "",
+          firstName: clerkUser.firstName ?? undefined,
+          lastName: clerkUser.lastName ?? undefined,
+          imageUrl: clerkUser.imageUrl ?? undefined,
+        },
+      });
     }
 
     // 4) Determine admin
@@ -74,7 +104,10 @@ export default async function Page({ loginParams }: LoginPageProps) {
         <Hero />
         <CategorySection />
         <LoginPageClient />
-        <FeaturedCourses />
+        <FeaturedCourses
+          categoryId={searchParams?.categoryId}
+          q={searchParams?.q}
+        />
         <Footer />
       </div>
     </div>
