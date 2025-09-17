@@ -6,6 +6,7 @@ import CategorySection from "@/components/udemy-clone/CategorySection";
 import FeaturedCourses from "@/components/udemy-clone/FeaturedCourses";
 import LoginPageClient from "./_components/LoginPageClient";
 import { db } from "@/lib/db";
+import Footer from "@/components/udemy-clone/Footer";
 
 interface LoginPageProps {
   loginParams?: {

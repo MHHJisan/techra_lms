@@ -1,3 +1,4 @@
+import Footer from "@/components/udemy-clone/Footer";
 import { Navbar } from "./_components/navbar";
 import { Sidebar } from "./_components/sidebar";
 
