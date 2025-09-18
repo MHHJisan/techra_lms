@@ -1,6 +1,7 @@
 import Image from "next/image";
 import Link from "next/link";
 import { db } from "@/lib/db";
+import type { Prisma } from "@prisma/client";
 import { formatPrice } from "@/lib/fomat";
 import { headers } from "next/headers";
 
@@ -46,8 +47,8 @@ function seededShuffle<T>(arr: T[], seedStr: string): T[] {
 }
 
 const FeaturedCourses = async ({ categoryId, q, seed }: FeaturedCoursesProps) => {
-  // Build filters
-  const where: any = { isPublished: true };
+  // Build filters with proper Prisma type
+  const where: Prisma.CourseWhereInput = { isPublished: true };
   if (categoryId) where.categoryId = categoryId;
   if (q) {
     where.OR = [

@@ -5,7 +5,6 @@ import * as ProgressPrimitive from "@radix-ui/react-progress";
 
 import { cn } from "@/lib/utils";
 import { cva, type VariantProps } from "class-variance-authority";
-import exp from "constants";
 
 const progressVarinats = cva("h-full w-full flex-1 bg-primary transition-all", {
   variants: {

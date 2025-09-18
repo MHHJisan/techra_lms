@@ -3,13 +3,12 @@
 import qs from "query-string";
 import { cn } from "@/lib/utils";
 import { usePathname, useSearchParams, useRouter } from "next/navigation";
-import { time } from "console";
-import { title } from "process";
+import { IconType } from "react-icons/lib";
 
 interface CategoryItemProps {
   label: string;
   value?: string;
-  icon?: string;
+  icon?: IconType;
 }
 export const CategoryItem = ({
   label,

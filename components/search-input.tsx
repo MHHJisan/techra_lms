@@ -7,7 +7,6 @@ import { Input } from "./ui/input";
 import { useEffect, useState } from "react";
 import { useDebounce } from "@/hooks/use-debouncd";
 import { useSearchParams, useRouter, usePathname } from "next/navigation";
-import { title } from "process";
 
 export const SearchInput = () => {
   const [value, setValue] = useState("");

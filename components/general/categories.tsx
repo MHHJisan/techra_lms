@@ -18,7 +18,6 @@ import {
   FcCommandLine,
   FcLibrary,
   FcCalculator,
-  FcSpotlight,
 } from "react-icons/fc";
 import { IconType } from "react-icons/lib";
 
@@ -45,7 +44,7 @@ const iconMap: Record<Category["name"], IconType> = {
   "Computer Science & Engineering": FcMultipleDevices,
   Literature: FcLibrary,
   Physics: FcCalculator,
-  English: FcSpotlight,
+  English: FcLibrary,
 };
 
 export const Categories = ({ items }: CategoriesProps) => {
