@@ -1,3 +1,19 @@
+# Techra LMS
+
+Techra LMS is a modern Next.js‑based learning platform to create, manage, and sell courses. Instructors publish chapters with YouTube videos, rich descriptions, pricing, and attachments; students get clean UX, progress tracking, and privacy‑friendly playback. Powered by Clerk auth, Prisma, and PostgreSQL.
+
+## Getting Started
+
+1. Install deps: `npm install`
+2. Set env: Clerk, DATABASE_URL, DIRECT_URL, UploadThing
+3. Migrate: `npx prisma migrate dev`
+4. Dev: `npm run dev`
+
+## Tech Stack
+
+- Next.js 14, TypeScript, TailwindCSS
+- Prisma + PostgreSQL
+- Clerk, UploadThing, react‑youtube, Zod
 This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
 
 ## Getting Started
