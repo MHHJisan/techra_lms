@@ -13,7 +13,10 @@ const groupByCourse = (purchases: PurchaseWithCourse[]) => {
     if (!grouped[courseTitle]) {
       grouped[courseTitle] = 0;
     }
-    grouped[courseTitle] += purchases.course.price!;
+    const price = purchases.course.price
+      ? Number(purchases.course.price as unknown as number)
+      : 0;
+    grouped[courseTitle] += price;
   });
 
   return grouped;
@@ -31,12 +34,17 @@ export const getAnalytics = async (userId: string) => {
         course: true,
       },
     });
-    const groupedEarnins = groupByCourse(purchases);
+    const groupedEarnings = groupByCourse(purchases);
 
-    const data = Object.entries(groupByCourse).map(([courseTitle, total]) => ({
+    const data = Object.entries(groupedEarnings).map(([courseTitle, total]) => ({
       name: courseTitle,
-      total: total,
+      total,
     }));
+
+    const totalRevenue = data.reduce((sum, item) => sum + item.total, 0);
+    const totalSales = purchases.length;
+
+    return { data, totalRevenue, totalSales };
   } catch (error) {
     console.log("[GET_ERROR");
     return {
