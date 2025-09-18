@@ -34,8 +34,8 @@ export const Actions = ({ disabled, courseId, isPublished }: ActionsProps) => {
 
       router.refresh();
     } catch (e: unknown) {
-      const status = e?.response?.status;
-      const data = e?.response?.data;
+      const status = axios.isAxiosError(e) ? e.response?.status : undefined;
+      const data = axios.isAxiosError(e) ? e.response?.data : undefined;
       if (status === 400 && data?.missing?.length) {
         const list = (data.missing as string[]).join(", ");
         toast.error(`Missing: ${list}`);

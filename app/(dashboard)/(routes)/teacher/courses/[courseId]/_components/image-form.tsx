@@ -5,23 +5,13 @@ import axios from "axios";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 
-import {
-  Form,
-  FormControl,
-  FormField,
-  FormItem,
-  FormMessage,
-} from "@/components/ui/form";
-
-import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";
+// (Form UI imports not needed here)
 import { Button } from "@/components/ui/button";
-import { title } from "process";
-import { ImageIcon, Pencil, PlusCircle, Save } from "lucide-react";
+import { ImageIcon, PlusCircle } from "lucide-react";
 import { useState } from "react";
 import toast from "react-hot-toast";
 import { useRouter } from "next/navigation";
-import { cn } from "@/lib/utils";
+// import { cn } from "@/lib/utils";
 import { Course } from "@prisma/client";
 import Image from "next/image";
 import { FileUpload } from "@/components/file-upload";
@@ -49,15 +39,19 @@ export const ImageForm = ({ initialData, courseId }: ImageFormProps) => {
     defaultValues: { imageUrl: initialData?.imageUrl || "" },
   });
 
-  const { isSubmitting, isValid } = form.formState;
+  // Not using isSubmitting/isValid here
   const onSubmit = async (values: z.infer<typeof formSchema>) => {
     try {
       await axios.patch(`/api/courses/${courseId}`, values);
       toast.success("Course Updated");
       toggleEdit();
       router.refresh();
-    } catch (e: any) {
-      console.error("[COURSE_IMAGE_UPDATE_ERROR]", e?.response?.data || e?.message || e);
+    } catch (e: unknown) {
+      if (axios.isAxiosError(e)) {
+        console.error("[COURSE_IMAGE_UPDATE_ERROR]", e.response?.data || e.message);
+      } else {
+        console.error("[COURSE_IMAGE_UPDATE_ERROR]", e);
+      }
       toast.error("Something went wrong updating image");
     }
   };

@@ -4,36 +4,14 @@ import * as z from "zod";
 import axios from "axios";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
-
-import {
-  Form,
-  FormControl,
-  FormField,
-  FormItem,
-  FormMessage,
-} from "@/components/ui/form";
-
-import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
-import { title } from "process";
-import {
-  File,
-  ImageIcon,
-  Loader2,
-  Pencil,
-  PlusCircle,
-  Save,
-  X,
-} from "lucide-react";
+import { PlusCircle, X, File, Loader2 } from "lucide-react";
 import { useState } from "react";
 import toast from "react-hot-toast";
 import { useRouter } from "next/navigation";
 import { cn } from "@/lib/utils";
-import { Attachment, Course } from "@prisma/client";
-import Image from "next/image";
+import { Course, Attachment } from "@prisma/client";
 import { FileUpload } from "@/components/file-upload";
-import { url } from "inspector";
 
 const formSchema = z.object({
   url: z.string().min(1),
@@ -65,15 +43,19 @@ export const AttachmentForm = ({
     },
   });
 
-  const { isSubmitting, isValid } = form.formState;
+  // no need to extract isSubmitting/isValid
   const onSubmit = async (values: z.infer<typeof formSchema>) => {
     try {
       await axios.post(`/api/courses/${courseId}/attachments`, values);
       toast.success("Attachment added");
       toggleEdit();
       router.refresh();
-    } catch (e: any) {
-      console.error("[ATTACHMENT_ADD_ERROR]", e?.response?.data || e?.message || e);
+    } catch (e: unknown) {
+      if (axios.isAxiosError(e)) {
+        console.error("[ATTACHMENT_ADD_ERROR]", e.response?.data || e.message);
+      } else {
+        console.error("[ATTACHMENT_ADD_ERROR]", e);
+      }
       toast.error("Failed to add attachment");
     }
   };
