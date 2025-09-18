@@ -1,6 +1,7 @@
 // app/components/all-courses-view.tsx
 import { ReactNode } from "react";
 import { CoursesList } from "@/components/courses-list";
+import type { CourseWithProgressCategory } from "@/components/courses-list";
 import { Categories } from "./general/categories";
 import { db } from "@/lib/db";
 import { TogglePublishButton } from "@/components/admin/toggle-publish-button";
@@ -8,7 +9,7 @@ import { auth } from "@clerk/nextjs/server";
 import { clerkClient } from "@clerk/nextjs/server";
 
 type AllCoursesViewProps = {
-  courses: any[]; // shape returned by your getCourses()
+  courses: CourseWithProgressCategory[];
   heading?: string; // defaults to "All Courses"
   showCount?: boolean; // display total count next to heading
   action?: ReactNode; // optional right-aligned action (e.g., a button)

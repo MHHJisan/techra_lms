@@ -4,7 +4,6 @@ import { auth, clerkClient } from "@clerk/nextjs/server";
 import { redirect } from "next/navigation";
 import { InfoCard } from "./_components/info-card";
 import { CheckCircle, Clock } from "lucide-react";
-import { db } from "@/lib/db";
 import DebugUserClient from "@/components/DebugUserClient";
 
 export default async function DashboardPage() {
@@ -21,8 +20,8 @@ export default async function DashboardPage() {
   // Fetch user details from Clerk
   const user = await clerkClient.users.getUser(userId);
 
-  // Also fetch corresponding DB user
-  const dbUser = await db.user.findUnique({ where: { clerkId: userId } });
+  // Also fetch corresponding DB user (optional)
+  // const dbUser = await db.user.findUnique({ where: { clerkId: userId } });
 
   // Server-side logs (visible in server console)
   // console.log("[DASHBOARD_USER_CLERK]", {
@@ -35,7 +34,7 @@ export default async function DashboardPage() {
   // });
   // console.log("[DASHBOARD_USER_DB]", dbUser);
 
-  const isStudent = !dbUser?.role || dbUser.role === "student";
+  // const isStudent = !dbUser?.role || dbUser.role === "student";
 
   // Use the preferred username or a fallback
   const username =

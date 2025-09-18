@@ -11,14 +11,14 @@ export const ourFileRouter = {
   courseAttachment: f({
     image: { maxFileSize: "4MB" }, // png/jpg/webp, etc.
     pdf: { maxFileSize: "16MB" }, // optional: allow PDFs too
-  }).onUploadComplete(async ({ file }) => {
+  }).onUploadComplete(async () => {
     // `file.url` is the public URL.
     // You can persist metadata here if you want, but your form already POSTs it later.
   }),
   // Endpoint for course cover image uploads
   courseImage: f({
     image: { maxFileSize: "4MB" },
-  }).onUploadComplete(async ({ file }) => {
+  }).onUploadComplete(async () => {
     // nothing to persist server-side here; client will PATCH course.imageUrl
   }),
 } satisfies FileRouter;

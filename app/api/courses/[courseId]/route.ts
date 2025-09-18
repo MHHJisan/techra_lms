@@ -84,12 +84,9 @@ export async function PATCH(
     });
 
     return NextResponse.json(updated, { status: 200 });
-  } catch (e: any) {
+  } catch (e: unknown) {
     console.error("[COURSE_PATCH]", e);
-    return NextResponse.json(
-      { error: e?.message || "Internal Server Error" },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: "Internal Server Error" }, { status: 500 });
   }
 }
 
@@ -126,11 +123,8 @@ export async function DELETE(
     });
 
     return NextResponse.json(deleted, { status: 200 });
-  } catch (e: any) {
+  } catch (e: unknown) {
     console.error("[COURSE_DELETE]", e);
-    return NextResponse.json(
-      { error: e?.message || "Internal Server Error" },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: "Internal Server Error" }, { status: 500 });
   }
 }

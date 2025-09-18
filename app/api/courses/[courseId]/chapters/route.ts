@@ -82,11 +82,8 @@ export async function POST(
     });
 
     return NextResponse.json(chapter, { status: 201 });
-  } catch (e: any) {
+  } catch (e: unknown) {
     console.error("[CHAPTERS_POST]", e);
-    return NextResponse.json(
-      { error: e?.message || "Internal Error" },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: "Internal Error" }, { status: 500 });
   }
 }

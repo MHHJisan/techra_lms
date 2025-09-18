@@ -8,10 +8,7 @@ interface CourseEnrollButtonProps {
   courseId: string;
 }
 
-export const CourseEnrollButton = ({
-  price,
-  courseId: _courseId,
-}: CourseEnrollButtonProps) => {
+export const CourseEnrollButton = ({ price }: CourseEnrollButtonProps) => {
   return (
     <Button size="sm" className="w-full md:w-auto">
       Enroll For {formatPrice(price)}

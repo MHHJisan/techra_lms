@@ -1,16 +1,14 @@
 import { db } from "@/lib/db";
 import { clerkClient } from "@clerk/nextjs/server";
 import AdminUserActions from "@/components/admin/AdminUserActions";
-// import { any } from "zod";
+type ClerkEmail = { emailAddress?: string; verification?: { status?: string } | null };
+type ClerkUserLike = { emailAddresses?: ClerkEmail[] } | null | undefined;
 
 function pickDisplayEmail(
-  cu: any,
+  cu: ClerkUserLike,
   fallback: string | null | undefined
 ): string {
-  const addresses = (cu?.emailAddresses || []) as Array<{
-    emailAddress?: string;
-    verification?: { status?: string } | null;
-  }>;
+  const addresses: ClerkEmail[] = cu?.emailAddresses || [];
   // Prefer verified, non-local.invalid
   const verified = addresses.find(
     (e) =>

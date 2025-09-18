@@ -4,7 +4,6 @@ import { Category } from "@prisma/client";
 
 import {
   FcAutomatic,
-  FcCopyright,
   FcEngineering,
   FcFilmReel,
   FcMultipleDevices,
