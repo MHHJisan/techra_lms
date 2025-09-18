@@ -9,10 +9,10 @@ interface VideoPlayerProps {
   videoUrlOrId: string; // Accept full YouTube URL or bare video ID
   courseId: string;
   chapterId: string;
-  nextChapterId?: string;
   isLocked: boolean;
-  completeOnEnd: boolean;
-  title: string;
+  // nextChapterId?: string; // reserved for future use
+  // completeOnEnd?: boolean; // reserved for future use
+  // title?: string; // reserved for future use
   className?: string;
 }
 
@@ -42,21 +42,21 @@ function extractYouTubeId(input: string): string | null {
 export const VideoPlayer = ({
   videoUrlOrId,
   isLocked,
-  title,
   className,
   chapterId,
   courseId,
-  nextChapterId,
-  completeOnEnd,
+  // nextChapterId,
+  // completeOnEnd,
 }: VideoPlayerProps) => {
   const [isReady, setIsReady] = useState(false);
-  const ytPlayerRef = useRef<any>(null);
+  type YTPlayerLike = { getCurrentTime?: () => number };
+  const ytPlayerRef = useRef<YTPlayerLike | null>(null);
   const [lastPingTime, setLastPingTime] = useState(0);
   const [intervalId, setIntervalId] = useState<NodeJS.Timeout | null>(null);
 
   const videoId = useMemo(() => extractYouTubeId(videoUrlOrId) || "", [videoUrlOrId]);
 
-  const sendEvent = useCallback(async (type: string, payload?: Record<string, any>) => {
+  const sendEvent = useCallback(async (type: string, payload?: Record<string, unknown>) => {
     try {
       await fetch("/api/analytics/video", {
         method: "POST",
@@ -79,7 +79,9 @@ export const VideoPlayer = ({
     if (intervalId) return; // already started
     const id = setInterval(() => {
       try {
-        const t = ytPlayerRef.current.getCurrentTime?.() ?? 0;
+        const player = ytPlayerRef.current;
+        if (!player || typeof player.getCurrentTime !== "function") return;
+        const t = player.getCurrentTime() ?? 0;
         if (Math.floor(t) !== Math.floor(lastPingTime)) {
           setLastPingTime(t);
           sendEvent("progress", { currentTime: t });
@@ -136,7 +138,7 @@ export const VideoPlayer = ({
               cc_load_policy: 0,
             },
           }}
-          onReady={(e: any) => {
+          onReady={(e: { target: YTPlayerLike }) => {
             ytPlayerRef.current = e.target;
             setIsReady(true);
             sendEvent("ready");

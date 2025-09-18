@@ -33,7 +33,7 @@ export const Actions = ({ disabled, courseId, isPublished }: ActionsProps) => {
       }
 
       router.refresh();
-    } catch (e: any) {
+    } catch (e: unknown) {
       const status = e?.response?.status;
       const data = e?.response?.data;
       if (status === 400 && data?.missing?.length) {
