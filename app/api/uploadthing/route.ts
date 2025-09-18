@@ -1,4 +1,4 @@
-import { createNextRouteHandler } from "uploadthing/next";
+import { createRouteHandler } from "uploadthing/next";
 import { ourFileRouter } from "./core";
 
 /**
@@ -6,6 +6,8 @@ import { ourFileRouter } from "./core";
  * If this route is blocked by auth middleware or crashes,
  * the client will show “Failed to parse response…”.
  */
-export const { GET, POST } = createNextRouteHandler({
+export const runtime = "nodejs";
+export const dynamic = "force-dynamic";
+export const { GET, POST } = createRouteHandler({
   router: ourFileRouter,
 });

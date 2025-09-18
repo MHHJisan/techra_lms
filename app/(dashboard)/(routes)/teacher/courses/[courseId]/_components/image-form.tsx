@@ -34,7 +34,7 @@ const formSchema = z.object({
 
 interface ImageFormProps {
   initialData: Course;
-  courseId: String;
+  courseId: string;
 }
 
 export const ImageForm = ({ initialData, courseId }: ImageFormProps) => {
@@ -55,9 +55,10 @@ export const ImageForm = ({ initialData, courseId }: ImageFormProps) => {
       await axios.patch(`/api/courses/${courseId}`, values);
       toast.success("Course Updated");
       toggleEdit();
-      router;
-    } catch {
-      toast.error("Something went wrong");
+      router.refresh();
+    } catch (e: any) {
+      console.error("[COURSE_IMAGE_UPDATE_ERROR]", e?.response?.data || e?.message || e);
+      toast.error("Something went wrong updating image");
     }
   };
 

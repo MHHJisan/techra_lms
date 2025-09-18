@@ -35,7 +35,7 @@ export default async function DashboardPage() {
   // });
   // console.log("[DASHBOARD_USER_DB]", dbUser);
 
-  const isStudent = !dbUser?.role || dbUser.role === "user";
+  const isStudent = !dbUser?.role || dbUser.role === "student";
 
   // Use the preferred username or a fallback
   const username =
@@ -52,11 +52,11 @@ export default async function DashboardPage() {
           <span className="text-xl font-bold text-green-500">{username}!</span>
           <span className="pl-2">this is your Dashboard...</span>
         </h1>
-        {isStudent && (
+        {/* {isStudent && (
           <span className="inline-flex items-center rounded-full px-4 py-1.5 text-sm md:text-base font-semibold text-white bg-gradient-to-r from-emerald-500 via-green-500 to-teal-600 shadow-sm">
             Hello Student
           </span>
-        )}
+        )} */}
       </div>
       <div className="p-6 space-y-4">
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">

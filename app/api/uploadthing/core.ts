@@ -15,6 +15,12 @@ export const ourFileRouter = {
     // `file.url` is the public URL.
     // You can persist metadata here if you want, but your form already POSTs it later.
   }),
+  // Endpoint for course cover image uploads
+  courseImage: f({
+    image: { maxFileSize: "4MB" },
+  }).onUploadComplete(async ({ file }) => {
+    // nothing to persist server-side here; client will PATCH course.imageUrl
+  }),
 } satisfies FileRouter;
 
 export type OurFileRouter = typeof ourFileRouter;

@@ -9,10 +9,31 @@ generator client {
   previewFeatures = ["fullTextSearch"]
 }
 
+model VideoEvent {
+  id     String  @id @default(uuid())
+  userId String?
+  user   User?   @relation(fields: [userId], references: [id])
+
+  courseId String
+  course   Course @relation(fields: [courseId], references: [id], onDelete: Cascade)
+
+  chapterId String
+  chapter   Chapter @relation(fields: [chapterId], references: [id], onDelete: Cascade)
+
+  videoId     String // YouTube video ID
+  eventType   String // e.g., "ready", "play", "pause", "ended", "progress"
+  currentTime Float?
+
+  createdAt DateTime @default(now())
+
+  @@index([courseId])
+  @@index([chapterId])
+}
+
 datasource db {
   provider  = "postgresql"
   url       = env("DATABASE_URL")
-  directUrl = env("DIRECT_URL") 
+  directUrl = env("DIRECT_URL")
 }
 
 model Course {
@@ -20,11 +41,11 @@ model Course {
   userId String
   user   User   @relation("UserCourses", fields: [userId], references: [id], onDelete: Cascade)
 
-  title       String  @db.Text
-  description String? @db.Text
-  imageUrl    String? @db.Text
-  price       Decimal? @db.Decimal(10,2) 
-  isPublished Boolean @default(false)
+  title       String   @db.Text
+  description String?  @db.Text
+  imageUrl    String?  @db.Text
+  price       Decimal? @db.Decimal(10, 2)
+  isPublished Boolean  @default(false)
 
   categoryId String?
   category   Category? @relation(fields: [categoryId], references: [id])
@@ -32,6 +53,7 @@ model Course {
   chapters    Chapter[]
   attachments Attachment[]
   purchases   Purchase[]
+  videoEvents VideoEvent[]
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -68,11 +90,11 @@ model Chapter {
   isPublished Boolean @default(false)
   isFree      Boolean @default(false)
 
-  muxData  MuxData?
   courseId String
-  course   Course   @relation(fields: [courseId], references: [id], onDelete: Cascade)
+  course   Course @relation(fields: [courseId], references: [id], onDelete: Cascade)
 
   userProgress UserProgress[]
+  videoEvents  VideoEvent[]
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -80,14 +102,7 @@ model Chapter {
   @@index([courseId])
 }
 
-model MuxData {
-  id         String @id @default(uuid())
-  assetId    String
-  playbackId String
-
-  chapterId String  @unique
-  chapter   Chapter @relation(fields: [chapterId], references: [id], onDelete: Cascade)
-}
+// MuxData removed; using YouTube URLs stored directly on Chapter.videoUrl
 
 model UserProgress {
   id     String @id @default(uuid())
@@ -144,6 +159,7 @@ model User {
   purchases      Purchase[]      @relation("UserPurchases")
   userProgress   UserProgress[]  @relation("UserProgress")
   stripeCustomer StripeCustomer?
+  videoEvents    VideoEvent[]
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt

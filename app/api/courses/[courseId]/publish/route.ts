@@ -12,16 +12,12 @@ export async function PATCH(req: Request, {
             return new NextResponse("Unauthorized", { status: 401 })
         }
 
-        const course = await db.course.findUnique({
+        const course = await db.course.findFirst({
             where:{
                 id: params.courseId,
-                userId
+                user: { clerkId: userId }
             }, include:{
-                chapters: {
-                    include: {
-                        muxData: true
-                    }
-                }
+                chapters: true
             }
         });
 
@@ -32,13 +28,21 @@ export async function PATCH(req: Request, {
         const hasPublishedChapter = course.chapters.some((chapter) => chapter.isPublished)
 
         if(!course.title || !course.description || !course.imageUrl || !course.categoryId || !hasPublishedChapter){
-            return new NextResponse("Missing required fields", {status: 401})
+            return NextResponse.json({
+              error: "Missing required fields",
+              missing: [
+                !course.title ? "title" : null,
+                !course.description ? "description" : null,
+                !course.imageUrl ? "imageUrl" : null,
+                !course.categoryId ? "categoryId" : null,
+                !hasPublishedChapter ? "publishedChapter" : null,
+              ].filter(Boolean)
+            }, {status: 400})
         }
 
         const publishedCourse = await db.course.update({
             where: {
                 id: params.courseId,
-                userId
             }, data: {
                 isPublished: true
             }

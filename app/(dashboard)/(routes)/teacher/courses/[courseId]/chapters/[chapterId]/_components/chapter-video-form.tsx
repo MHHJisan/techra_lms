@@ -3,22 +3,36 @@
 import * as z from "zod";
 import axios from "axios";
 
-import MuxPlayer from "@mux/mux-player-react";
+import { useState } from "react";
 
 import { Button } from "@/components/ui/button";
 import { PlusCircle, VideoIcon } from "lucide-react";
-import { useState } from "react";
 import toast from "react-hot-toast";
 import { useRouter } from "next/navigation";
-import { Chapter, Course, MuxData } from "@prisma/client";
-import { FileUpload } from "@/components/file-upload";
+import { Chapter } from "@prisma/client";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 
 const formSchema = z.object({
-  videoUrl: z.string().min(1),
+  videoUrl: z
+    .string()
+    .min(1, { message: "Please enter a YouTube URL or video ID" })
+    .refine((val) => {
+      // Allow 11-char ID or valid YouTube URL
+      if (/^[a-zA-Z0-9_-]{11}$/.test(val)) return true;
+      try {
+        const u = new URL(val);
+        return (
+          u.hostname.includes("youtube.com") || u.hostname === "youtu.be"
+        );
+      } catch (_) {
+        return false;
+      }
+    }, { message: "Enter a valid YouTube link or 11-character ID" }),
 });
 
 interface ChapterVideoFormProps {
-  initialData: Chapter & { muxData?: MuxData | null };
+  initialData: Chapter;
   courseId: string;
   chapterId: string;
 }
@@ -29,6 +43,7 @@ export const ChapterVideoForm = ({
   chapterId,
 }: ChapterVideoFormProps) => {
   const [isEditing, setIsEditing] = useState(false);
+  const [value, setValue] = useState(initialData.videoUrl || "");
 
   const toggleEdit = () => setIsEditing((current) => !current);
 
@@ -70,28 +85,52 @@ export const ChapterVideoForm = ({
           </div>
         ) : (
           <div className="relative aspect-video mt-2">
-            <MuxPlayer playbackId={initialData?.muxData?.playbackId || ""} />
+            {/* Simple preview using privacy-enhanced domain */}
+            <iframe
+              className="w-full h-full rounded"
+              src={`https://www.youtube-nocookie.com/embed/${(function(v){
+                if (/^[a-zA-Z0-9_-]{11}$/.test(v)) return v;
+                try { const u = new URL(v); if (u.searchParams.get("v")) return u.searchParams.get("v"); if (u.hostname === "youtu.be") return u.pathname.replace("/", ""); const p = u.pathname.split("/"); const i = p.findIndex((x) => x === "embed" || x === "shorts"); if (i !== -1 && p[i+1]) return p[i+1]; } catch(_) {}
+                return "";
+              })(initialData.videoUrl || "")}`}
+              title="YouTube video preview"
+              allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+              allowFullScreen
+            />
           </div>
         ))}
       {isEditing && (
-        <div>
-          <FileUpload
-            endPoint="chapterVideo"
-            onChange={(url) => {
-              if (url) {
-                onSubmit({ videoUrl: url });
-              }
-            }}
+        <div className="space-y-3">
+          <Label htmlFor="videoUrl">YouTube URL or Video ID</Label>
+          <Input
+            id="videoUrl"
+            placeholder="https://youtu.be/XXXXXXXXXXX or 11-char ID"
+            value={value}
+            onChange={(e) => setValue(e.target.value)}
           />
-          <div className="text-xs text-muted-foreground mt-4">
-            Upload this chapter's video
+          <div className="flex gap-2">
+            <Button
+              onClick={() => {
+                const parsed = formSchema.safeParse({ videoUrl: value.trim() });
+                if (!parsed.success) {
+                  toast.error(parsed.error.errors[0]?.message || "Invalid URL");
+                  return;
+                }
+                onSubmit({ videoUrl: value.trim() });
+              }}
+            >
+              Save
+            </Button>
+            <Button variant="outline" onClick={toggleEdit}>Cancel</Button>
+          </div>
+          <div className="text-xs text-muted-foreground">
+            Paste a YouTube link (privacy-enhanced) or the 11-character video ID.
           </div>
         </div>
       )}
       {initialData.videoUrl && !isEditing && (
         <div className="text-xs text-muted-foreground mt-2">
-          Videos can take a few minutes to process. Refresh the page if video
-          does not appear.
+          Ensure your YouTube video is public or unlisted for students to view.
         </div>
       )}
     </div>

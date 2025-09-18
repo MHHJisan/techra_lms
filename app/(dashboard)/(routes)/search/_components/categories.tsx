@@ -46,6 +46,8 @@ const iconMap: Record<Category["name"], IconType> = {
   Literature: FcLibrary,
   Physics: FcCalculator,
   English: FcSpotlight,
+  Chemistry: FcCopyright,
+  "Skill Development": FcSalesPerformance,
 };
 
 export const Categories = ({ items }: CategoriesProps) => {

@@ -22,7 +22,6 @@ const ChapterIdPage = async ({
   const {
     chapter,
     course,
-    muxData,
     attachments,
     nextChapter,
     userProgress,
@@ -39,7 +38,7 @@ const ChapterIdPage = async ({
   }
   const isLocked = !chapter.isFree && !purchase;
   const completeOnEnd = !!purchase && !userProgress?.isCompleted;
-  const playbackId = muxData?.playbackId;
+  const videoUrlOrId = chapter.videoUrl || "";
 
   return (
     <div className="w-full p-6 px-6">
@@ -54,14 +53,14 @@ const ChapterIdPage = async ({
       )}
       <div className="w-full p-6">
         <div className="-mx-4 md:-mx-6">
-          {playbackId ? (
+          {videoUrlOrId ? (
             <div className="relative w-full aspect-video rounded-md overflow-hidden bg-black">
               <VideoPlayer
                 chapterId={params.chapterId}
                 title={chapter.title}
                 courseId={params.courseId}
                 nextChapterId={nextChapter?.id}
-                playbackId={playbackId}
+                videoUrlOrId={videoUrlOrId}
                 isLocked={isLocked}
                 completeOnEnd={completeOnEnd}
                 className="absolute inset-0 w-full h-full"

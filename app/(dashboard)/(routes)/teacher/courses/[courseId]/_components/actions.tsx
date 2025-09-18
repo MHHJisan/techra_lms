@@ -33,8 +33,19 @@ export const Actions = ({ disabled, courseId, isPublished }: ActionsProps) => {
       }
 
       router.refresh();
-    } catch {
-      toast.error("Something went wrong");
+    } catch (e: any) {
+      const status = e?.response?.status;
+      const data = e?.response?.data;
+      if (status === 400 && data?.missing?.length) {
+        const list = (data.missing as string[]).join(", ");
+        toast.error(`Missing: ${list}`);
+      } else if (status === 404) {
+        toast.error("Course not found or not owned by you");
+      } else if (status === 401) {
+        toast.error("Unauthorized");
+      } else {
+        toast.error("Something went wrong");
+      }
     } finally {
       setIsLoading(false);
     }

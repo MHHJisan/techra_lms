@@ -13,10 +13,10 @@ export async function PATCH (
             return new NextResponse("Unauthorized", { status: 401 })
         }
 
-        const ownCourse = await db.course.findUnique({
+        const ownCourse = await db.course.findFirst({
             where: {
                 id: params.courseId,
-                userId
+                user: { clerkId: userId }
             }
         })
         if(!ownCourse){
@@ -30,14 +30,19 @@ export async function PATCH (
             }
         })
 
-        const muxData = await db.muxData.findUnique({
-            where:{
-                chapterId: params.chapterId,
-            }
-        })
+        if (!chapter) {
+            return new NextResponse("Not Found", { status: 404 });
+        }
 
-        if(!chapter || !muxData || !chapter.title || !chapter.description || !chapter.videoUrl){
-            return new NextResponse("Missing required fields", { status: 400})
+        const missing: string[] = [];
+        if (!chapter.title) missing.push("title");
+        if (!chapter.description) missing.push("description");
+        if (!chapter.videoUrl) missing.push("videoUrl");
+        if (missing.length) {
+            return NextResponse.json(
+                { error: "Missing required fields", missing },
+                { status: 400 }
+            );
         }
 
         const publishedChapter = await db.chapter.update({

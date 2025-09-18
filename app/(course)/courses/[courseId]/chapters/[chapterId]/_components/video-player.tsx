@@ -1,12 +1,12 @@
 "use client";
 
-import MuxPlayer from "@mux/mux-player-react";
+import YouTube from "react-youtube";
 import { Loader2, Lock } from "lucide-react";
-import { useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import clsx from "clsx";
 
 interface VideoPlayerProps {
-  playbackId: string;
+  videoUrlOrId: string; // Accept full YouTube URL or bare video ID
   courseId: string;
   chapterId: string;
   nextChapterId?: string;
@@ -16,13 +16,91 @@ interface VideoPlayerProps {
   className?: string;
 }
 
+function extractYouTubeId(input: string): string | null {
+  if (!input) return null;
+  // If it's already a plain ID
+  if (/^[a-zA-Z0-9_-]{11}$/.test(input)) return input;
+  try {
+    const url = new URL(input);
+    if (url.hostname.includes("youtube.com")) {
+      if (url.searchParams.get("v")) return url.searchParams.get("v");
+      const parts = url.pathname.split("/");
+      // Handle /embed/{id} or /shorts/{id}
+      const embedIndex = parts.findIndex((p) => p === "embed" || p === "shorts");
+      if (embedIndex !== -1 && parts[embedIndex + 1]) return parts[embedIndex + 1];
+    }
+    if (url.hostname === "youtu.be") {
+      const id = url.pathname.replace("/", "");
+      if (id) return id;
+    }
+  } catch (_) {
+    // not a URL, fallthrough
+  }
+  return null;
+}
+
 export const VideoPlayer = ({
-  playbackId,
+  videoUrlOrId,
   isLocked,
   title,
   className,
+  chapterId,
+  courseId,
+  nextChapterId,
+  completeOnEnd,
 }: VideoPlayerProps) => {
   const [isReady, setIsReady] = useState(false);
+  const ytPlayerRef = useRef<any>(null);
+  const [lastPingTime, setLastPingTime] = useState(0);
+  const [intervalId, setIntervalId] = useState<NodeJS.Timeout | null>(null);
+
+  const videoId = useMemo(() => extractYouTubeId(videoUrlOrId) || "", [videoUrlOrId]);
+
+  const sendEvent = useCallback(async (type: string, payload?: Record<string, any>) => {
+    try {
+      await fetch("/api/analytics/video", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          type,
+          courseId,
+          chapterId,
+          videoId,
+          ...payload,
+        }),
+      });
+    } catch (e) {
+      // swallow analytics errors
+    }
+  }, [chapterId, courseId, videoId]);
+
+  const startProgressPings = useCallback(() => {
+    if (!ytPlayerRef.current) return;
+    if (intervalId) return; // already started
+    const id = setInterval(() => {
+      try {
+        const t = ytPlayerRef.current.getCurrentTime?.() ?? 0;
+        if (Math.floor(t) !== Math.floor(lastPingTime)) {
+          setLastPingTime(t);
+          sendEvent("progress", { currentTime: t });
+        }
+      } catch (_) {}
+    }, 10000); // every 10s
+    setIntervalId(id);
+  }, [intervalId, lastPingTime, sendEvent]);
+
+  const stopProgressPings = useCallback(() => {
+    if (intervalId) {
+      clearInterval(intervalId);
+      setIntervalId(null);
+    }
+  }, [intervalId]);
+
+  useEffect(() => {
+    return () => {
+      stopProgressPings();
+    };
+  }, [stopProgressPings]);
 
   return (
     // 16:9 responsive box (zero dependency)
@@ -46,15 +124,37 @@ export const VideoPlayer = ({
       )}
 
       {/* Player fills the box */}
-      {!isLocked && (
-        <MuxPlayer
-          title={title}
-          playbackId={playbackId}
-          autoPlay
-          onCanPlay={() => setIsReady(true)}
-          onError={(e) => console.error("Mux Player Error:", e)}
+      {!isLocked && videoId && (
+        <YouTube
+          videoId={videoId}
+          opts={{
+            host: "https://www.youtube-nocookie.com",
+            playerVars: {
+              autoplay: 1,
+              modestbranding: 1,
+              rel: 0,
+              cc_load_policy: 0,
+            },
+          }}
+          onReady={(e: any) => {
+            ytPlayerRef.current = e.target;
+            setIsReady(true);
+            sendEvent("ready");
+          }}
+          onPlay={() => {
+            startProgressPings();
+            sendEvent("play");
+          }}
+          onPause={() => {
+            stopProgressPings();
+            sendEvent("pause");
+          }}
+          onEnd={() => {
+            stopProgressPings();
+            sendEvent("ended");
+          }}
           className={clsx("absolute inset-0 w-full h-full z-0", className)}
-          style={{ width: "100%", height: "100%" }}
+          iframeClassName={clsx("absolute inset-0 w-full h-full z-0", className)}
         />
       )}
     </div>

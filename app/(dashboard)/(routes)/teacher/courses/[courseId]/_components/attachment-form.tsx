@@ -41,7 +41,7 @@ const formSchema = z.object({
 
 interface AttachmentFormProps {
   initialData: Course & { attachments: Attachment[] };
-  courseId: String;
+  courseId: string;
 }
 
 export const AttachmentForm = ({
@@ -69,11 +69,12 @@ export const AttachmentForm = ({
   const onSubmit = async (values: z.infer<typeof formSchema>) => {
     try {
       await axios.post(`/api/courses/${courseId}/attachments`, values);
-      toast.success("Cours Updated");
+      toast.success("Attachment added");
       toggleEdit();
       router.refresh();
-    } catch {
-      toast.error("Something went wrong");
+    } catch (e: any) {
+      console.error("[ATTACHMENT_ADD_ERROR]", e?.response?.data || e?.message || e);
+      toast.error("Failed to add attachment");
     }
   };
 

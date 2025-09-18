@@ -14,10 +14,10 @@ export async function POST(
             return new NextResponse("Unauthorized", { status: 401});
         }
 
-        const courseOwner = await db.course.findUnique({
+        const courseOwner = await db.course.findFirst({
             where: {
-                id: params.courseId, 
-                userId: userId,
+                id: params.courseId,
+                user: { clerkId: userId },
             }
         });
 
@@ -33,7 +33,7 @@ export async function POST(
             }
         })
 
-        return NextResponse.json(attachment);
+        return NextResponse.json(attachment, { status: 201 });
 
     } catch(error) {
         console.log("COURSE_ID_ATTACHMENTS", error);

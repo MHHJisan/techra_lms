@@ -2,22 +2,12 @@
 import { NextResponse } from "next/server";
 import { auth } from "@clerk/nextjs/server";
 import { db } from "@/lib/db";
-import { Mux } from "@mux/mux-node";
 import * as z from "zod";
 
 export const runtime = "nodejs"; // Prisma needs Node runtime
 export const dynamic = "force-dynamic"; // avoid caching when updating
 
-// ---------- Mux (optional) ----------
-const muxTokenId = process.env.MUX_TOKEN_ID;
-const muxTokenSecret = process.env.MUX_TOKEN_SECRET;
-
-// Initialize only if tokens exist; otherwise skip remote deletes gracefully.
-const mux =
-  muxTokenId && muxTokenSecret
-    ? new Mux({ tokenId: muxTokenId, tokenSecret: muxTokenSecret })
-    : null;
-const video = mux?.video;
+// Mux has been removed; courses no longer manage remote video assets here.
 
 // ---------- Validation ----------
 const PatchSchema = z.object({
@@ -103,7 +93,7 @@ export async function PATCH(
   }
 }
 
-// ---------- DELETE: delete a course the caller owns (+ Mux cleanup) ----------
+// ---------- DELETE: delete a course the caller owns ----------
 export async function DELETE(
   _req: Request,
   { params }: { params: { courseId: string } }
@@ -114,14 +104,10 @@ export async function DELETE(
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    // Load course with children to verify ownership and collect Mux assets
+    // Load course with children to verify ownership
     const course = await db.course.findFirst({
       where: { id: params.courseId, user: { clerkId } }, // relation filter
-      include: {
-        chapters: {
-          include: { muxData: true },
-        },
-      },
+      include: { chapters: true },
     });
 
     if (!course) {
@@ -131,31 +117,7 @@ export async function DELETE(
       );
     }
 
-    // Delete remote Mux assets (best-effort), if credentials are available
-    if (video) {
-      for (const ch of course.chapters) {
-        const assetId = ch.muxData?.assetId;
-        if (!assetId) continue;
-        try {
-          await video.assets.delete(assetId);
-        } catch (err: any) {
-          // Ignore 404s or auth errors, but log for observability
-          console.warn(
-            `[MUX] Failed to delete asset ${assetId}:`,
-            err?.message || err
-          );
-        }
-      }
-    } else {
-      console.warn(
-        "[MUX] Skipping remote asset deletion: missing MUX_TOKEN_ID/SECRET"
-      );
-    }
-
-    // Remove Mux metadata rows (if you keep them)
-    await db.muxData.deleteMany({
-      where: { chapterId: { in: course.chapters.map((c) => c.id) } },
-    });
+    // No Mux cleanup necessary.
 
     // Finally, delete the course (ensure your schema cascades chapters/attachments as desired)
     const deleted = await db.course.delete({
