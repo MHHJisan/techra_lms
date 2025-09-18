@@ -14,10 +14,9 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 
-import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";
+// (unused inputs removed)
 import { Button } from "@/components/ui/button";
-import { title } from "process";
+// (unused title import removed)
 import { Pencil } from "lucide-react";
 import { useState } from "react";
 import toast from "react-hot-toast";
@@ -54,7 +53,7 @@ export const CategoryForm = ({
     },
   });
 
-  const { isSubmitting } = form.formState;
+  // no need to extract form state here
   const onSubmit = async (values: z.infer<typeof formSchema>) => {
     try {
       // Log the values being sent to the API for debugging
@@ -116,7 +115,7 @@ export const CategoryForm = ({
             <FormField
               control={form.control}
               name="categoryId"
-              render={(_field) => (
+              render={() => (
                 <FormItem>
                   <FormControl>
                     {/* Use Controller to wrap the Combobox */}

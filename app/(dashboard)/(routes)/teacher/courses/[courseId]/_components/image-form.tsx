@@ -1,11 +1,6 @@
 "use client";
 
-import * as z from "zod";
 import axios from "axios";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { useForm } from "react-hook-form";
-
-// (Form UI imports not needed here)
 import { Button } from "@/components/ui/button";
 import { ImageIcon, PlusCircle } from "lucide-react";
 import { useState } from "react";
@@ -16,11 +11,6 @@ import { Course } from "@prisma/client";
 import Image from "next/image";
 import { FileUpload } from "@/components/file-upload";
 
-const formSchema = z.object({
-  imageUrl: z.string().min(1, {
-    message: "Image is required",
-  }),
-});
 
 interface ImageFormProps {
   initialData: Course;
@@ -34,13 +24,7 @@ export const ImageForm = ({ initialData, courseId }: ImageFormProps) => {
 
   const router = useRouter();
 
-  const form = useForm<z.infer<typeof formSchema>>({
-    resolver: zodResolver(formSchema),
-    defaultValues: { imageUrl: initialData?.imageUrl || "" },
-  });
-
-  // Not using isSubmitting/isValid here
-  const onSubmit = async (values: z.infer<typeof formSchema>) => {
+  const onSubmit = async (values: { imageUrl: string }) => {
     try {
       await axios.patch(`/api/courses/${courseId}`, values);
       toast.success("Course Updated");

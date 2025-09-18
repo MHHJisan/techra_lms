@@ -16,14 +16,18 @@ export async function PUT(
 
         const { list } = await req.json()
 
-        const ownCourse = await db.course.findUnique({
+        const ownCourse = await db.course.findFirst({
             where: {
                 id: params.courseId,
-                userId: userId
-            }
+                user: { clerkId: userId }
+            },
+            select: { id: true }
         })
+        if (!ownCourse) {
+            return new NextResponse("Unauthorized", { status: 401 })
+        }
 
-        for( let item of list ){
+        for (const item of list as Array<{ id: string; position: number }>) {
             await db.chapter.update({
                 where: { id: item.id },
                 data: { position: item.position }

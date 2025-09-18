@@ -1,31 +1,20 @@
 "use client";
 
-import * as z from "zod";
 import axios from "axios";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { useForm } from "react-hook-form";
 import { Button } from "@/components/ui/button";
 import { PlusCircle, X, File, Loader2 } from "lucide-react";
 import { useState } from "react";
 import toast from "react-hot-toast";
 import { useRouter } from "next/navigation";
-import { cn } from "@/lib/utils";
 import { Course, Attachment } from "@prisma/client";
 import { FileUpload } from "@/components/file-upload";
-
-const formSchema = z.object({
-  url: z.string().min(1),
-});
 
 interface AttachmentFormProps {
   initialData: Course & { attachments: Attachment[] };
   courseId: string;
 }
 
-export const AttachmentForm = ({
-  initialData,
-  courseId,
-}: AttachmentFormProps) => {
+export const AttachmentForm = ({ initialData, courseId }: AttachmentFormProps) => {
   const [isEditing, setIsEditing] = useState(false);
   const [deletingId, setDeletingId] = useState<string | null>(null);
 
@@ -33,18 +22,7 @@ export const AttachmentForm = ({
 
   const router = useRouter();
 
-  const form = useForm<z.infer<typeof formSchema>>({
-    resolver: zodResolver(formSchema),
-    defaultValues: {
-      url:
-        initialData.attachments.length > 0
-          ? initialData.attachments[0].url
-          : "",
-    },
-  });
-
-  // no need to extract isSubmitting/isValid
-  const onSubmit = async (values: z.infer<typeof formSchema>) => {
+  const onSubmit = async (values: { url: string }) => {
     try {
       await axios.post(`/api/courses/${courseId}/attachments`, values);
       toast.success("Attachment added");
