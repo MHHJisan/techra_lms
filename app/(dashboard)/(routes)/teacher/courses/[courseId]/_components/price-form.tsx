@@ -45,7 +45,8 @@ export const PriceForm = ({ initialData, courseId }: PriceFormProps) => {
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
-      price: initialData?.price || undefined,
+      // Prisma Decimal -> number for the input default value
+      price: initialData?.price != null ? Number(initialData.price as unknown as number) : undefined,
     },
   });
 
@@ -84,7 +85,7 @@ export const PriceForm = ({ initialData, courseId }: PriceFormProps) => {
           )}
         >
           {initialData.price
-            ? formatPrice(initialData.price)
+            ? formatPrice(Number(initialData.price as unknown as number))
             : "No price given "}
         </p>
       )}

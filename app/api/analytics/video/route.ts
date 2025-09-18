@@ -37,10 +37,10 @@ export async function POST(req: Request) {
     });
 
     return NextResponse.json({ ok: true });
-  } catch (e: any) {
+  } catch (e: unknown) {
     console.error("[ANALYTICS_VIDEO_POST]", e);
     return NextResponse.json(
-      { error: e?.message || "Internal Server Error" },
+      { error: "Internal Server Error" },
       { status: 500 }
     );
   }
