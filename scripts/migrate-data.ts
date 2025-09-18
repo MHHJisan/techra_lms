@@ -32,7 +32,6 @@ async function main() {
     categories,
     courses,
     chapters,
-    muxData,
     attachments,
     purchases,
     progress,
@@ -42,7 +41,6 @@ async function main() {
     mysql.category.findMany(),
     mysql.course.findMany(),
     mysql.chapter.findMany(),
-    mysql.muxData.findMany(),
     mysql.attachment.findMany(),
     mysql.purchase.findMany(),
     mysql.userProgress.findMany(),
@@ -54,7 +52,6 @@ async function main() {
     categories: categories.length,
     courses: courses.length,
     chapters: chapters.length,
-    muxData: muxData.length,
     attachments: attachments.length,
     purchases: purchases.length,
     progress: progress.length,
@@ -238,20 +235,7 @@ async function main() {
     console.log(`  Chapters batch ${idx} OK`);
   });
 
-  // ── MuxData ──────────────────────────────────────────────────────
-  console.log("Inserting MuxData...");
-  await inBatches(muxData, 500, async (batch, idx) => {
-    await pg.muxData.createMany({
-      data: batch.map((m) => ({
-        id: m.id,
-        assetId: m.assetId,
-        playbackId: m.playbackId,
-        chapterId: m.chapterId,
-      })),
-      skipDuplicates: true,
-    });
-    console.log(`  MuxData batch ${idx} OK`);
-  });
+  // Note: No MuxData table in Postgres. Video is handled via Chapter.videoUrl.
 
   // ── Attachments ──────────────────────────────────────────────────
   console.log("Inserting Attachments...");

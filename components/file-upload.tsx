@@ -11,7 +11,7 @@ type Props = {
 
 export function FileUpload({ endPoint, onChange }: Props) {
   return (
-    <UploadDropzone<OurFileRouter>
+    <UploadDropzone<OurFileRouter, keyof OurFileRouter>
       endpoint={endPoint}
       // Do NOT pass any config/file types/size here; they must be defined on the server only.
       onClientUploadComplete={(res) => {

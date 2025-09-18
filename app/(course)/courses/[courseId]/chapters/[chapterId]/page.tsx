@@ -23,7 +23,7 @@ const ChapterIdPage = async ({
     chapter,
     course,
     attachments,
-    nextChapter,
+    // nextChapter,
     userProgress,
     purchase,
     author,
@@ -37,7 +37,7 @@ const ChapterIdPage = async ({
     return redirect("/");
   }
   const isLocked = !chapter.isFree && !purchase;
-  const completeOnEnd = !!purchase && !userProgress?.isCompleted;
+  // const completeOnEnd = !!purchase && !userProgress?.isCompleted;
   const videoUrlOrId = chapter.videoUrl || "";
 
   return (
@@ -57,12 +57,9 @@ const ChapterIdPage = async ({
             <div className="relative w-full aspect-video rounded-md overflow-hidden bg-black">
               <VideoPlayer
                 chapterId={params.chapterId}
-                title={chapter.title}
                 courseId={params.courseId}
-                nextChapterId={nextChapter?.id}
                 videoUrlOrId={videoUrlOrId}
                 isLocked={isLocked}
-                completeOnEnd={completeOnEnd}
                 className="absolute inset-0 w-full h-full"
               />
             </div>
