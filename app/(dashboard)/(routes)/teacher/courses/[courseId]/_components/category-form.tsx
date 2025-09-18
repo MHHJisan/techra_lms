@@ -18,7 +18,7 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
 import { title } from "process";
-import { Pencil, Save } from "lucide-react";
+import { Pencil } from "lucide-react";
 import { useState } from "react";
 import toast from "react-hot-toast";
 import { useRouter } from "next/navigation";
@@ -32,7 +32,7 @@ const formSchema = z.object({
 
 interface CategoryFormProps {
   initialData: Course;
-  courseId: String;
+  courseId: string;
   options: { label: string; value: string }[];
 }
 
@@ -54,7 +54,7 @@ export const CategoryForm = ({
     },
   });
 
-  const { isSubmitting, isValid } = form.formState;
+  const { isSubmitting } = form.formState;
   const onSubmit = async (values: z.infer<typeof formSchema>) => {
     try {
       // Log the values being sent to the API for debugging
@@ -116,7 +116,7 @@ export const CategoryForm = ({
             <FormField
               control={form.control}
               name="categoryId"
-              render={(field) => (
+              render={(_field) => (
                 <FormItem>
                   <FormControl>
                     {/* Use Controller to wrap the Combobox */}

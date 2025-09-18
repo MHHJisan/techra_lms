@@ -6,20 +6,15 @@ import CategorySection from "@/components/udemy-clone/CategorySection";
 import FeaturedCourses from "@/components/udemy-clone/FeaturedCourses";
 import LoginPageClient from "./_components/LoginPageClient";
 import { db } from "@/lib/db";
-import Footer from "@/components/udemy-clone/Footer";
 
 interface LoginPageProps {
-  loginParams?: {
-    title?: string;
-    categoryId?: string;
-  };
   searchParams?: {
     categoryId?: string;
     q?: string;
   };
 }
 
-export default async function Page({ loginParams, searchParams }: LoginPageProps) {
+export default async function Page({ searchParams }: LoginPageProps) {
   const { userId } = auth();
 
   if (userId) {

@@ -1,7 +1,6 @@
 import { db } from "@/lib/db"
 import { auth } from "@clerk/nextjs/server"
 import { NextResponse } from "next/server"
-import { error } from "console";
 
 export async function DELETE(req: Request, { params }: { params: { courseId: string; chapterId: string } }) {
     try {
@@ -72,7 +71,8 @@ export async function DELETE(req: Request, { params }: { params: { courseId: str
 export async function  PATCH(req: Request, { params }: { params: {courseId: string, chapterId: string}}) {
     try{
         const { userId } = auth()
-        const { isPublished, ...values }= await req.json()
+        const payload = await req.json()
+        const { /* isPublished, */ ...values } = payload
 
         if(!userId ) {
             return new NextResponse("Unauthorized", { status: 401 })

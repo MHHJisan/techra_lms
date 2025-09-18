@@ -13,11 +13,9 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 
-import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
-import { title } from "process";
-import { Pencil, Save } from "lucide-react";
+import { Pencil } from "lucide-react";
 import { useState } from "react";
 import toast from "react-hot-toast";
 import { useRouter } from "next/navigation";
@@ -26,7 +24,7 @@ import { Course } from "@prisma/client";
 
 interface DescriptionFormProps {
   initialData: Course;
-  courseId: String;
+  courseId: string;
 }
 
 // Include description in the schema
@@ -51,7 +49,7 @@ export const DescriptionForm = ({
     },
   });
 
-  const { isSubmitting, isValid } = form.formState;
+  const { isSubmitting } = form.formState;
 
   const onSubmit = async (values: z.infer<typeof formSchema>) => {
     try {

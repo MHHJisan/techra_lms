@@ -2,7 +2,7 @@ import { Category, Course } from "@prisma/client";
 import { ReactNode } from "react";
 import { CourseCard } from "./course-card";
 
-type CourseWithProgressCategory = Course & {
+export type CourseWithProgressCategory = Course & {
   category: Category | null;
   chapters: { id: string }[];
   progress: number | null;
@@ -19,7 +19,7 @@ export const CoursesList = ({ items, renderActions, showStatusBadge = false }: C
       <div className="grid sm:grid-cols-2 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl: grid-cols-4 gap-4">
         {items.map((item) => {
           const imageUrl = item.imageUrl || "/img/course1.jpg";
-          const priceNumber = item.price ? Number(item.price as any) : 0;
+          const priceNumber = item.price ? Number(item.price as unknown as number) : 0;
           const categoryName = item.category?.name || "Uncategorized";
           return (
             <div key={item.id} className="space-y-2">

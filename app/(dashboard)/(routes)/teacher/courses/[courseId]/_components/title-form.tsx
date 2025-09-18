@@ -47,11 +47,11 @@ export const TitleForm = ({ initialData, courseId }: TitleFormProps) => {
       form.reset(values);
       setIsEditing(false);
       router.refresh();
-    } catch (err) {
-      toast.error(
-        (axios.isAxiosError(err) && (err.response?.data as any)?.error) ||
-          "Something went wrong"
-      );
+    } catch (err: unknown) {
+      const apiError = axios.isAxiosError(err)
+        ? (err.response?.data as { error?: string } | undefined)
+        : undefined;
+      toast.error(apiError?.error || "Something went wrong");
     }
   };
 

@@ -33,7 +33,7 @@ export const ChaptersList = ({
 
   useEffect(() => {
     setIsMounted(true);
-  });
+  }, []);
 
   //tutorial version
   // useEffect(() => {

@@ -48,11 +48,8 @@ export async function POST(req: Request) {
     });
 
     return NextResponse.json({ id: course.id }, { status: 201 });
-  } catch (e: any) {
+  } catch (e: unknown) {
     console.error("[COURSES_POST]", e);
-    return NextResponse.json(
-      { error: e?.message || "Internal Error" },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: "Internal Error" }, { status: 500 });
   }
 }

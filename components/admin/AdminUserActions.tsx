@@ -60,7 +60,7 @@ export default function AdminUserActions({
   };
 
   return (
-    <div className="flex items-center gap-2">
+    <div className="flex items-center gap-2" title={email || undefined} data-email={email || undefined}>
       <select
         className="border rounded-md p-1 text-xs"
         value={role}
