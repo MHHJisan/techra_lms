@@ -42,18 +42,27 @@ export async function POST(req: NextRequest) {
 
     // We handle user.created and user.updated
     if (evt.type === "user.created" || evt.type === "user.updated") {
-      const user = evt.data;
+      const user = evt.data as {
+        id: string;
+        image_url?: string | null;
+        email_addresses?: Array<{ id: string; email_address: string }>;
+        primary_email_address_id?: string | null;
+        first_name?: string | null;
+        last_name?: string | null;
+      };
       const clerkId = user.id;
       const imageUrl = user.image_url ?? undefined;
 
       // Resolve primary email
-      const emailAddresses = (user.email_addresses || []) as Array<{ id: string; email_address: string }>;
-      const primaryEmailId = (user as any).primary_email_address_id as string | undefined;
-      const primaryEmail = emailAddresses.find((e) => e.id === primaryEmailId)?.email_address || emailAddresses[0]?.email_address;
+      const emailAddresses = user.email_addresses ?? [];
+      const primaryEmailId = user.primary_email_address_id ?? undefined;
+      const primaryEmail =
+        emailAddresses.find((e) => e.id === primaryEmailId)?.email_address ||
+        emailAddresses[0]?.email_address;
 
       // Names
-      const firstName = (user as any).first_name as string | undefined;
-      const lastName = (user as any).last_name as string | undefined;
+      const firstName = user.first_name ?? undefined;
+      const lastName = user.last_name ?? undefined;
 
       await db.user.upsert({
         where: { clerkId },

@@ -15,12 +15,12 @@ import {
 
 import { Button } from "@/components/ui/button";
 
-import { Pencil, Save } from "lucide-react";
+import { Pencil } from "lucide-react";
 import { useState } from "react";
 import toast from "react-hot-toast";
 import { useRouter } from "next/navigation";
 import { cn } from "@/lib/utils";
-import { Chapter, Course } from "@prisma/client";
+import { Chapter } from "@prisma/client";
 
 import { Checkbox } from "@/components/ui/checkbox";
 
@@ -52,7 +52,7 @@ export const ChapterAccessForm = ({
     },
   });
 
-  const { isSubmitting, isValid } = form.formState;
+  // No need to extract isSubmitting/isValid here since we don't use them in this form
   const onSubmit = async (values: z.infer<typeof formSchema>) => {
     try {
       await axios.patch(

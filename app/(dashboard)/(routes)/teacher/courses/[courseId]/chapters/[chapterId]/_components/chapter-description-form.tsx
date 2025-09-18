@@ -17,12 +17,12 @@ import {
 
 import { Button } from "@/components/ui/button";
 
-import { Pencil, Save } from "lucide-react";
+import { Pencil } from "lucide-react";
 import { useState } from "react";
 import toast from "react-hot-toast";
 import { useRouter } from "next/navigation";
 import { cn } from "@/lib/utils";
-import { Chapter, Course } from "@prisma/client";
+import { Chapter } from "@prisma/client";
 import { Editor } from "@/components/editor";
 import { Preview } from "@/components/preview";
 
@@ -56,7 +56,7 @@ export const ChapterDescriptionForm = ({
     },
   });
 
-  // const { isSubmitting, isValid } = form.formState;
+  // We don't use isSubmitting/isValid here
 
   const onSubmit = async (values: z.infer<typeof formSchema>) => {
     try {
