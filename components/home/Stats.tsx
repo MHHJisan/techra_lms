@@ -16,10 +16,10 @@ const CONTENT = {
     { label: "Instructors", value: "50+" },
   ],
   bn: [
-    { label: "শিক্ষার্থী", value: "১০ হাজার+" },
-    { label: "কোর্স", value: "১২০+" },
+    { label: "শিক্ষার্থী", value: "500+" },
+    { label: "কোর্স", value: "08+" },
     { label: "গড় রেটিং", value: "৪.৮/৫" },
-    { label: "শিক্ষক", value: "৫০+" },
+    { label: "শিক্ষক", value: "৫+" },
   ],
 } as const;
 
@@ -86,9 +86,4 @@ export default function Stats() {
   );
 }
 
-// You are viewing a previous version
-// Restore this version to make edits
 
-// Restore this version
-
-// Back to latest version

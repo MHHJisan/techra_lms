@@ -6,22 +6,21 @@ import { FaBook, FaVideo, FaQuestionCircle } from "react-icons/fa";
 
 /**
  * CategorySection — BN/EN synced with navbar toggle
- * Sync strategy:
- * 1) Primary: URL ?lang=bn|en (updates via navbar toggle)
- * 2) Fallbacks: cookie `lang` and localStorage `lang`
- * 3) Live sync: listens to `storage` events (navbar writes localStorage on toggle)
+ * Redirect each card to a different external URL (same tab).
+ * - Facebook for the first card, YouTube for the second, Google for the third.
+ * - To open in a new tab, add target="_blank" rel="noopener noreferrer" on the <a>.
  */
 
 const CONTENT = {
   en: [
-    { icon: FaBook, title: "Courses", desc: "Explore various courses" },
-    { icon: FaVideo, title: "Videos", desc: "Watch educational videos" },
-    { icon: FaQuestionCircle, title: "Quizzes", desc: "Test your skills" },
+    { icon: FaBook, title: "Courses", desc: "Explore various courses", href: "/courses" },
+    { icon: FaVideo, title: "Videos", desc: "Watch educational videos", href: "https://www.youtube.com/@techra2811" },
+    { icon: FaQuestionCircle, title: "Quizzes", desc: "Test your skills", href: "https://www.google.com/" },
   ],
   bn: [
-    { icon: FaBook, title: "কোর্সসমূহ", desc: "বিভিন্ন কোর্স এক্সপ্লোর করুন" },
-    { icon: FaVideo, title: "ভিডিও", desc: "শিক্ষামূলক ভিডিও দেখুন" },
-    { icon: FaQuestionCircle, title: "কুইজ", desc: "আপনার দক্ষতা যাচাই করুন" },
+    { icon: FaBook, title: "কোর্সসমূহ", desc: "বিভিন্ন কোর্স এক্সপ্লোর করুন", href: "/courses" },
+    { icon: FaVideo, title: "ভিডিও", desc: "শিক্ষামূলক ভিডিও দেখুন", href: "https://www.youtube.com/@techra2811" },
+    { icon: FaQuestionCircle, title: "কুইজ", desc: "আপনার দক্ষতা যাচাই করুন", href: "https://www.google.com/" },
   ],
 } as const;
 
@@ -75,11 +74,16 @@ export default function CategorySection() {
       </h2>
       <div className="max-w-5xl mx-auto grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6 px-4">
         {items.map((cat, idx) => (
-          <div key={idx} className="p-6 bg-gray-100 rounded-lg shadow-md text-center hover:shadow-lg transition">
+          <a
+            key={idx}
+            href={cat.href}
+            aria-label={t(`Go to ${cat.title}`, `${cat.title} এ যান`)}
+            className="block p-6 bg-gray-100 rounded-lg shadow-md text-center hover:shadow-lg transition outline-none focus-visible:ring-2 focus-visible:ring-blue-500"
+          >
             <cat.icon className="text-blue-500 text-4xl mx-auto mb-4" />
             <h3 className="text-xl font-bold">{cat.title}</h3>
             <p className="text-gray-600 mt-2">{cat.desc}</p>
-          </div>
+          </a>
         ))}
       </div>
     </section>
