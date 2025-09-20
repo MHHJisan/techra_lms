@@ -26,7 +26,7 @@ const Navbar = () => {
         <div className="flex items-center gap-6">
           <Link href="/" className="flex items-center gap-2">
             <Image src="/logo.svg" alt="Logo" width={32} height={32} />
-            <span className="hidden text-xl font-bold text-gray-900 sm:inline">{lang === "bn" ? "টেকরা" : "Techra"}</span>
+            <span className="hidden text-xl font-bold text-gray-900 sm:inline">{lang === "bn" ? "টেকরা লার্নিং সেন্টার" : "Techra Learning Center"}</span>
           </Link>
         </div>
 
@@ -57,11 +57,11 @@ const Navbar = () => {
 
         {/* Right side: Links + Buttons + Language toggle */}
         <div className="flex items-center gap-3 md:gap-4">
-          <Link href="/teach" className="hidden text-sm font-medium text-gray-700 hover:text-blue-600 md:inline">
+          <Link href="/sign-up" className="hidden text-sm font-medium text-gray-700 hover:text-blue-600 md:inline">
             {lang === "bn" ? "টেকরায় শেখান" : "Teach on Techra"}
           </Link>
-          <Link href="/my-courses" className="hidden text-sm font-medium text-gray-700 hover:text-blue-600 md:inline">
-            {lang === "bn" ? "আমার কোর্সসমূহ" : "My Courses"}
+          <Link href="/courses" className="hidden text-sm font-medium text-gray-700 hover:text-blue-600 md:inline">
+            {lang === "bn" ? "কোর্সসমূহ" : "Courses"}
           </Link>
           <Link
             href="/cart"

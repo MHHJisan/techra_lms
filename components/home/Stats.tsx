@@ -10,16 +10,16 @@ import { useSearchParams } from "next/navigation";
 
 const CONTENT = {
   en: [
-    { label: "Learners", value: "10k+" },
-    { label: "Courses", value: "120+" },
+    { label: "Learners", value: "500+" },
+    { label: "Courses", value: "08+" },
     { label: "Avg. Rating", value: "4.8/5" },
-    { label: "Instructors", value: "50+" },
+    { label: "Instructors", value: "10+" },
   ],
   bn: [
     { label: "শিক্ষার্থী", value: "500+" },
     { label: "কোর্স", value: "08+" },
     { label: "গড় রেটিং", value: "৪.৮/৫" },
-    { label: "শিক্ষক", value: "৫+" },
+    { label: "শিক্ষক", value: "১০+" },
   ],
 } as const;
 
@@ -70,7 +70,7 @@ export default function Stats() {
           {stats.map((s) => (
             <div
               key={s.label}
-              className="text-center rounded-lg border border-slate-200 dark:border-slate-800 p-6 bg-slate-50/60 dark:bg-slate-900/60 hover:shadow-md transition"
+              className="text-center rounded-lg border border-slate-200 dark:border-slate-800 p-6 bg-slate-50/60 dark:bg-slate-900/60 hover:shadow-md hover:scale-105 hover:bg-blue-500 dark:hover:bg-blue-900/80 transition"
             >
               <div className="text-2xl font-bold text-slate-900 dark:text-white">
                 {s.value}
