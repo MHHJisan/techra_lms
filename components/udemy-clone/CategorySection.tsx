@@ -77,6 +77,8 @@ export default function CategorySection() {
           <a
             key={idx}
             href={cat.href}
+            target="_blank"
+            rel="noopener noreferrer"
             aria-label={t(`Go to ${cat.title}`, `${cat.title} এ যান`)}
             className="block p-6 bg-gray-100 rounded-lg shadow-md text-center hover:shadow-lg transition outline-none focus-visible:ring-2 focus-visible:ring-blue-500"
           >
