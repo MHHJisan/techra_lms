@@ -12,27 +12,34 @@ import {
 import { SidebarItem } from "./sidebar-item";
 import { usePathname } from "next/navigation";
 import { useEffect, useState } from "react";
+import { useLang } from "@/app/providers/LanguageProvider";
 
-const guestRoutes = [
-  { icon: Layout, label: "Dashboard", href: "/" },
-  { icon: Compass, label: "Browse", href: "/search" },
-];
-
-const teacherRoutes = [
-  { icon: List, label: "My Courses", href: "/teacher/courses" },
-  { icon: BarChart, label: "Analytics", href: "/teacher/analytics" },
-  { icon: Grid2X2, label: "All Courses", href: "/teacher/all-courses" },
-];
-
-const adminRoutes = [
-  { icon: Layout, label: "All Users", href: "/admin/users" },
-  { icon: Users, label: "Teachers", href: "/admin/teachers" },
-  { icon: GraduationCap, label: "Students", href: "/admin/students" },
-  { icon: Grid2X2, label: "All Courses", href: "/admin/all-courses" },
-];
+const translations = {
+  en: {
+    dashboard: "Dashboard",
+    browse: "Browse",
+    myCourses: "My Courses",
+    analytics: "Analytics",
+    allCourses: "All Courses",
+    allUsers: "All Users",
+    teachers: "Teachers",
+    students: "Students",
+  },
+  bn: {
+    dashboard: "ড্যাশবোর্ড",
+    browse: "ব্রাউজ করুন",
+    myCourses: "আমার কোর্সসমূহ",
+    analytics: "অ্যানালিটিক্স",
+    allCourses: "সমস্ত কোর্স",
+    allUsers: "সকল ব্যবহারকারী",
+    teachers: "শিক্ষকবৃন্দ",
+    students: "শিক্ষার্থীরা",
+  },
+};
 
 export const SidebarRoutes = () => {
   const pathname = usePathname();
+  const { lang } = useLang();
 
   const [role, setRole] = useState<string | null>(null);
   const [isAdmin, setIsAdmin] = useState(false);
@@ -51,7 +58,7 @@ export const SidebarRoutes = () => {
         setRole(data?.role ?? null);
         setIsAdmin(Boolean(data?.isAdmin));
       } catch {
-        // ignore network errors; we'll fall back to guest
+        // ignore; fallback to guest
       } finally {
         setReady(true);
       }
@@ -59,7 +66,6 @@ export const SidebarRoutes = () => {
     return () => ac.abort();
   }, []);
 
-  // Optional: a small skeleton to prevent flash
   if (!ready) {
     return (
       <div className="flex flex-col gap-2 w-full">
@@ -70,21 +76,35 @@ export const SidebarRoutes = () => {
     );
   }
 
+  const t = translations[lang];
+
+  const guestRoutes = [
+    { icon: Layout, label: t.dashboard, href: "/" },
+    { icon: Compass, label: t.browse, href: "/search" },
+  ];
+
+  const teacherRoutes = [
+    { icon: List, label: t.myCourses, href: "/teacher/courses" },
+    { icon: BarChart, label: t.analytics, href: "/teacher/analytics" },
+    { icon: Grid2X2, label: t.allCourses, href: "/teacher/all-courses" },
+  ];
+
+  const adminRoutes = [
+    { icon: Layout, label: t.allUsers, href: "/admin/users" },
+    { icon: Users, label: t.teachers, href: "/admin/teachers" },
+    { icon: GraduationCap, label: t.students, href: "/admin/students" },
+    { icon: Grid2X2, label: t.allCourses, href: "/admin/all-courses" },
+  ];
+
   const isTeacher = role === "teacher" || role === "instructor";
   const isAdminPage = pathname?.startsWith("/admin") ?? false;
 
   let routes = guestRoutes;
-
-  if (isAdminPage && isAdmin) {
-    routes = adminRoutes; // Admin on /admin → admin menu
-  } else if (isTeacher) {
-    routes = teacherRoutes; // Teacher anywhere else → teacher menu
-  } else {
-    routes = guestRoutes; // Everyone else → guest menu
-  }
+  if (isAdminPage && isAdmin) routes = adminRoutes;
+  else if (isTeacher) routes = teacherRoutes;
 
   return (
-    <div className="flex flex-col w-full">
+    <div className="flex flex-col w-full gap-2">
       {routes.map((route) => (
         <SidebarItem
           key={route.href}
@@ -93,6 +113,7 @@ export const SidebarRoutes = () => {
           href={route.href}
         />
       ))}
+      {/* No language toggle here; Navbar controls language */}
     </div>
   );
 };

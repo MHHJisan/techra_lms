@@ -57,7 +57,7 @@ const Navbar = () => {
 
         {/* Right side: Links + Buttons + Language toggle */}
         <div className="flex items-center gap-3 md:gap-4">
-          <Link href="/sign-up" className="hidden text-sm font-medium text-gray-700 hover:text-blue-600 md:inline">
+          <Link href="/sign-in" className="hidden text-sm font-medium text-gray-700 hover:text-blue-600 md:inline">
             {lang === "bn" ? "টেকরায় শেখান" : "Teach on Techra"}
           </Link>
           <Link href="/courses" className="hidden text-sm font-medium text-gray-700 hover:text-blue-600 md:inline">
