@@ -2,10 +2,13 @@
 import { redirect } from "next/navigation";
 import { auth, clerkClient } from "@clerk/nextjs/server";
 import Hero from "@/components/udemy-clone/Hero";
+import Stats from "@/components/home/Stats";
 import CategorySection from "@/components/udemy-clone/CategorySection";
 import FeaturedCourses from "@/components/udemy-clone/FeaturedCourses";
-import LoginPageClient from "./_components/LoginPageClient";
+import Testimonials from "@/components/home/Testimonials";
+import FinalCta from "@/components/home/FinalCta";
 import { db } from "@/lib/db";
+import UdemyStyleNavbar from "@/components/udemy-clone/UdemyStyleNavbar";
 
 interface LoginPageProps {
   searchParams?: {
@@ -94,16 +97,17 @@ export default async function Page({ searchParams }: LoginPageProps) {
 
   // Guest view
   return (
-    <div className="flex justify-center items-center min-h-screen">
-      <div className="w-full">
-        <Hero />
-        <CategorySection />
-        <LoginPageClient />
-        <FeaturedCourses
-          categoryId={searchParams?.categoryId}
-          q={searchParams?.q}
-        />
-      </div>
+    <div className="w-full">
+      <UdemyStyleNavbar />
+      <FeaturedCourses
+        categoryId={searchParams?.categoryId}
+        q={searchParams?.q}
+      />
+      {/* <Hero /> */}
+      <CategorySection />
+      <Stats />
+      <Testimonials />
+      <FinalCta />
     </div>
   );
 }

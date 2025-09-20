@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { headers } from "next/headers";
 import { db } from "@/lib/db";
+import { sendAdminNewUserEmail } from "@/lib/email";
 
 // Optional: Verify Clerk webhook using Svix (recommended in production)
 // If CLERK_WEBHOOK_SECRET is set, we will verify the signature.
@@ -80,6 +81,21 @@ export async function POST(req: NextRequest) {
           imageUrl: imageUrl ?? undefined,
         },
       });
+
+      // Only send email on first creation event
+      if (evt.type === "user.created") {
+        try {
+          await sendAdminNewUserEmail({
+            clerkId,
+            email: primaryEmail || undefined,
+            firstName: firstName ?? null,
+            lastName: lastName ?? null,
+            imageUrl: imageUrl ?? null,
+          });
+        } catch (e) {
+          console.warn("[CLERK_WEBHOOK][EMAIL] Failed to send admin notification:", e);
+        }
+      }
     }
 
     return NextResponse.json({ ok: true });

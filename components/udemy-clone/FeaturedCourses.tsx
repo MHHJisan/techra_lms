@@ -1,112 +1,81 @@
+"use client";
+
 import Image from "next/image";
 import Link from "next/link";
-import { db } from "@/lib/db";
-import type { Prisma } from "@prisma/client";
-import { formatPrice } from "@/lib/fomat";
-import { headers } from "next/headers";
+import { usePathname, useRouter, useSearchParams } from "next/navigation";
 
-interface FeaturedCoursesProps {
-  categoryId?: string;
-  q?: string;
-  seed?: string; // optional external seed (e.g., from IP + query)
-}
+const FeaturedCourses = () => {
+  const router = useRouter();
+  const pathname = usePathname();
+  const searchParams = useSearchParams();
 
-// Simple deterministic PRNG (Mulberry32) + string hash (xmur3)
-function xmur3(str: string) {
-  let h = 1779033703 ^ str.length;
-  for (let i = 0; i < str.length; i++) {
-    h = Math.imul(h ^ str.charCodeAt(i), 3432918353);
-    h = (h << 13) | (h >>> 19);
-  }
-  return () => {
-    h = Math.imul(h ^ (h >>> 16), 2246822507);
-    h = Math.imul(h ^ (h >>> 13), 3266489909);
-    h ^= h >>> 16;
-    return h >>> 0;
-  };
-}
-
-function mulberry32(a: number) {
-  return function () {
-    let t = (a += 0x6d2b79f5);
-    t = Math.imul(t ^ (t >>> 15), t | 1);
-    t ^= t + Math.imul(t ^ (t >>> 7), t | 61);
-    return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
-  };
-}
-
-function seededShuffle<T>(arr: T[], seedStr: string): T[] {
-  const seedFn = xmur3(seedStr);
-  const rand = mulberry32(seedFn());
-  const a = [...arr];
-  for (let i = a.length - 1; i > 0; i--) {
-    const j = Math.floor(rand() * (i + 1));
-    [a[i], a[j]] = [a[j], a[i]];
-  }
-  return a;
-}
-
-const FeaturedCourses = async ({ categoryId, q, seed }: FeaturedCoursesProps) => {
-  // Build filters with proper Prisma type
-  const where: Prisma.CourseWhereInput = { isPublished: true };
-  if (categoryId) where.categoryId = categoryId;
-  if (q) {
-    where.OR = [
-      { title: { contains: q, mode: "insensitive" as const } },
-      { description: { contains: q, mode: "insensitive" as const } },
-    ];
-  }
-
-  // Pull a pool of courses and then deterministically shuffle to pick 3
-  const pool = await db.course.findMany({
-    where,
-    select: { id: true, title: true, imageUrl: true, price: true },
-    take: 30,
-  });
-
-  const hdrs = headers();
-  const ip = hdrs.get("x-forwarded-for")?.split(",")[0]?.trim() || "0.0.0.0";
-  const seedStr = seed || `${ip}|${categoryId || "*"}|${q || "*"}`;
-  const shuffled = seededShuffle(pool, seedStr);
-  const top3 = shuffled.slice(0, 3).map((c) => ({
-    id: c.id,
-    title: c.title,
-    imageUrl: c.imageUrl ?? "/img/course1.jpg",
-    priceNumber: c.price ? Number(c.price) : 0,
-  }));
+  const lang = (searchParams.get("lang") || "en").toLowerCase();
 
   return (
-    <section className="py-16 bg-gray-50">
-      <h2 className="text-center text-3xl font-bold mb-8">Featured Courses</h2>
-      <div className="max-w-7xl mx-auto grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-8 px-4">
-        {top3.map((course) => (
-          <div
-            key={course.id}
-            className="bg-white rounded-lg shadow-md overflow-hidden border hover:shadow-lg transition"
-          >
-            <Link href={`/courses/${course.id}`}>
-              <Image
-                src={course.imageUrl}
-                alt={course.title}
-                width={400}
-                height={192}
-                className="w-full h-48 object-cover"
-              />
-            </Link>
-            <div className="p-4">
-              <h3 className="text-lg font-bold line-clamp-2 min-h-[3rem]">{course.title}</h3>
-              <p className="text-gray-600 mt-1">
-                {course.priceNumber > 0 ? formatPrice(course.priceNumber) : "Free"}
-              </p>
+    <section className="relative py-5">
+      {/* Decorative gradient background */}
+      <div
+        aria-hidden
+        className="pointer-events-none absolute inset-0 -z-10 overflow-hidden"
+      >
+        <div className="absolute right-[-20%] top-[-10%] h-[34rem] w-[34rem] rounded-full blur-3xl opacity-30 bg-gradient-to-br from-blue-200 via-indigo-200 to-purple-200" />
+        <div className="absolute left-[-15%] bottom-[-20%] h-[28rem] w-[28rem] rounded-full blur-3xl opacity-20 bg-gradient-to-tr from-sky-100 via-cyan-100 to-emerald-100" />
+      </div>
+
+      <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+        <div className="mx-auto max-w-2xl text-center">
+          <h2 className="text-balance text-3xl font-bold tracking-tight text-gray-900 sm:text-4xl">
+            {lang === "bn" ? "বাছাইকৃত কোর্সসমূহ" : "Featured Courses"}
+          </h2>
+          <p className="mt-3 text-pretty text-gray-600">
+            {lang === "bn" ? "আপনার আগ্রহের উপর ভিত্তি করে নির্বাচিত" : "Hand‑picked for you based on your interests."}
+          </p>
+        </div>
+
+        {/* Cards placeholder */}
+        <div className="mt-12 grid grid-cols-1 gap-8 sm:grid-cols-2 lg:grid-cols-3">
+          {/* Imagine map of courses here */}
+          <article className="rounded-2xl border border-gray-200 bg-white/70 p-5 shadow-sm">
+            <h3 className="text-lg font-semibold text-gray-900">
+              {lang === "bn" ? "নমুনা কোর্স" : "Sample Course"}
+            </h3>
+            <p className="mt-2 text-sm text-gray-600">
+              {lang === "bn" ? "এটি একটি ডেমো কার্ড" : "This is a demo card."}
+            </p>
+            <div className="mt-4 flex items-center justify-between">
               <Link
-                href={`/courses/${course.id}`}
-                className="inline-block mt-4 px-4 py-2 bg-blue-600 text-white rounded-md shadow-md hover:bg-blue-700"
+                href="/courses/demo"
+                className="inline-flex items-center gap-2 rounded-xl bg-blue-600 px-4 py-2 text-sm font-medium text-white shadow-sm hover:bg-blue-700"
               >
-                Learn More
+                {lang === "bn" ? "বিস্তারিত দেখুন" : "Learn more"}
+              </Link>
+              <Link
+                href="/courses/demo/enroll"
+                className="inline-flex items-center gap-2 rounded-xl border border-blue-600 bg-white px-4 py-2 text-sm font-semibold text-blue-700 hover:bg-blue-50"
+              >
+                {lang === "bn" ? "ভর্তি হোন" : "Enroll to this course"}
               </Link>
             </div>
-          </div>
-        ))}
+          </article>
+        </div>
+
+        {/* Bottom CTA */}
+        <div className="mt-12 text-center relative z-20 pointer-events-auto">
+          <Link
+            href="/search"
+            className="inline-flex items-center gap-2 rounded-full border border-gray-300 bg-white/80 px-5 py-2.5 text-sm font-medium text-gray-700 shadow-sm hover:border-gray-400 hover:shadow-md"
+          >
+            {lang === "bn" ? "সব কোর্স দেখুন" : "Browse all courses"}
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              viewBox="0 0 24 24"
+              fill="currentColor"
+              className="h-4 w-4"
+            >
+              <path fillRule="evenodd" d="M12.97 4.97a.75.75 0 0 1 1.06 0l6 6a.75.75 0 0 1 0 1.06l-6 6a.75.75 0 1 1-1.06-1.06L17.94 12l-4.97-4.97a.75.75 0 0 1 0-1.06Z" clipRule="evenodd" />
+            </svg>
+          </Link>
+        </div>
       </div>
     </section>
   );
