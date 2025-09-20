@@ -1,19 +1,56 @@
-"use client";
-
-import Image from "next/image";
+/* eslint-disable @typescript-eslint/no-explicit-any */
+// app/(site)/_components/FeaturedCourses.tsx  (SERVER COMPONENT)
 import Link from "next/link";
-import { usePathname, useRouter, useSearchParams } from "next/navigation";
+import { cookies } from "next/headers";
+import { db } from "@/lib/db";
+import { CoursesList } from "@/components/courses-list";
 
-const FeaturedCourses = () => {
-  const router = useRouter();
-  const pathname = usePathname();
-  const searchParams = useSearchParams();
+function normalizeLang(v?: string | null) {
+  return v?.toLowerCase() === "bn" ? "bn" : "en";
+}
+function t(lang: "en" | "bn", en: string, bn: string) {
+  return lang === "bn" ? bn : en;
+}
 
-  const lang = (searchParams.get("lang") || "en").toLowerCase();
+export default async function FeaturedCourses({
+  lang: langProp,
+  categoryId,
+  q,
+}: {
+  lang?: "en" | "bn"; // <- receive from the page
+  categoryId?: string;
+  q?: string;
+}) {
+  // Fallback to cookie if the page didn’t pass it
+  const cookieLang = cookies().get("lang")?.value;
+  const lang = normalizeLang(langProp ?? cookieLang);
+
+  const where: any = { isPublished: true };
+  if (categoryId) where.categoryId = categoryId;
+  if (q) {
+    where.OR = [
+      { title: { contains: q, mode: "insensitive" as const } },
+      { description: { contains: q, mode: "insensitive" as const } },
+    ];
+  }
+
+  const courses = await db.course.findMany({
+    where,
+    orderBy: { createdAt: "desc" },
+    take: 12,
+    include: {
+      category: { select: { id: true, name: true } },
+      chapters: { select: { id: true } },
+    },
+  });
+
+  const coursesWithProgress = courses.map((course) => ({
+    ...course,
+    progress: null,
+  }));
 
   return (
     <section className="relative py-5">
-      {/* Decorative gradient background */}
       <div
         aria-hidden
         className="pointer-events-none absolute inset-0 -z-10 overflow-hidden"
@@ -25,60 +62,42 @@ const FeaturedCourses = () => {
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
         <div className="mx-auto max-w-2xl text-center">
           <h2 className="text-balance text-3xl font-bold tracking-tight text-gray-900 sm:text-4xl">
-            {lang === "bn" ? "বাছাইকৃত কোর্সসমূহ" : "Featured Courses"}
+            {t(lang, "Featured Courses", "বাছাইকৃত কোর্সসমূহ")}
           </h2>
           <p className="mt-3 text-pretty text-gray-600">
-            {lang === "bn" ? "আপনার আগ্রহের উপর ভিত্তি করে নির্বাচিত" : "Hand‑picked for you based on your interests."}
+            {t(
+              lang,
+              "Hand-picked for you based on your interests.",
+              "আপনার আগ্রহের উপর ভিত্তি করে নির্বাচিত"
+            )}
           </p>
         </div>
 
-        {/* Cards placeholder */}
-        <div className="mt-12 grid grid-cols-1 gap-8 sm:grid-cols-2 lg:grid-cols-3">
-          {/* Imagine map of courses here */}
-          <article className="rounded-2xl border border-gray-200 bg-white/70 p-5 shadow-sm">
-            <h3 className="text-lg font-semibold text-gray-900">
-              {lang === "bn" ? "নমুনা কোর্স" : "Sample Course"}
-            </h3>
-            <p className="mt-2 text-sm text-gray-600">
-              {lang === "bn" ? "এটি একটি ডেমো কার্ড" : "This is a demo card."}
-            </p>
-            <div className="mt-4 flex items-center justify-between">
-              <Link
-                href="/courses/demo"
-                className="inline-flex items-center gap-2 rounded-xl bg-blue-600 px-4 py-2 text-sm font-medium text-white shadow-sm hover:bg-blue-700"
-              >
-                {lang === "bn" ? "বিস্তারিত দেখুন" : "Learn more"}
-              </Link>
-              <Link
-                href="/courses/demo/enroll"
-                className="inline-flex items-center gap-2 rounded-xl border border-blue-600 bg-white px-4 py-2 text-sm font-semibold text-blue-700 hover:bg-blue-50"
-              >
-                {lang === "bn" ? "ভর্তি হোন" : "Enroll to this course"}
-              </Link>
-            </div>
-          </article>
+        <div className="mt-10 items-center">
+          <CoursesList items={coursesWithProgress} />
         </div>
 
-        {/* Bottom CTA */}
         <div className="mt-12 text-center relative z-20 pointer-events-auto">
           <Link
-            href="/search"
+            href={{ pathname: "/courses", query: { lang } }}
             className="inline-flex items-center gap-2 rounded-full border border-gray-300 bg-white/80 px-5 py-2.5 text-sm font-medium text-gray-700 shadow-sm hover:border-gray-400 hover:shadow-md"
           >
-            {lang === "bn" ? "সব কোর্স দেখুন" : "Browse all courses"}
+            {t(lang, "Browse all courses", "সব কোর্স দেখুন")}
             <svg
               xmlns="http://www.w3.org/2000/svg"
               viewBox="0 0 24 24"
               fill="currentColor"
               className="h-4 w-4"
             >
-              <path fillRule="evenodd" d="M12.97 4.97a.75.75 0 0 1 1.06 0l6 6a.75.75 0 0 1 0 1.06l-6 6a.75.75 0 1 1-1.06-1.06L17.94 12l-4.97-4.97a.75.75 0 0 1 0-1.06Z" clipRule="evenodd" />
+              <path
+                fillRule="evenodd"
+                d="M12.97 4.97a.75.75 0 0 1 1.06 0l6 6a.75.75 0 0 1 0 1.06l-6 6a.75.75 0 1 1-1.06-1.06L17.94 12l-4.97-4.97a.75.75 0 0 1 0-1.06Z"
+                clipRule="evenodd"
+              />
             </svg>
           </Link>
         </div>
       </div>
     </section>
   );
-};
-
-export default FeaturedCourses;
+}

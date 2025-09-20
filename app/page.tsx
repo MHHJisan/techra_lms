@@ -1,7 +1,7 @@
 // Server Component: no "use client"
 import { redirect } from "next/navigation";
 import { auth, clerkClient } from "@clerk/nextjs/server";
-import Hero from "@/components/udemy-clone/Hero";
+// import Hero from "@/components/udemy-clone/Hero";
 import Stats from "@/components/home/Stats";
 import CategorySection from "@/components/udemy-clone/CategorySection";
 import FeaturedCourses from "@/components/udemy-clone/FeaturedCourses";
@@ -14,6 +14,7 @@ interface LoginPageProps {
   searchParams?: {
     categoryId?: string;
     q?: string;
+    lang?: string;
   };
 }
 
@@ -95,6 +96,11 @@ export default async function Page({ searchParams }: LoginPageProps) {
     redirect("/dashboard");
   }
 
+
+    // ✅ Normalize lang from the URL (?lang=bn|en)
+  const lang = (searchParams?.lang === "bn" ? "bn" : "en") as "bn" | "en";
+
+
   // Guest view
   return (
     <div className="w-full">
@@ -102,6 +108,7 @@ export default async function Page({ searchParams }: LoginPageProps) {
       <FeaturedCourses
         categoryId={searchParams?.categoryId}
         q={searchParams?.q}
+        lang={lang}
       />
       {/* <Hero /> */}
       <CategorySection />
