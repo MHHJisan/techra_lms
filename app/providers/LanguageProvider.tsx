@@ -43,37 +43,61 @@ export function LanguageProvider({ children }: { children: React.ReactNode }) {
     }
     if (typeof window !== "undefined") {
       localStorage.setItem("lang", lang);
+            // Optional (recommended if server components read cookies):
+      // document.cookie = `lang=${lang}; path=/; max-age=31536000; SameSite=Lax`;
     }
   }, [lang]);
 
-  // Keep URL's ?lang in sync (preserves other query params)
-  useEffect(() => {
-    const current = params.get("lang");
-    if (current !== lang) {
-      const usp = new URLSearchParams(params.toString());
-      usp.set("lang", lang);
-      router.replace(`${pathname}?${usp.toString()}`);
-    }
-  }, [lang, params, pathname, router]);
 
-  // Cross-tab sync via storage event
-  useEffect(() => {
-    const onStorage = (e: StorageEvent) => {
-      if (e.key === "lang") {
-        const v = e.newValue === "bn" ? "bn" : "en";
-        setLangState(v);
-      }
-    };
-    window.addEventListener("storage", onStorage);
-    return () => window.removeEventListener("storage", onStorage);
-  }, []);
+
+    // Remove the previous effect that forced URL to match state to avoid fighting changes:
+
+  // Keep URL's ?lang in sync (preserves other query params)
+  // useEffect(() => {
+  //   const current = params.get("lang");
+  //   if (current !== lang) {
+  //     const usp = new URLSearchParams(params.toString());
+  //     usp.set("lang", lang);
+  //     router.replace(`${pathname}?${usp.toString()}`);
+  //   }
+  // }, [lang, params, pathname, router]);
 
   const setLang = useCallback((next: Lang) => {
     setLangState(next);
-  }, []);
+    // const usp = new URLSearchParams(params.toString());
+    // usp.set("lang", next);
+    // router.replace(`${pathname}?${usp.toString()}`);
+
+    // Optional: if you want to also reflect this into the URL when
+    // language is changed via context API, uncomment:
+    // const usp = new URLSearchParams(params.toString());
+    // usp.set("lang", next);
+    // router.replace(`${pathname}?${usp.toString()}`);
+  }, [params, pathname, router]);
+
+  // Cross-tab sync via storage event
+  // useEffect(() => {
+  //   const onStorage = (e: StorageEvent) => {
+  //     if (e.key === "lang") {
+  //       const v = e.newValue === "bn" ? "bn" : "en";
+  //       setLangState(v);
+  //     }
+  //   };
+  //   window.addEventListener("storage", onStorage);
+  //   return () => window.removeEventListener("storage", onStorage);
+  // }, []);
+
+  // const setLang = useCallback((next: Lang) => {
+  //   setLangState(next);
+  // }, []);
 
   const toggleLang = useCallback(() => {
     setLangState((prev) => (prev === "bn" ? "en" : "bn"));
+    // Optional: reflect into URL as well:
+    // const next = lang === "bn" ? "en" : "bn";
+    // const usp = new URLSearchParams(params.toString());
+    // usp.set("lang", next);
+    // router.replace(`${pathname}?${usp.toString()}`);
   }, []);
 
   const value = useMemo(() => ({ lang, setLang, toggleLang }), [lang, setLang, toggleLang]);
