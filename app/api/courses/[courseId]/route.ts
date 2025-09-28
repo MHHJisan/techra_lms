@@ -3,6 +3,7 @@ import { NextResponse } from "next/server";
 import { auth } from "@clerk/nextjs/server";
 import { db } from "@/lib/db";
 import * as z from "zod";
+import { getRoleInfo } from "@/lib/auth-roles";
 
 export const runtime = "nodejs"; // Prisma needs Node runtime
 export const dynamic = "force-dynamic"; // avoid caching when updating
@@ -101,17 +102,17 @@ export async function DELETE(
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    // Load course with children to verify ownership
+    // Determine if caller is admin; admins can delete any course
+    const { isAdmin } = await getRoleInfo(clerkId);
+
+    // Load course with children; enforce ownership only for non-admins
     const course = await db.course.findFirst({
-      where: { id: params.courseId, user: { clerkId } }, // relation filter
+      where: isAdmin ? { id: params.courseId } : { id: params.courseId, user: { clerkId } },
       include: { chapters: true },
     });
 
     if (!course) {
-      return NextResponse.json(
-        { error: "Course not found or not owned by you" },
-        { status: 404 }
-      );
+      return NextResponse.json({ error: "Course not found" }, { status: 404 });
     }
 
     // No Mux cleanup necessary.

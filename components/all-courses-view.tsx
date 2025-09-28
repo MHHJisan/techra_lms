@@ -92,6 +92,7 @@ export default async function AllCoursesView({
             />
           ) : undefined}
           showStatusBadge={isAdmin}
+          buildHref={isAdmin ? (c) => `/teacher/courses/${c.id}` : undefined}
         />
       ) : (
         <div className="rounded-lg border bg-white p-8 text-center text-slate-600">

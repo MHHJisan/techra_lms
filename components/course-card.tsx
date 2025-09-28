@@ -17,6 +17,8 @@ interface CourseCardProps {
   isPublished: boolean;
   showStatusBadge?: boolean;
   rightAction?: ReactNode;
+  href?: string; // optional override for click target
+  instructorName?: string;
 }
 
 export const CourseCard = ({
@@ -30,9 +32,11 @@ export const CourseCard = ({
   isPublished,
   showStatusBadge = false,
   rightAction,
+  href,
+  instructorName,
 }: CourseCardProps) => {
   return (
-    <Link href={`/courses/${id}`}>
+    <Link href={href || `/courses/${id}`}>
       <div className="group hover:shadow-sm transition overflow-hidden border rounded-lg p-3 h-full">
         <div className="relative w-full aspect-video rounded-md overflow-hidden">
           <Image fill className="object-cover" alt={title} src={imageUrl} />
@@ -70,6 +74,11 @@ export const CourseCard = ({
           ) : (
             <p className="text-md md:text-sm font-medium text-slate-700">
               {formatPrice(price)} টাকা/-
+            </p>
+          )}
+          {(
+            <p className="text-xs text-slate-600 mt-1">
+              Instructor - {instructorName || "Instructor"}
             </p>
           )}
         </div>

@@ -28,6 +28,23 @@ function pickDisplayEmail(
   );
 }
 
+function roleRowClass(role?: string | null): string {
+  const r = (role || "").toLowerCase();
+  switch (r) {
+    case "admin":
+      return "bg-red-50";
+    case "teacher":
+    case "instructor":
+      return "bg-yellow-50";
+    case "student":
+    case "students":
+      return "bg-green-50";
+    case "user":
+    default:
+      return "bg-blue-50";
+  }
+}
+
 export default async function AdminUsersPage() {
   const users = await db.user.findMany({
     orderBy: { createdAt: "desc" },
@@ -71,7 +88,7 @@ export default async function AdminUsersPage() {
           </thead>
           <tbody>
             {rows.map((u) => (
-              <tr key={u.id} className="border-t">
+              <tr key={u.id} className={`border-t ${roleRowClass(u.role)}`}>
                 <td className="p-3">
                   {`${u.firstName ?? ""} ${u.lastName ?? ""}`.trim() || "—"}
                 </td>

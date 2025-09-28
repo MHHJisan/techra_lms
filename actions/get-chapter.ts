@@ -1,5 +1,6 @@
 import { db } from "@/lib/db";
 import { Attachment, Chapter } from "@prisma/client";
+import { getRoleInfo } from "@/lib/auth-roles";
 
 interface GetChapterProps {
   userId?: string;
@@ -13,15 +14,8 @@ export const getChapter = async ({
   chapterId,
 }: GetChapterProps) => {
   try {
-    // Determine caller identity & privileges
-    const me = userId
-      ? await db.user.findUnique({ where: { clerkId: userId } })
-      : null;
-    const adminEmails = (process.env.ADMIN_EMAILS || "")
-      .split(",")
-      .map((e) => e.trim().toLowerCase())
-      .filter(Boolean);
-    const isAdmin = !!(me?.email && adminEmails.includes(me.email.toLowerCase()));
+    // Determine caller identity & privileges (role first, then ADMIN_EMAILS fallback)
+    const { me, isAdmin } = await getRoleInfo(userId ?? null);
 
     // Load course without enforcing publish (we'll enforce after we know owner/admin)
     const courseBasic = await db.course.findUnique({

@@ -2,6 +2,7 @@
 import { notFound, redirect } from "next/navigation";
 import { auth } from "@clerk/nextjs/server";
 import { db } from "@/lib/db";
+import { getRoleInfo } from "@/lib/auth-roles";
 
 import { Banner } from "@/components/banner";
 import { IconBadge } from "@/components/icon-badge";
@@ -20,6 +21,7 @@ import {
   ListChecks,
   CircleDollarSign,
   File,
+  Mail,
 } from "lucide-react";
 
 type PageProps = {
@@ -30,15 +32,18 @@ export default async function CourseIdPage({ params }: PageProps) {
   const { userId: clerkId } = auth();
   if (!clerkId) redirect("/");
 
-  // Ensure the course belongs to the signed-in teacher by matching related User.clerkId
+  // Determine if caller is admin; admins can edit any course
+  const { isAdmin } = await getRoleInfo(clerkId);
+
+  // Load course with appropriate ownership constraints
   const course = await db.course.findFirst({
-    where: {
-      id: params.courseId,
-      user: { clerkId }, // relation filter
-    },
+    where: isAdmin
+      ? { id: params.courseId }
+      : { id: params.courseId, user: { clerkId } },
     include: {
       chapters: { orderBy: { position: "asc" } },
       attachments: { orderBy: { createdAt: "desc" } },
+      user: { select: { email: true } },
     },
   });
 
@@ -128,6 +133,14 @@ export default async function CourseIdPage({ params }: PageProps) {
               <h2 className="text-xl">Resources & Attachments</h2>
             </div>
             <AttachmentForm initialData={course} courseId={course.id} />
+
+            <div className="flex items-center gap-x-2 pt-4">
+              <IconBadge icon={Mail} />
+              <h2 className="text-xl">Created By</h2>
+            </div>
+            <div className="ml-2 text-slate-700 break-all">
+              {course.user?.email || "—"}
+            </div>
           </div>
         </div>
       </div>

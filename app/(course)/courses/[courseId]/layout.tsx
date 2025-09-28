@@ -4,6 +4,7 @@ import { auth } from "@clerk/nextjs/server";
 import { redirect } from "next/navigation";
 import { CourseSidebar } from "./_components/course-sidebar";
 import { CourseNavbar } from "./_components/course-navbar";
+import { getRoleInfo } from "@/lib/auth-roles";
 
 const CourseLayout = async ({
   children,
@@ -13,13 +14,8 @@ const CourseLayout = async ({
   params: { courseId: string };
 }) => {
   const { userId } = auth();
-  // Determine admin/owner privileges
-  const me = userId ? await db.user.findUnique({ where: { clerkId: userId } }) : null;
-  const adminEmails = (process.env.ADMIN_EMAILS || "")
-    .split(",")
-    .map((e) => e.trim().toLowerCase())
-    .filter(Boolean);
-  const isAdmin = !!(me?.email && adminEmails.includes(me.email.toLowerCase()));
+  // Determine admin/owner privileges (role first, then ADMIN_EMAILS)
+  const { me, isAdmin } = await getRoleInfo(userId ?? null);
 
   // Step 1: get course meta to determine ownership/publish status
   const courseMeta = await db.course.findUnique({

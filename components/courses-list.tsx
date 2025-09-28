@@ -6,14 +6,20 @@ export type CourseWithProgressCategory = Course & {
   category: Category | null;
   chapters: { id: string }[];
   progress: number | null;
+  user?: {
+    firstName: string | null;
+    lastName: string | null;
+    email: string | null;
+  };
 };
 
 interface CoursesListProps {
   items: CourseWithProgressCategory[];
   renderActions?: (item: CourseWithProgressCategory) => ReactNode;
   showStatusBadge?: boolean;
+  buildHref?: (item: CourseWithProgressCategory) => string; // optional custom link builder
 }
-export const CoursesList = ({ items, renderActions, showStatusBadge = false }: CoursesListProps) => {
+export const CoursesList = ({ items, renderActions, showStatusBadge = false, buildHref }: CoursesListProps) => {
   return (
     <div>
       <div className="grid sm:grid-cols-2 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl: grid-cols-4 gap-4">
@@ -21,6 +27,12 @@ export const CoursesList = ({ items, renderActions, showStatusBadge = false }: C
           const imageUrl = item.imageUrl || "/img/course1.jpg";
           const priceNumber = item.price ? Number(item.price as unknown as number) : 0;
           const categoryName = item.category?.name || "Uncategorized";
+          const href = buildHref ? buildHref(item) : `/courses/${item.id}`;
+          const instrName =
+            [item.user?.firstName, item.user?.lastName]
+              .filter(Boolean)
+              .join(" ")
+              .trim() || (item.user?.email || "");
           return (
             <div key={item.id} className="space-y-2">
               <CourseCard
@@ -34,6 +46,8 @@ export const CoursesList = ({ items, renderActions, showStatusBadge = false }: C
                 isPublished={item.isPublished}
                 showStatusBadge={showStatusBadge}
                 rightAction={renderActions ? renderActions(item) : undefined}
+                href={href}
+                instructorName={instrName}
               />
             </div>
           );

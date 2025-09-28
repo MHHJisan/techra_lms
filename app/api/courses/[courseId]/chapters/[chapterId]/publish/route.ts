@@ -1,6 +1,7 @@
 import { db } from "@/lib/db"
 import { auth } from "@clerk/nextjs/server"
 import { NextResponse } from "next/server"
+import { getRoleInfo } from "@/lib/auth-roles"
 
 export async function PATCH (
     req: Request,
@@ -13,11 +14,12 @@ export async function PATCH (
             return new NextResponse("Unauthorized", { status: 401 })
         }
 
+        const { isAdmin } = await getRoleInfo(userId)
+
         const ownCourse = await db.course.findFirst({
-            where: {
-                id: params.courseId,
-                user: { clerkId: userId }
-            }
+            where: isAdmin
+              ? { id: params.courseId }
+              : { id: params.courseId, user: { clerkId: userId } }
         })
         if(!ownCourse){
             return new NextResponse("Unauthorized", { status: 401})

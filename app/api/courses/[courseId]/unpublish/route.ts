@@ -1,6 +1,7 @@
 import { db } from "@/lib/db";
 import { auth } from "@clerk/nextjs/server";
 import { NextResponse } from "next/server"
+import { getRoleInfo } from "@/lib/auth-roles";
 
 export async function PATCH(req: Request, {
     params }: { params: { courseId: string}}
@@ -12,11 +13,12 @@ export async function PATCH(req: Request, {
             return new NextResponse("Unauthorized", { status: 401 })
         }
 
-        const course = await db.course.findUnique({
-            where:{
-                id: params.courseId,
-                userId
-            }, 
+        const { isAdmin } = await getRoleInfo(userId);
+
+        const course = await db.course.findFirst({
+            where: isAdmin
+              ? { id: params.courseId }
+              : { id: params.courseId, user: { clerkId: userId } },
         });
 
         if(!course){
@@ -24,12 +26,8 @@ export async function PATCH(req: Request, {
         }
 
         const unPublishedCourse = await db.course.update({
-            where: {
-                id: params.courseId,
-                userId
-            }, data: {
-                isPublished: false
-            }
+            where: { id: params.courseId },
+            data: { isPublished: false }
         })
         return NextResponse.json(unPublishedCourse)
 

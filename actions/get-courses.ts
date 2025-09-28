@@ -9,6 +9,11 @@ type coureWithProgressWithCategory = Course & {
   category: Category | null;
   chapters: { id: string }[];
   progress: number | null;
+  user?: {
+    firstName: string | null;
+    lastName: string | null;
+    email: string | null;
+  };
 };
 
 type GetCourses = {
@@ -42,6 +47,13 @@ export const getCourses = async ({
           },
           select: {
             id: true,
+          },
+        },
+        user: {
+          select: {
+            firstName: true,
+            lastName: true,
+            email: true,
           },
         },
         purchases: userId

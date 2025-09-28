@@ -10,7 +10,6 @@ import {
   Grid2X2,
 } from "lucide-react";
 import { SidebarItem } from "./sidebar-item";
-import { usePathname } from "next/navigation";
 import { useEffect, useState } from "react";
 import { useLang } from "@/app/providers/LanguageProvider";
 
@@ -38,7 +37,6 @@ const translations = {
 };
 
 export const SidebarRoutes = () => {
-  const pathname = usePathname();
   const { lang } = useLang();
 
   const [role, setRole] = useState<string | null>(null);
@@ -97,10 +95,11 @@ export const SidebarRoutes = () => {
   ];
 
   const isTeacher = role === "teacher" || role === "instructor";
-  const isAdminPage = pathname?.startsWith("/admin") ?? false;
 
+  // Prioritize admin sidebar everywhere (including /teacher/* pages),
+  // then teacher sidebar, otherwise guest.
   let routes = guestRoutes;
-  if (isAdminPage && isAdmin) routes = adminRoutes;
+  if (isAdmin) routes = adminRoutes;
   else if (isTeacher) routes = teacherRoutes;
 
   return (
