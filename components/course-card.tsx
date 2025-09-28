@@ -1,3 +1,5 @@
+"use client";
+
 import Image from "next/image";
 import Link from "next/link";
 import { IconBadge } from "./icon-badge";
@@ -5,6 +7,8 @@ import { ReactNode } from "react";
 import { BookOpen } from "lucide-react";
 import { formatPrice } from "@/lib/fomat";
 import { CourseProgress } from "@/components/course-progress";
+import BuyNowButton from "@/components/buy-now-button";
+import { useLang } from "@/app/providers/LanguageProvider";
 
 interface CourseCardProps {
   id: string;
@@ -35,9 +39,11 @@ export const CourseCard = ({
   href,
   instructorName,
 }: CourseCardProps) => {
+  const { lang } = useLang();
+  const learnMoreLabel = lang === "bn" ? "আরও জানুন" : "Learn More";
   return (
-    <Link href={href || `/courses/${id}`}>
-      <div className="group hover:shadow-sm transition overflow-hidden border rounded-lg p-3 h-full">
+    <BuyNowButton asChild>
+      <div className="group hover:shadow-sm transition overflow-hidden border rounded-lg p-2 h-[300px] sm:h-[320px] md:h-[340px] lg:h-[360px] cursor-pointer flex flex-col">
         <div className="relative w-full aspect-video rounded-md overflow-hidden">
           <Image fill className="object-cover" alt={title} src={imageUrl} />
           {showStatusBadge && (
@@ -53,15 +59,15 @@ export const CourseCard = ({
             </span>
           )}
         </div>
-        <div className="flex flex-col pt-2">
+        <div className="flex flex-col pt-2 flex-1">
           <div className="flex items-start justify-between gap-2">
-            <div className="text-lg md:text-base font-medium group-hover:text-sky-700 transiion line-clamp-2">
+            <div className="text-lg md:text-base font-medium group-hover:text-sky-700 transiion line-clamp-2 min-h-[36px]">
               {title}
             </div>
             {rightAction ? <div className="shrink-0">{rightAction}</div> : null}
           </div>
           <p className="text-xs text-muted-foregroud">{category}</p>
-          <div className="my-3 flex items-center gap-x-2 text-sm md:text-xs">
+          <div className="mt-2 mb-1 flex items-center gap-x-2 text-sm md:text-xs">
             <div className="flex items-center gap-x-1 text-slate-500">
               <IconBadge size="sm" icon={BookOpen} />
               <span>
@@ -69,20 +75,35 @@ export const CourseCard = ({
               </span>
             </div>
           </div>
-          {progress !== null ? (
-            <CourseProgress value={progress} variant="success" size="sm" />
-          ) : (
-            <p className="text-md md:text-sm font-medium text-slate-700">
-              {formatPrice(price)} টাকা/-
-            </p>
-          )}
-          {(
+          <div className="mt-0">
+            {progress !== null ? (
+              <CourseProgress value={progress} variant="success" size="sm" />
+            ) : (
+              <div className="mt-1 flex items-center justify-between gap-3">
+                <p className="text-md md:text-sm font-medium text-slate-700">
+                  {formatPrice(price)} টাকা/-
+                </p>
+                {!showStatusBadge ? (
+                  <Link
+                    href={href || `/courses/${id}`}
+                    className="inline-flex items-center justify-center rounded-md bg-sky-600 px-3 py-1.5 text-xs font-semibold text-white shadow-sm hover:bg-sky-700 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-sky-600"
+                    onClick={(e) => {
+                      // prevent opening the modal when clicking the Learn More link
+                      e.stopPropagation();
+                    }}
+                  >
+                    {learnMoreLabel}
+                  </Link>
+                ) : null}
+              </div>
+            )}
             <p className="text-xs text-slate-600 mt-1">
               Instructor - {instructorName || "Instructor"}
             </p>
-          )}
+            {/* Buy button is now inline with price above when visible */}
+          </div>
         </div>
       </div>
-    </Link>
+    </BuyNowButton>
   );
-};
+}

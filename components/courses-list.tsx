@@ -22,7 +22,7 @@ interface CoursesListProps {
 export const CoursesList = ({ items, renderActions, showStatusBadge = false, buildHref }: CoursesListProps) => {
   return (
     <div>
-      <div className="grid sm:grid-cols-2 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl: grid-cols-4 gap-4">
+      <div className="grid sm:grid-cols-2 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-4 gap-4 auto-rows-fr items-stretch">
         {items.map((item) => {
           const imageUrl = item.imageUrl || "/img/course1.jpg";
           const priceNumber = item.price ? Number(item.price as unknown as number) : 0;
@@ -34,7 +34,7 @@ export const CoursesList = ({ items, renderActions, showStatusBadge = false, bui
               .join(" ")
               .trim() || (item.user?.email || "");
           return (
-            <div key={item.id} className="space-y-2">
+            <div key={item.id} className="h-full">
               <CourseCard
                 id={item.id}
                 title={item.title}
