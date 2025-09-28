@@ -3,6 +3,7 @@ import { Category, Course } from "@prisma/client";
 import { getProgress } from "@/actions/get-progress";
 
 import { db } from "@/lib/db";
+import { clerkClient } from "@clerk/nextjs/server";
 
 
 type coureWithProgressWithCategory = Course & {
@@ -13,6 +14,7 @@ type coureWithProgressWithCategory = Course & {
     firstName: string | null;
     lastName: string | null;
     email: string | null;
+    clerkId?: string | null;
   };
 };
 
@@ -54,6 +56,7 @@ export const getCourses = async ({
             firstName: true,
             lastName: true,
             email: true,
+            clerkId: true,
           },
         },
         purchases: userId
@@ -72,6 +75,29 @@ export const getCourses = async ({
     const couresesWithProgress: coureWithProgressWithCategory[] =
       await Promise.all(
         courses.map(async (course) => {
+          // Try to populate instructor info from Clerk if missing
+          const u = course.user;
+          if (u && !u.firstName && !u.lastName && !u.email && u.clerkId) {
+            try {
+              const cc = clerkClient();
+              const cu = await cc.users.getUser(u.clerkId);
+              const cFirst = (cu.firstName as string | null) ?? null;
+              const cLast = (cu.lastName as string | null) ?? null;
+              const cEmail = (cu.emailAddresses?.[0]?.emailAddress as string | null) ?? null;
+              course = {
+                ...course,
+                user: {
+                  ...u,
+                  firstName: cFirst,
+                  lastName: cLast,
+                  email: u.email ?? cEmail,
+                },
+              } as typeof course;
+            } catch {
+              // ignore clerk errors
+            }
+          }
+
           // If no userId or no purchases for this user, no progress
           if (!userId || ("purchases" in course && course.purchases.length === 0)) {
             return {

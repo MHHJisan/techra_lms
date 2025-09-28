@@ -4,6 +4,7 @@ import Link from "next/link";
 import { cookies } from "next/headers";
 import { db } from "@/lib/db";
 import { CoursesList } from "@/components/courses-list";
+import { clerkClient } from "@clerk/nextjs/server";
 
 function normalizeLang(v?: string | null) {
   return v?.toLowerCase() === "bn" ? "bn" : "en";
@@ -41,13 +42,39 @@ export default async function FeaturedCourses({
     include: {
       category: { select: { id: true, name: true } },
       chapters: { select: { id: true } },
+      user: { select: { firstName: true, lastName: true, email: true, clerkId: true } },
     },
   });
 
-  const coursesWithProgress = courses.map((course) => ({
-    ...course,
-    progress: null,
-  }));
+  // Fill missing instructor fields from Clerk as a fallback
+  const cc = clerkClient();
+  const coursesWithProgress = await Promise.all(
+    courses.map(async (course) => {
+      const u = course.user as
+        | { firstName: string | null; lastName: string | null; email: string | null; clerkId?: string | null }
+        | undefined;
+      if (u && !u.firstName && !u.lastName && !u.email && u.clerkId) {
+        try {
+          const cu = await cc.users.getUser(u.clerkId);
+          const cFirst = (cu.firstName as string | null) ?? null;
+          const cLast = (cu.lastName as string | null) ?? null;
+          const cEmail = (cu.emailAddresses?.[0]?.emailAddress as string | null) ?? null;
+          course = {
+            ...course,
+            user: {
+              ...u,
+              firstName: cFirst,
+              lastName: cLast,
+              email: u.email ?? cEmail,
+            },
+          } as typeof course;
+        } catch {
+          // ignore clerk fallback errors
+        }
+      }
+      return { ...course, progress: null };
+    })
+  );
 
   return (
     <section className="relative py-5">
