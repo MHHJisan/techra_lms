@@ -1,4 +1,5 @@
 // Server Component: no "use client"
+import type { Metadata } from "next";
 import { redirect } from "next/navigation";
 import { auth, clerkClient } from "@clerk/nextjs/server";
 // import Hero from "@/components/udemy-clone/Hero";
@@ -9,6 +10,46 @@ import Testimonials from "@/components/home/Testimonials";
 import FinalCta from "@/components/home/FinalCta";
 import { db } from "@/lib/db";
 import UdemyStyleNavbar from "@/components/udemy-clone/UdemyStyleNavbar";
+
+const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || "http://localhost:3000";
+
+export async function generateMetadata(): Promise<Metadata> {
+  const title = "TECHRA LMS – High‑quality tech courses";
+  const description = "Learn and upskill with curated tech courses from TECHRA LMS. Browse courses, track progress, and advance your career.";
+  const canonical = `${siteUrl}/`;
+
+  return {
+    title,
+    description,
+    alternates: {
+      canonical,
+      languages: {
+        en: `${canonical}?lang=en`,
+        bn: `${canonical}?lang=bn`,
+      },
+    },
+    openGraph: {
+      type: "website",
+      url: canonical,
+      title,
+      description,
+      images: [
+        {
+          url: "/og-image.png",
+          width: 1200,
+          height: 630,
+          alt: "TECHRA LMS",
+        },
+      ],
+    },
+    twitter: {
+      card: "summary_large_image",
+      title,
+      description,
+      images: ["/og-image.png"],
+    },
+  };
+}
 
 interface LoginPageProps {
   searchParams?: {

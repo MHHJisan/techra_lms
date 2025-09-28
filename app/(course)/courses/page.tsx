@@ -1,9 +1,41 @@
 // app/courses/page.tsx
+import type { Metadata } from "next";
 import { Navbar } from "@/app/(dashboard)/_components/navbar";
 import { getCourses } from "@/actions/get-courses";
 import { CoursesList } from "@/components/courses-list";
 import UdemyStyleNavbar from "@/components/udemy-clone/UdemyStyleNavbar";
 import { auth } from "@clerk/nextjs/server";
+
+const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || "http://localhost:3000";
+
+export async function generateMetadata(): Promise<Metadata> {
+  const title = "All Courses – TECHRA LMS";
+  const description = "Browse all published courses on TECHRA LMS. Find curated tech courses to learn and advance your career.";
+  const canonical = `${siteUrl}/courses`;
+
+  return {
+    title,
+    description,
+    alternates: {
+      canonical,
+      languages: {
+        en: `${canonical}?lang=en`,
+        bn: `${canonical}?lang=bn`,
+      },
+    },
+    openGraph: {
+      type: "website",
+      url: canonical,
+      title,
+      description,
+    },
+    twitter: {
+      card: "summary",
+      title,
+      description,
+    },
+  };
+}
 
 const CoursesPage = async () => {
   // Get session / user info (server-side)

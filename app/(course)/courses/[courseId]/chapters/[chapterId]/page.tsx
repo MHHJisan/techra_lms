@@ -1,3 +1,4 @@
+import type { Metadata } from "next";
 import { getChapter } from "@/actions/get-chapter";
 import { Banner } from "@/components/banner";
 import { auth } from "@clerk/nextjs/server";
@@ -8,6 +9,61 @@ import { Separator } from "@/components/ui/separator";
 import { Preview } from "@/components/preview";
 import { File } from "lucide-react";
 import Image from "next/image";
+import CourseJsonLd from "@/components/seo/CourseJsonLd";
+
+const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || "http://localhost:3000";
+
+export async function generateMetadata(
+  { params }: { params: { courseId: string; chapterId: string } }
+): Promise<Metadata> {
+  const { chapter, course } = await getChapter({
+    userId: undefined,
+    chapterId: params.chapterId,
+    courseId: params.courseId,
+  });
+
+  if (!chapter || !course) {
+    return {
+      title: "Course chapter",
+    };
+  }
+
+  const title = chapter.title || "Course chapter";
+  // Strip rich content to a short plain description
+  const rawDesc = (chapter.description || "") as unknown as string;
+  const description = rawDesc
+    .replace(/<[^>]*>/g, " ")
+    .replace(/\s+/g, " ")
+    .trim()
+    .slice(0, 160);
+
+  const canonical = `${siteUrl}/courses/${params.courseId}/chapters/${params.chapterId}`;
+
+  return {
+    title,
+    description,
+    alternates: {
+      canonical,
+      languages: {
+        en: `${canonical}?lang=en`,
+        bn: `${canonical}?lang=bn`,
+      },
+    },
+    openGraph: {
+      type: "article",
+      url: canonical,
+      title,
+      description,
+      images: undefined,
+    },
+    twitter: {
+      card: "summary_large_image",
+      title,
+      description,
+      images: undefined,
+    },
+  };
+}
 
 const ChapterIdPage = async ({
   params,
@@ -42,6 +98,20 @@ const ChapterIdPage = async ({
 
   return (
     <div className="w-full p-6 px-6">
+      <CourseJsonLd
+        url={`${siteUrl}/courses/${params.courseId}/chapters/${params.chapterId}`}
+        courseId={params.courseId}
+        courseTitle={chapter.title || "Course"}
+        courseDescription={(chapter.description as unknown as string) || ""}
+        priceBDT={course.price ? Number(course.price as unknown as number) : null}
+        providerName="TECHRA LMS"
+        providerUrl={siteUrl}
+        breadcrumbs={[
+          { name: "Courses", item: `${siteUrl}/courses` },
+          { name: "Course", item: `${siteUrl}/courses/${params.courseId}` },
+          { name: chapter.title, item: `${siteUrl}/courses/${params.courseId}/chapters/${params.chapterId}` },
+        ]}
+      />
       {userProgress?.isCompleted && (
         <Banner
           variant="success"
