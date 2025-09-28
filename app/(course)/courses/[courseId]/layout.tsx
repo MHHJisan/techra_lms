@@ -13,35 +13,50 @@ const CourseLayout = async ({
   params: { courseId: string };
 }) => {
   const { userId } = auth();
+  // Determine admin/owner privileges
+  const me = userId ? await db.user.findUnique({ where: { clerkId: userId } }) : null;
+  const adminEmails = (process.env.ADMIN_EMAILS || "")
+    .split(",")
+    .map((e) => e.trim().toLowerCase())
+    .filter(Boolean);
+  const isAdmin = !!(me?.email && adminEmails.includes(me.email.toLowerCase()));
+
+  // Step 1: get course meta to determine ownership/publish status
+  const courseMeta = await db.course.findUnique({
+    where: { id: params.courseId },
+    select: { id: true, userId: true, isPublished: true },
+  });
+
+  const isOwner = !!(userId && courseMeta?.userId && me && courseMeta.userId === me.id);
+  const canBypassPublish = isAdmin || isOwner;
+
+  if (!courseMeta || (!courseMeta.isPublished && !canBypassPublish)) {
+    console.log("Course not found with ID:", params.courseId);
+    return redirect("/");
+  }
+
+  // Step 2: fetch full course with chapters filtered per privilege
   const course = await db.course.findUnique({
-    where: {
-      id: params.courseId,
-    },
+    where: { id: params.courseId },
     include: {
       chapters: {
-        where: {
-          isPublished: true,
-        },
+        where: canBypassPublish ? {} : { isPublished: true },
         ...(userId
           ? {
               include: {
                 userProgress: {
-                  where: {
-                    userId,
-                  },
+                  where: { userId },
                 },
               },
             }
           : {}),
-        orderBy: {
-          position: "asc",
-        },
+        orderBy: { position: "asc" },
       },
     },
   });
 
   if (!course) {
-    console.log("Course not found with ID:", params.courseId);
+    console.log("Course not found after meta check:", params.courseId);
     return redirect("/");
   }
 

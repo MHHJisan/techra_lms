@@ -92,7 +92,13 @@ export default function RootLayout({
         <body className={`${geistSans.variable} ${geistMono.variable} antialiased`}>
           <LanguageProvider>
             <ToastProvider />
-            <OrganizationJsonLd siteUrl={siteUrl} />
+            <OrganizationJsonLd
+              siteUrl={siteUrl}
+              sameAs={[
+                "https://facebook.com/Techrabd",
+                "https://youtube.com/@techra2811",
+              ]}
+            />
             <div className="min-h-screen flex flex-col">
               <div className="flex-1">{children}</div>
               <Footer />

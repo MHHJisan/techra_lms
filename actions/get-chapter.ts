@@ -13,21 +13,21 @@ export const getChapter = async ({
   chapterId,
 }: GetChapterProps) => {
   try {
-    const purchase = userId ? await db.purchase.findUnique({
-      where: {
-        userId_courseId: {
-          userId,
-          courseId,
-        },
-      },
-    }) : null;
+    // Determine caller identity & privileges
+    const me = userId
+      ? await db.user.findUnique({ where: { clerkId: userId } })
+      : null;
+    const adminEmails = (process.env.ADMIN_EMAILS || "")
+      .split(",")
+      .map((e) => e.trim().toLowerCase())
+      .filter(Boolean);
+    const isAdmin = !!(me?.email && adminEmails.includes(me.email.toLowerCase()));
 
-    const course = await db.course.findUnique({
-      where: {
-        isPublished: true,
-        id: courseId,
-      },
+    // Load course without enforcing publish (we'll enforce after we know owner/admin)
+    const courseBasic = await db.course.findUnique({
+      where: { id: courseId },
       select: {
+        isPublished: true,
         price: true,
         user: {
           select: {
@@ -40,28 +40,38 @@ export const getChapter = async ({
         },
       },
     });
+
+    const isOwner = !!(userId && courseBasic?.user?.clerkId === userId);
+    const canBypassPublish = isAdmin || isOwner;
+
+    // If not allowed and course is not published, deny
+    if (!courseBasic || (!courseBasic.isPublished && !canBypassPublish)) {
+      throw new Error("Chapter or Course not found");
+    }
+
+    // Load chapter with conditional publish filter
     const chapter = await db.chapter.findUnique({
       where: {
         id: chapterId,
-        isPublished: true,
+        ...(canBypassPublish ? {} : { isPublished: true }),
       },
     });
 
-    if (!chapter || !course) {
+    if (!chapter) {
       throw new Error("Chapter or Course not found");
     }
 
     // Build author object from local DB, fallback to Clerk if missing
-    let authorName = [course.user?.firstName, course.user?.lastName]
+    let authorName = [courseBasic.user?.firstName, courseBasic.user?.lastName]
       .filter(Boolean)
       .join(" ")
       .trim();
-    let authorImageUrl = course.user?.imageUrl ?? null;
+    let authorImageUrl = courseBasic.user?.imageUrl ?? null;
 
-    if (!authorName && course.user?.clerkId) {
+    if (!authorName && courseBasic.user?.clerkId) {
       try {
         const { clerkClient } = await import("@clerk/nextjs/server");
-        const clerkUser = await clerkClient.users.getUser(course.user.clerkId);
+        const clerkUser = await clerkClient.users.getUser(courseBasic.user.clerkId);
         const cFirst = (clerkUser.firstName as string | null) ?? undefined;
         const cLast = (clerkUser.lastName as string | null) ?? undefined;
         const cImage = (clerkUser.imageUrl as string | null) ?? undefined;
@@ -74,11 +84,20 @@ export const getChapter = async ({
 
     if (!authorName) {
       // Try sanitized email local-part (avoid unknown+user_* patterns)
-      const email = course.user?.email || "";
+      const email = courseBasic.user?.email || "";
       const local = email.includes("@") ? email.split("@")[0] : "";
       const sanitized = local.replace(/^unknown\+user_.+$/, "").trim();
       authorName = sanitized || "Instructor";
     }
+
+    const purchase = userId ? await db.purchase.findUnique({
+      where: {
+        userId_courseId: {
+          userId,
+          courseId,
+        },
+      },
+    }) : null;
 
     let attachments: Attachment[] = [];
     let nextChapter: Chapter | null = null;
@@ -95,7 +114,7 @@ export const getChapter = async ({
       nextChapter = await db.chapter.findFirst({
         where: {
           courseId: courseId,
-          isPublished: true,
+          ...(canBypassPublish ? {} : { isPublished: true }),
           position: {
             gt: chapter?.position,
           },
@@ -116,7 +135,10 @@ export const getChapter = async ({
     }) : null;
     return {
       chapter,
-      course,
+      course: {
+        price: courseBasic.price,
+        user: courseBasic.user,
+      },
       attachments,
       nextChapter,
       userProgress,

@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
+import { Facebook, Youtube } from "lucide-react";
 import { useSearchParams } from "next/navigation";
 
 /**
@@ -69,9 +70,31 @@ export default function Footer() {
 
   return (
     <footer className="py-6 bg-gray-800 text-gray-300 text-center md:pl-80">
-      <p>
-        &copy; {startYear}–{currentYear} {brand}. {t("All rights reserved.", "সর্বস্বত্ব সংরক্ষিত।")}
-      </p>
+      <div className="flex items-center justify-center gap-5 flex-wrap">
+        <p className="m-0">
+          &copy; {startYear}–{currentYear} {brand}. {t("All rights reserved.", "সর্বস্বত্ব সংরক্ষিত।")}
+        </p>
+        <div className="flex items-center gap-4">
+          <a
+            href="https://facebook.com/Techrabd"
+            target="_blank"
+            rel="noopener noreferrer"
+            aria-label="Facebook"
+            className="inline-flex items-center justify-center w-10 h-10 rounded-full bg-gray-700/60 hover:bg-blue-600 text-gray-100 transition"
+          >
+            <Facebook className="w-5 h-5" />
+          </a>
+          <a
+            href="https://youtube.com/@techra2811"
+            target="_blank"
+            rel="noopener noreferrer"
+            aria-label="YouTube"
+            className="inline-flex items-center justify-center w-10 h-10 rounded-full bg-gray-700/60 hover:bg-red-600 text-gray-100 transition"
+          >
+            <Youtube className="w-5 h-5" />
+          </a>
+        </div>
+      </div>
     </footer>
   );
 }
