@@ -85,7 +85,7 @@ export const PriceForm = ({ initialData, courseId }: PriceFormProps) => {
           )}
         >
           {initialData.price
-            ? formatPrice(Number(initialData.price as unknown as number))
+            ? `${formatPrice(Number(initialData.price as unknown as number))} টাকা/-`
             : "No price given "}
         </p>
       )}

@@ -1,7 +1,10 @@
 export const formatPrice = (price: number) => {
-    return new Intl.NumberFormat("en-US", {
+    return new Intl.NumberFormat("en-BD", {
         style: "currency",
-        currency: "USD"
-    }).format(price)
+        currency: "BDT",
+        currencyDisplay: "narrowSymbol",
+        minimumFractionDigits: 2,
+        maximumFractionDigits: 2,
+    }).format(price);
 }
  
