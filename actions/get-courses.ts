@@ -15,6 +15,7 @@ type coureWithProgressWithCategory = Course & {
     lastName: string | null;
     email: string | null;
     clerkId?: string | null;
+    imageUrl?: string | null;
   };
 };
 
@@ -57,6 +58,7 @@ export const getCourses = async ({
             lastName: true,
             email: true,
             clerkId: true,
+            imageUrl: true,
           },
         },
         purchases: userId
@@ -84,6 +86,7 @@ export const getCourses = async ({
               const cFirst = (cu.firstName as string | null) ?? null;
               const cLast = (cu.lastName as string | null) ?? null;
               const cEmail = (cu.emailAddresses?.[0]?.emailAddress as string | null) ?? null;
+              const cImg = (cu.imageUrl as string | null) ?? null;
               course = {
                 ...course,
                 user: {
@@ -91,6 +94,7 @@ export const getCourses = async ({
                   firstName: cFirst,
                   lastName: cLast,
                   email: u.email ?? cEmail,
+                  imageUrl: u.imageUrl ?? cImg,
                 },
               } as typeof course;
             } catch {

@@ -10,6 +10,7 @@ export type CourseWithProgressCategory = Course & {
     firstName: string | null;
     lastName: string | null;
     email: string | null;
+    imageUrl?: string | null;
   };
 };
 
@@ -18,8 +19,9 @@ interface CoursesListProps {
   renderActions?: (item: CourseWithProgressCategory) => ReactNode;
   showStatusBadge?: boolean;
   buildHref?: (item: CourseWithProgressCategory) => string; // optional custom link builder
+  enableCardModal?: boolean; // when true, clicking card opens buy modal (for students)
 }
-export const CoursesList = ({ items, renderActions, showStatusBadge = false, buildHref }: CoursesListProps) => {
+export const CoursesList = ({ items, renderActions, showStatusBadge = false, buildHref, enableCardModal = true }: CoursesListProps) => {
   return (
     <div>
       <div className="grid sm:grid-cols-2 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-4 gap-4 auto-rows-fr items-stretch">
@@ -33,6 +35,7 @@ export const CoursesList = ({ items, renderActions, showStatusBadge = false, bui
               .filter(Boolean)
               .join(" ")
               .trim() || (item.user?.email || "");
+          const instrImage = item.user?.imageUrl ?? null;
           return (
             <div key={item.id} className="h-full">
               <CourseCard
@@ -48,6 +51,8 @@ export const CoursesList = ({ items, renderActions, showStatusBadge = false, bui
                 rightAction={renderActions ? renderActions(item) : undefined}
                 href={href}
                 instructorName={instrName}
+                instructorImageUrl={instrImage}
+                modalEnabled={enableCardModal}
               />
             </div>
           );

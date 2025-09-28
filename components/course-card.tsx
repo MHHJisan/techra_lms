@@ -23,6 +23,8 @@ interface CourseCardProps {
   rightAction?: ReactNode;
   href?: string; // optional override for click target
   instructorName?: string;
+  instructorImageUrl?: string | null;
+  modalEnabled?: boolean;
 }
 
 export const CourseCard = ({
@@ -38,12 +40,14 @@ export const CourseCard = ({
   rightAction,
   href,
   instructorName,
+  instructorImageUrl,
+  modalEnabled = true,
 }: CourseCardProps) => {
   const { lang } = useLang();
   const learnMoreLabel = lang === "bn" ? "আরও জানুন" : "Learn More";
-  return (
-    <BuyNowButton asChild>
-      <div className="group hover:shadow-sm transition overflow-hidden border rounded-lg p-2 h-[300px] sm:h-[320px] md:h-[340px] lg:h-[360px] cursor-pointer flex flex-col">
+  const currencyLabel = lang === "bn" ? "টাকা/-" : "Taka/-";
+  const CardInner = (
+    <div className="group hover:shadow-sm transition overflow-hidden border rounded-lg p-2 h-[300px] sm:h-[320px] md:h-[340px] lg:h-[360px] cursor-pointer flex flex-col">
         <div className="relative w-full aspect-video rounded-md overflow-hidden">
           <Image fill className="object-cover" alt={title} src={imageUrl} />
           {showStatusBadge && (
@@ -81,7 +85,7 @@ export const CourseCard = ({
             ) : (
               <div className="mt-1 flex items-center justify-between gap-3">
                 <p className="text-md md:text-sm font-medium text-slate-700">
-                  {formatPrice(price)} টাকা/-
+                  {formatPrice(price)} {currencyLabel}
                 </p>
                 {!showStatusBadge ? (
                   <Link
@@ -97,13 +101,30 @@ export const CourseCard = ({
                 ) : null}
               </div>
             )}
-            <p className="text-xs text-slate-600 mt-1">
-              Instructor - {instructorName || "Instructor"}
-            </p>
-            {/* Buy button is now inline with price above when visible */}
           </div>
+          <div className="mt-1 flex items-center gap-2 text-xs text-slate-600">
+              {instructorImageUrl ? (
+                <span className="inline-block h-6 w-6 relative overflow-hidden rounded-full bg-slate-200">
+                  <Image
+                    src={instructorImageUrl}
+                    alt={instructorName || "Instructor"}
+                    width={24}
+                    height={24}
+                    className="object-cover"
+                  />
+                </span>
+              ) : (
+                <span className="inline-block h-6 w-6 rounded-full bg-slate-200" />
+              )}
+              <span>Instructor - {instructorName || "Instructor"}</span>
+          </div>
+          {/* Buy button is now inline with price above when visible */}
         </div>
-      </div>
-    </BuyNowButton>
+    </div>
   );
+
+  if (modalEnabled) {
+    return <BuyNowButton asChild>{CardInner}</BuyNowButton>;
+  }
+  return <Link href={href || `/courses/${id}`}>{CardInner}</Link>;
 }

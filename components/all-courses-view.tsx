@@ -41,11 +41,14 @@ export default async function AllCoursesView({
   // Admin check (role OR allowlist)
   const { userId } = auth();
   let isAdmin = false;
+  let isTeacher = false;
   if (userId) {
     const me = await db.user.findUnique({ where: { clerkId: userId } });
     // Role-based admin (preferred if set)
     if (me?.role?.toLowerCase() === "admin") {
       isAdmin = true;
+    } else if (me?.role && ["teacher", "instructor"].includes(me.role.toLowerCase())) {
+      isTeacher = true;
     } else {
       // Email allowlist fallback
       const adminEmails = (process.env.ADMIN_EMAILS || "")
@@ -93,6 +96,7 @@ export default async function AllCoursesView({
           ) : undefined}
           showStatusBadge={isAdmin}
           buildHref={isAdmin ? (c) => `/teacher/courses/${c.id}` : undefined}
+          enableCardModal={!isAdmin && !isTeacher}
         />
       ) : (
         <div className="rounded-lg border bg-white p-8 text-center text-slate-600">
