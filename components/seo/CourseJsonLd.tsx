@@ -24,7 +24,7 @@ export default function CourseJsonLd({
   providerUrl,
   breadcrumbs = [],
 }: CourseJsonLdProps) {
-  const courseData: any = {
+  const courseData: Record<string, unknown> = {
     "@context": "https://schema.org",
     "@type": "Course",
     name: courseTitle,
@@ -48,7 +48,7 @@ export default function CourseJsonLd({
     };
   }
 
-  const breadcrumbData = breadcrumbs.length
+  const breadcrumbData: Record<string, unknown> | null = breadcrumbs.length
     ? {
         "@context": "https://schema.org",
         "@type": "BreadcrumbList",

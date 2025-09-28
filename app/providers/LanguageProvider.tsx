@@ -1,7 +1,7 @@
 "use client";
 
 import React, { createContext, useCallback, useContext, useEffect, useMemo, useState } from "react";
-import { usePathname, useRouter, useSearchParams } from "next/navigation";
+import { useSearchParams } from "next/navigation";
 
 type Lang = "en" | "bn";
 
@@ -14,8 +14,6 @@ type LangContextType = {
 const LangContext = createContext<LangContextType | undefined>(undefined);
 
 export function LanguageProvider({ children }: { children: React.ReactNode }) {
-  const router = useRouter();
-  const pathname = usePathname();
   const params = useSearchParams();
 
   const [lang, setLangState] = useState<Lang>("en");
@@ -73,7 +71,7 @@ export function LanguageProvider({ children }: { children: React.ReactNode }) {
     // const usp = new URLSearchParams(params.toString());
     // usp.set("lang", next);
     // router.replace(`${pathname}?${usp.toString()}`);
-  }, [params, pathname, router]);
+  }, []);
 
   // Cross-tab sync via storage event
   // useEffect(() => {
