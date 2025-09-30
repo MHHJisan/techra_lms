@@ -1,9 +1,8 @@
 "use client";
 
 import React, { createContext, useCallback, useContext, useEffect, useMemo, useState } from "react";
-import { useSearchParams } from "next/navigation";
 
-type Lang = "en" | "bn";
+export type Lang = "en" | "bn";
 
 type LangContextType = {
   lang: Lang;
@@ -13,36 +12,19 @@ type LangContextType = {
 
 const LangContext = createContext<LangContextType | undefined>(undefined);
 
-export function LanguageProvider({ children }: { children: React.ReactNode }) {
-  const params = useSearchParams();
+export function LanguageProvider({ children, initialLang }: { children: React.ReactNode; initialLang: Lang }) {
+  // Initialize synchronously from server-provided value to avoid hydration mismatch
+  const [lang, setLangState] = useState<Lang>(initialLang);
 
-  const [lang, setLangState] = useState<Lang>("en");
-
-  // Initialize from URL (?lang=) or localStorage
-  useEffect(() => {
-    const urlLang = (params.get("lang") as Lang | null);
-    const storedLang = (typeof window !== "undefined" && localStorage.getItem("lang")) as Lang | null;
-
-    const initial: Lang =
-      urlLang === "bn" || urlLang === "en"
-        ? urlLang
-        : storedLang === "bn" || storedLang === "en"
-        ? storedLang
-        : "en";
-
-    setLangState(initial);
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []); // run once (we'll sync URL below)
-
-  // Reflect lang into <html lang="..."> and localStorage
+  // Reflect lang into <html lang="..."> and localStorage and cookie
   useEffect(() => {
     if (typeof document !== "undefined") {
       document.documentElement.lang = lang;
     }
     if (typeof window !== "undefined") {
       localStorage.setItem("lang", lang);
-            // Optional (recommended if server components read cookies):
-      // document.cookie = `lang=${lang}; path=/; max-age=31536000; SameSite=Lax`;
+      // Also store in cookie so server can read on next request
+      document.cookie = `lang=${lang}; path=/; max-age=31536000; SameSite=Lax`;
     }
   }, [lang]);
 
@@ -62,15 +44,6 @@ export function LanguageProvider({ children }: { children: React.ReactNode }) {
 
   const setLang = useCallback((next: Lang) => {
     setLangState(next);
-    // const usp = new URLSearchParams(params.toString());
-    // usp.set("lang", next);
-    // router.replace(`${pathname}?${usp.toString()}`);
-
-    // Optional: if you want to also reflect this into the URL when
-    // language is changed via context API, uncomment:
-    // const usp = new URLSearchParams(params.toString());
-    // usp.set("lang", next);
-    // router.replace(`${pathname}?${usp.toString()}`);
   }, []);
 
   // Cross-tab sync via storage event
@@ -91,11 +64,6 @@ export function LanguageProvider({ children }: { children: React.ReactNode }) {
 
   const toggleLang = useCallback(() => {
     setLangState((prev) => (prev === "bn" ? "en" : "bn"));
-    // Optional: reflect into URL as well:
-    // const next = lang === "bn" ? "en" : "bn";
-    // const usp = new URLSearchParams(params.toString());
-    // usp.set("lang", next);
-    // router.replace(`${pathname}?${usp.toString()}`);
   }, []);
 
   const value = useMemo(() => ({ lang, setLang, toggleLang }), [lang, setLang, toggleLang]);

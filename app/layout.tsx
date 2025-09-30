@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import localFont from "next/font/local";
 import { ClerkProvider } from "@clerk/nextjs";
+import { cookies } from "next/headers";
 import "./globals.css";
 import { ToastProvider } from "@/components/providers/toast-provider";
 import Footer from "@/components/udemy-clone/Footer";
@@ -85,12 +86,13 @@ export const metadata: Metadata = {
 export default function RootLayout({
   children,
 }: Readonly<{ children: React.ReactNode }>) {
+  const cookieStore = cookies();
+  const initialLang = (cookieStore.get("lang")?.value === "bn" ? "bn" : "en");
   return (
     <ClerkProvider>
-      {/* Option A: let LanguageProvider set <html lang> client-side */}
-      <html /* lang="en" */ suppressHydrationWarning>
+      <html lang={initialLang}>
         <body className={`${geistSans.variable} ${geistMono.variable} antialiased`}>
-          <LanguageProvider>
+          <LanguageProvider initialLang={initialLang}>
             <ToastProvider />
             <OrganizationJsonLd
               siteUrl={siteUrl}

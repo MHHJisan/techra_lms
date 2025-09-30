@@ -19,6 +19,12 @@ import {
 import UdemyStyleNavbar from "@/components/udemy-clone/UdemyStyleNavbar";
 import { SignedIn, SignedOut } from "@clerk/nextjs";
 import { NavbarRoutes } from "@/components/navbar-routes";
+import { usePathname, useRouter, useSearchParams } from "next/navigation";
+import Link from "next/link";
+import Image from "next/image";
+import { Playfair_Display } from "next/font/google";
+
+const playfair = Playfair_Display({ subsets: ["latin"], weight: ["700", "800", "900"] });
 
 const RegistrationSchema = z.object({
   name: z.string().min(1, "Name is required"),
@@ -64,6 +70,16 @@ const RegistrationSchema = z.object({
 
 type RegistrationValues = z.infer<typeof RegistrationSchema>;
 export default function RegisterPage() {
+  const router = useRouter();
+  const pathname = usePathname();
+  const searchParams = useSearchParams();
+  const lang = (searchParams.get("lang") || "en").toLowerCase();
+  const nextLang = lang === "bn" ? "en" : "bn";
+  const toggleLang = () => {
+    const params = new URLSearchParams(searchParams.toString());
+    params.set("lang", nextLang);
+    router.push(`${pathname}?${params.toString()}`);
+  };
   const [submitStatus, setSubmitStatus] = useState<"idle"|"success"|"warning"|"error">("idle");
   const [submitMessage, setSubmitMessage] = useState<string>("");
   const form = useForm<RegistrationValues>({
@@ -119,16 +135,43 @@ export default function RegisterPage() {
     <div className="w-full">
       {/* Show role-aware navbar when logged in; otherwise show the public navbar */}
       <SignedIn>
-        <div className="sticky top-0 z-40 p-3 md:p-4 border-b w-full flex items-center justify-end bg-white/95 backdrop-blur shadow-sm">
-          <NavbarRoutes />
+        <div className="sticky top-0 z-40 p-3 md:p-4 border-b w-full flex items-center justify-between bg-white/95 backdrop-blur shadow-sm">
+          <div className="flex items-center gap-2 sm:gap-3 md:gap-4 ml-3 sm:ml-4 md:ml-8">
+            <Link href="/" className="flex items-center gap-2 sm:gap-3 group">
+              <Image
+                className="transform-gpu scale-x-110 md:scale-x-115 w-8 h-8 md:w-10 md:h-10 lg:w-12 lg:h-12"
+                src="/techra.png"
+                alt="Techra Logo"
+                width={48}
+                height={48}
+              />
+              <span className={`${playfair.className} text-lg sm:text-xl md:text-2xl font-extrabold tracking-wide sm:tracking-wider md:tracking-[0.15em] text-indigo-900 drop-shadow-sm transform-gpu md:scale-x-105`}>Techra Learning Center</span>
+            </Link>
+          </div>
+          <div className="flex items-center gap-2 sm:gap-3 md:gap-4">
+            <button
+              type="button"
+              onClick={toggleLang}
+              className="inline-flex items-center gap-1 rounded-full border border-gray-300 bg-white px-2 py-1 text-[10px] sm:text-xs font-semibold text-gray-700 shadow-sm transition hover:border-gray-400 hover:bg-gray-50"
+              aria-label={lang === "bn" ? "ইংরেজিতে পরিবর্তন করুন" : "Switch to Bangla"}
+            >
+              <span className={"rounded-full px-2 py-0.5 " + (lang === "bn" ? "bg-blue-600 text-white" : "text-gray-700")}>
+                বাংলা
+              </span>
+              <span className={"rounded-full px-2 py-0.5 " + (lang === "en" ? "bg-blue-600 text-white" : "text-gray-700")}>
+                ENG
+              </span>
+            </button>
+            <NavbarRoutes />
+          </div>
         </div>
       </SignedIn>
       <SignedOut>
         <UdemyStyleNavbar />
       </SignedOut>
       <div className="container max-w-3xl mx-auto px-4 py-10">
-      <h1 className="text-2xl md:text-3xl font-semibold mb-2">Student Registration</h1>
-      <p className="text-muted-foreground mb-8">Fill up the form to register for a course.</p>
+      <h1 className="text-2xl md:text-3xl items-center justify-center text-center font-semibold mb-2">Student Registration</h1>
+      <p className="text-muted-foreground mb-8 text-center">Fill up the form to register for a course.</p>
 
       {submitStatus !== "idle" && (
         <div
@@ -153,9 +196,9 @@ export default function RegisterPage() {
               name="name"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Name</FormLabel>
+                  <FormLabel className="text-sm font-semibold text-slate-700">Name</FormLabel>
                   <FormControl>
-                    <Input className="h-8 text-xs px-2" placeholder="Your full name" {...field} />
+                    <Input className="h-8 text-sm px-2 border-slate-300 placeholder:text-slate-400 focus:ring-2 focus:ring-sky-500 focus:border-sky-500" placeholder="Your full name" {...field} />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -167,9 +210,9 @@ export default function RegisterPage() {
               name="fatherName"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Father&apos;s Name</FormLabel>
+                  <FormLabel className="text-sm font-semibold text-slate-700">Father&apos;s Name</FormLabel>
                   <FormControl>
-                    <Input className="h-8 text-xs px-2" placeholder="Father's name" {...field} />
+                    <Input className="h-8 text-sm px-2 border-slate-300 placeholder:text-slate-400 focus:ring-2 focus:ring-sky-500 focus:border-sky-500" placeholder="Father's name" {...field} />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -181,9 +224,9 @@ export default function RegisterPage() {
               name="motherName"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Mother&apos;s Name</FormLabel>
+                  <FormLabel className="text-sm font-semibold text-slate-700">Mother&apos;s Name</FormLabel>
                   <FormControl>
-                    <Input className="h-8 text-xs px-2" placeholder="Mother's name" {...field} />
+                    <Input className="h-8 text-sm px-2 border-slate-300 placeholder:text-slate-400 focus:ring-2 focus:ring-sky-500 focus:border-sky-500" placeholder="Mother's name" {...field} />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -195,9 +238,9 @@ export default function RegisterPage() {
               name="dateOfBirth"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Date of Birth</FormLabel>
+                  <FormLabel className="text-sm font-semibold text-slate-700">Date of Birth</FormLabel>
                   <FormControl>
-                    <Input className="h-8 text-xs px-2" type="date" {...field} />
+                    <Input className="h-8 text-sm px-2 border-slate-300 focus:ring-2 focus:ring-sky-500 focus:border-sky-500" type="date" {...field} />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -210,9 +253,9 @@ export default function RegisterPage() {
             name="address"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>Address</FormLabel>
+                <FormLabel className="text-sm font-semibold text-slate-700">Address</FormLabel>
                 <FormControl>
-                  <Textarea className="min-h-[32px] text-xs px-2 py-2" placeholder="Your full address" {...field} />
+                  <Textarea className="min-h-[32px] text-sm px-2 py-2 border-slate-300 placeholder:text-slate-400 focus:ring-2 focus:ring-sky-500 focus:border-sky-500" placeholder="Your full address" {...field} />
                 </FormControl>
                 <FormDescription>House, street, city, district, etc.</FormDescription>
                 <FormMessage />
@@ -226,9 +269,9 @@ export default function RegisterPage() {
               name="nidOrBirthCert"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>NID/Birth Certificate</FormLabel>
+                  <FormLabel className="text-sm font-semibold text-slate-700">NID/Birth Certificate</FormLabel>
                   <FormControl>
-                    <Input className="h-8 text-xs px-2" placeholder="ID number" {...field} />
+                    <Input className="h-8 text-sm px-2 border-slate-300 placeholder:text-slate-400 focus:ring-2 focus:ring-sky-500 focus:border-sky-500" placeholder="ID number" {...field} />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -240,9 +283,9 @@ export default function RegisterPage() {
               name="guardianName"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Guardian&apos;s Name</FormLabel>
+                  <FormLabel className="text-sm font-semibold text-slate-700">Guardian&apos;s Name</FormLabel>
                   <FormControl>
-                    <Input className="h-8 text-xs px-2" placeholder="Guardian's name" {...field} />
+                    <Input className="h-8 text-sm px-2 border-slate-300 placeholder:text-slate-400 focus:ring-2 focus:ring-sky-500 focus:border-sky-500" placeholder="Guardian's name" {...field} />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -254,10 +297,10 @@ export default function RegisterPage() {
               name="occupation"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Occupation</FormLabel>
+                  <FormLabel className="text-sm font-semibold text-slate-700">Occupation</FormLabel>
                   <FormControl>
                     <select
-                      className="h-8 w-full rounded-md border px-2 text-xs bg-white"
+                      className="h-8 w-full rounded-md border px-2 text-sm bg-white border-slate-300 focus:ring-2 focus:ring-sky-500 focus:border-sky-500"
                       value={field.value}
                       onChange={field.onChange}
                       onBlur={field.onBlur}
@@ -278,9 +321,9 @@ export default function RegisterPage() {
                 name="studentInstitution"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>School/College/University</FormLabel>
+                    <FormLabel className="text-sm font-semibold text-slate-700">School/College/University</FormLabel>
                     <FormControl>
-                      <Input className="h-6 text-xs px-2 py-1" placeholder="e.g., Dhaka University" {...field} />
+                      <Input className="h-6 text-sm px-2 py-1 border-slate-300 placeholder:text-slate-400 focus:ring-2 focus:ring-sky-500 focus:border-sky-500" placeholder="e.g., Dhaka University" {...field} />
                   </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -294,9 +337,9 @@ export default function RegisterPage() {
                 name="organizationName"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Organization&apos;s Name</FormLabel>
+                    <FormLabel className="text-sm font-semibold text-slate-700">Organization&apos;s Name</FormLabel>
                     <FormControl>
-                      <Input className="h-6 text-xs px-2 py-1" placeholder="e.g., Techra Softwares" {...field} />
+                      <Input className="h-6 text-sm px-2 py-1 border-slate-300 placeholder:text-slate-400 focus:ring-2 focus:ring-sky-500 focus:border-sky-500" placeholder="e.g., Techra Softwares" {...field} />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -309,10 +352,10 @@ export default function RegisterPage() {
               name="courseName"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Course Name</FormLabel>
+                  <FormLabel className="text-sm font-semibold text-slate-700">Course Name</FormLabel>
                   <FormControl>
                     <select
-                      className="h-8 w-full rounded-md border px-2 text-xs bg-white"
+                      className="h-8 w-full rounded-md border px-2 text-xs bg-white border-slate-300 focus:ring-2 focus:ring-sky-500 focus:border-sky-500"
                       value={field.value}
                       onChange={field.onChange}
                       onBlur={field.onBlur}
@@ -338,9 +381,9 @@ export default function RegisterPage() {
               name="email"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Email</FormLabel>
+                  <FormLabel className="text-sm font-semibold text-slate-700">Email</FormLabel>
                   <FormControl>
-                    <Input className="h-8 text-xs px-2" type="email" placeholder="you@example.com" {...field} />
+                    <Input className="h-8 text-sm px-2 border-slate-300 placeholder:text-slate-400 focus:ring-2 focus:ring-sky-500 focus:border-sky-500" type="email" placeholder="you@example.com" {...field} />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -352,10 +395,10 @@ export default function RegisterPage() {
               name="mobile"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Mobile</FormLabel>
+                  <FormLabel className="text-sm font-semibold text-slate-700">Mobile</FormLabel>
                   <FormControl>
                     <Input
-                      className="h-8 text-xs px-2"
+                      className="h-8 text-sm px-2 border-slate-300 placeholder:text-slate-400 focus:ring-2 focus:ring-sky-500 focus:border-sky-500"
                       type="tel"
                       inputMode="tel"
                       placeholder="01XXXXXXXXX or +8801XXXXXXXXX"
