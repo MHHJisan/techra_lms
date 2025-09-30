@@ -101,7 +101,7 @@ export default async function FeaturedCourses({
         </div>
 
         <div className="mt-10 items-center">
-          <CoursesList items={coursesWithProgress} />
+          <CoursesList items={coursesWithProgress} enableCardModal={false} />
         </div>
 
         <div className="mt-12 text-center relative z-20 pointer-events-auto">

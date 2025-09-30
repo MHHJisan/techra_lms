@@ -2,14 +2,17 @@
 
 import { PropsWithChildren, useState } from "react";
 import Image from "next/image";
+import Link from "next/link";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 
 interface BuyNowButtonProps extends PropsWithChildren {
   label?: string;
   asChild?: boolean;
+  learnMoreHref?: string;
+  learnMoreText?: string;
 }
 
-export default function BuyNowButton({ label = "Buy Now", asChild = false, children }: BuyNowButtonProps) {
+export default function BuyNowButton({ label = "Buy Now", asChild = false, children, learnMoreHref, learnMoreText = "Learn More" }: BuyNowButtonProps) {
   const [open, setOpen] = useState(false);
 
   return (
@@ -69,6 +72,17 @@ export default function BuyNowButton({ label = "Buy Now", asChild = false, child
             />
           </div>
         </div>
+        {learnMoreHref ? (
+          <div className="mt-4 rounded-md border border-slate-200 bg-slate-50 p-3 text-sm text-slate-700">
+            <p className="mb-2">To visit the course please click</p>
+            <Link
+              href={learnMoreHref}
+              className="inline-flex items-center justify-center rounded-md bg-sky-600 px-3 py-1.5 text-xs font-semibold text-white shadow-sm hover:bg-sky-700 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-sky-600"
+            >
+              {learnMoreText}
+            </Link>
+          </div>
+        ) : null}
       </DialogContent>
     </Dialog>
   );

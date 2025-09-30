@@ -88,16 +88,22 @@ export const CourseCard = ({
                   {formatPrice(price)} {currencyLabel}
                 </p>
                 {!showStatusBadge ? (
-                  <Link
-                    href={href || `/courses/${id}`}
-                    className="inline-flex items-center justify-center rounded-md bg-sky-600 px-3 py-1.5 text-xs font-semibold text-white shadow-sm hover:bg-sky-700 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-sky-600"
-                    onClick={(e) => {
-                      // prevent opening the modal when clicking the Learn More link
-                      e.stopPropagation();
-                    }}
-                  >
-                    {learnMoreLabel}
-                  </Link>
+                  modalEnabled ? (
+                    <Link
+                      href={href || `/courses/${id}`}
+                      className="inline-flex items-center justify-center rounded-md bg-sky-600 px-3 py-1.5 text-xs font-semibold text-white shadow-sm hover:bg-sky-700 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-sky-600"
+                      onClick={(e) => {
+                        // prevent opening the modal when clicking the Learn More link
+                        e.stopPropagation();
+                      }}
+                    >
+                      {learnMoreLabel}
+                    </Link>
+                  ) : (
+                    <span className="inline-flex items-center justify-center rounded-md bg-sky-600 px-3 py-1.5 text-xs font-semibold text-white opacity-90">
+                      {learnMoreLabel}
+                    </span>
+                  )
                 ) : null}
               </div>
             )}
@@ -124,7 +130,11 @@ export const CourseCard = ({
   );
 
   if (modalEnabled) {
-    return <BuyNowButton asChild>{CardInner}</BuyNowButton>;
+    return (
+      <BuyNowButton asChild learnMoreHref={href || `/courses/${id}`}>
+        {CardInner}
+      </BuyNowButton>
+    );
   }
   return <Link href={href || `/courses/${id}`}>{CardInner}</Link>;
 }
