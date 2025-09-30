@@ -127,39 +127,39 @@ export default async function AdminRegistrationsPage({ searchParams }: PageProps
     <div className="px-6 py-8">
       <h1 className="text-2xl font-semibold mb-6">Registered</h1>
 
-      <form className="mb-4 flex flex-wrap gap-3" method="get">
+      <form className="mb-3 flex flex-wrap gap-1.5" method="get">
         <input
           type="text"
           name="q"
           defaultValue={q}
           placeholder="Search name/email/mobile/address/guardian"
-          className="w-full md:w-80 rounded-md border px-3 py-2 text-sm"
+          className="h-8 w-full md:w-80 rounded-md border px-2 text-xs"
         />
         <input
           type="text"
           name="course"
           defaultValue={course}
           placeholder="Filter by course name"
-          className="w-full md:w-64 rounded-md border px-3 py-2 text-sm"
+          className="h-8 w-full md:w-64 rounded-md border px-2 text-xs"
         />
         <input
           type="date"
           name="dateStart"
           defaultValue={dateStart}
-          className="w-full md:w-48 rounded-md border px-3 py-2 text-sm"
+          className="h-8 w-full md:w-48 rounded-md border px-2 text-xs"
           aria-label="Start date"
         />
         <input
           type="date"
           name="dateEnd"
           defaultValue={dateEnd}
-          className="w-full md:w-48 rounded-md border px-3 py-2 text-sm"
+          className="h-8 w-full md:w-48 rounded-md border px-2 text-xs"
           aria-label="End date"
         />
         <select
           name="sort"
           defaultValue={sortField}
-          className="w-full md:w-48 rounded-md border px-3 py-2 text-sm"
+          className="h-8 w-full md:w-48 rounded-md border px-2 text-xs"
         >
           <option value="created_at">Sort by Created</option>
           <option value="name">Sort by Name</option>
@@ -168,16 +168,16 @@ export default async function AdminRegistrationsPage({ searchParams }: PageProps
         <select
           name="dir"
           defaultValue={sortDir.toLowerCase()}
-          className="w-full md:w-32 rounded-md border px-3 py-2 text-sm"
+          className="h-8 w-full md:w-32 rounded-md border px-2 text-xs"
         >
           <option value="desc">Desc</option>
           <option value="asc">Asc</option>
         </select>
-        <button className="inline-flex items-center rounded-md bg-slate-900 text-white px-4 py-2 text-sm font-medium hover:bg-slate-800" type="submit">
+        <button className="h-8 inline-flex items-center rounded-md bg-slate-900 text-white px-3 text-xs font-medium hover:bg-slate-800" type="submit">
           Apply
         </button>
         <a
-          className="inline-flex items-center rounded-md border px-4 py-2 text-sm hover:bg-slate-50"
+          className="h-8 inline-flex items-center rounded-md border px-3 text-xs hover:bg-slate-50"
           href={`/api/admin/registrations/export?${new URLSearchParams({ q, course, dateStart, dateEnd, sort: sortField, dir: sortDir.toLowerCase() }).toString()}`}
           target="_blank"
           rel="noreferrer"
@@ -186,51 +186,51 @@ export default async function AdminRegistrationsPage({ searchParams }: PageProps
         </a>
       </form>
       <div className="overflow-x-auto border rounded-lg bg-white">
-        <table className="min-w-full text-sm">
+        <table className="min-w-full text-xs">
           <thead className="bg-slate-50">
             <tr>
-              <th className="text-left p-3 whitespace-nowrap">#</th>
-              <th className="text-left p-3 whitespace-nowrap">Created</th>
-              <th className="text-left p-3 whitespace-nowrap">Name</th>
-              <th className="text-left p-3 whitespace-nowrap">Father</th>
-              <th className="text-left p-3 whitespace-nowrap">Mother</th>
-              <th className="text-left p-3 whitespace-nowrap">Guardian</th>
-              <th className="text-left p-3 whitespace-nowrap">Occupation</th>
-              <th className="text-left p-3 whitespace-nowrap">Institution</th>
-              <th className="text-left p-3 whitespace-nowrap">Organization</th>
-              <th className="text-left p-3 whitespace-nowrap">Email</th>
-              <th className="text-left p-3 whitespace-nowrap">Mobile</th>
-              <th className="text-left p-3 whitespace-nowrap">Course</th>
-              <th className="text-left p-3">Address</th>
-              <th className="text-left p-3 whitespace-nowrap">DOB</th>
-              <th className="text-left p-3 whitespace-nowrap">NID/Birth Cert</th>
-              <th className="text-left p-3 whitespace-nowrap">Actions</th>
+              <th className="text-left p-2 whitespace-nowrap">#</th>
+              <th className="text-left p-2 whitespace-nowrap">Created</th>
+              <th className="text-left p-2 whitespace-nowrap">Name</th>
+              <th className="text-left p-2 whitespace-nowrap">Father</th>
+              <th className="text-left p-2 whitespace-nowrap">Mother</th>
+              <th className="text-left p-2 whitespace-nowrap">Guardian</th>
+              <th className="text-left p-2 whitespace-nowrap">Occupation</th>
+              <th className="text-left p-2 whitespace-nowrap">Institution</th>
+              <th className="text-left p-2 whitespace-nowrap">Organization</th>
+              <th className="text-left p-2 whitespace-nowrap">Email</th>
+              <th className="text-left p-2 whitespace-nowrap">Mobile</th>
+              <th className="text-left p-2 whitespace-nowrap">Course</th>
+              <th className="text-left p-2">Address</th>
+              <th className="text-left p-2 whitespace-nowrap">DOB</th>
+              <th className="text-left p-2 whitespace-nowrap">NID/Birth Cert</th>
+              <th className="text-left p-2 whitespace-nowrap">Actions</th>
             </tr>
           </thead>
           <tbody>
             {rows.map((r) => (
               <tr key={r.id} className="border-t align-top">
-                <td className="p-3 text-slate-500">{r.id}</td>
-                <td className="p-3">{new Date(r.created_at).toLocaleString()}</td>
-                <td className="p-3 font-medium">{r.name}</td>
-                <td className="p-3">{r.father_name}</td>
-                <td className="p-3">{r.mother_name}</td>
-                <td className="p-3">{r.guardian_name}</td>
-                <td className="p-3">{r.occupation}</td>
-                <td className="p-3">{r.student_institution || "—"}</td>
-                <td className="p-3">{r.organization_name || "—"}</td>
-                <td className="p-3">{r.email}</td>
-                <td className="p-3">{r.mobile}</td>
-                <td className="p-3">{r.course_name}</td>
-                <td className="p-3 max-w-[320px] whitespace-pre-wrap break-words">{r.address}</td>
-                <td className="p-3">{r.date_of_birth}</td>
-                <td className="p-3">{r.nid_or_birth_cert}</td>
-                <td className="p-3"><RegistrationActions id={r.id} /></td>
+                <td className="p-2 text-slate-500">{r.id}</td>
+                <td className="p-2">{new Date(r.created_at).toLocaleString()}</td>
+                <td className="p-2 font-medium">{r.name}</td>
+                <td className="p-2">{r.father_name}</td>
+                <td className="p-2">{r.mother_name}</td>
+                <td className="p-2">{r.guardian_name}</td>
+                <td className="p-2">{r.occupation}</td>
+                <td className="p-2">{r.student_institution || "—"}</td>
+                <td className="p-2">{r.organization_name || "—"}</td>
+                <td className="p-2">{r.email}</td>
+                <td className="p-2">{r.mobile}</td>
+                <td className="p-2">{r.course_name}</td>
+                <td className="p-2 max-w-[320px] whitespace-pre-wrap break-words">{r.address}</td>
+                <td className="p-2">{r.date_of_birth}</td>
+                <td className="p-2">{r.nid_or_birth_cert}</td>
+                <td className="p-2"><RegistrationActions id={r.id} /></td>
               </tr>
             ))}
             {rows.length === 0 && (
               <tr>
-                <td className="p-4 text-slate-500" colSpan={13}>
+                <td className="p-3 text-slate-500" colSpan={13}>
                   No registrations found.
                 </td>
               </tr>

@@ -31,7 +31,7 @@ export const Navbar = () => {
           className="inline-flex items-center gap-1 rounded-full border border-gray-300 bg-white px-2 py-1 text-xs font-semibold text-gray-700 shadow-sm transition hover:border-gray-400 hover:bg-gray-50"
           aria-label={lang === "bn" ? "ইংরেজিতে পরিবর্তন করুন" : "Switch to Bangla"}
         >
-          <span className={"rounded-full px-2 py-0.5 " + (lang === "bn" ? "bg-blue-600 text-white" : "text-gray-700")}>BN</span>
+          <span className={"rounded-full px-2 py-0.5 " + (lang === "bn" ? "bg-blue-600 text-white" : "text-gray-700")}>বাংলা</span>
           <span className={"rounded-full px-2 py-0.5 " + (lang === "en" ? "bg-blue-600 text-white" : "text-gray-700")}>EN</span>
         </button>
         <NavbarRoutes />

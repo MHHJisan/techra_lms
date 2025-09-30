@@ -17,6 +17,8 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import UdemyStyleNavbar from "@/components/udemy-clone/UdemyStyleNavbar";
+import { SignedIn, SignedOut } from "@clerk/nextjs";
+import { NavbarRoutes } from "@/components/navbar-routes";
 
 const RegistrationSchema = z.object({
   name: z.string().min(1, "Name is required"),
@@ -115,7 +117,15 @@ export default function RegisterPage() {
 
   return (
     <div className="w-full">
-      <UdemyStyleNavbar />
+      {/* Show role-aware navbar when logged in; otherwise show the public navbar */}
+      <SignedIn>
+        <div className="sticky top-0 z-40 p-3 md:p-4 border-b w-full flex items-center justify-end bg-white/95 backdrop-blur shadow-sm">
+          <NavbarRoutes />
+        </div>
+      </SignedIn>
+      <SignedOut>
+        <UdemyStyleNavbar />
+      </SignedOut>
       <div className="container max-w-3xl mx-auto px-4 py-10">
       <h1 className="text-2xl md:text-3xl font-semibold mb-2">Student Registration</h1>
       <p className="text-muted-foreground mb-8">Fill up the form to register for a course.</p>
@@ -145,7 +155,7 @@ export default function RegisterPage() {
                 <FormItem>
                   <FormLabel>Name</FormLabel>
                   <FormControl>
-                    <Input placeholder="Your full name" {...field} />
+                    <Input className="h-8 text-xs px-2" placeholder="Your full name" {...field} />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -159,7 +169,7 @@ export default function RegisterPage() {
                 <FormItem>
                   <FormLabel>Father&apos;s Name</FormLabel>
                   <FormControl>
-                    <Input placeholder="Father's name" {...field} />
+                    <Input className="h-8 text-xs px-2" placeholder="Father's name" {...field} />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -173,7 +183,7 @@ export default function RegisterPage() {
                 <FormItem>
                   <FormLabel>Mother&apos;s Name</FormLabel>
                   <FormControl>
-                    <Input placeholder="Mother's name" {...field} />
+                    <Input className="h-8 text-xs px-2" placeholder="Mother's name" {...field} />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -187,7 +197,7 @@ export default function RegisterPage() {
                 <FormItem>
                   <FormLabel>Date of Birth</FormLabel>
                   <FormControl>
-                    <Input type="date" {...field} />
+                    <Input className="h-8 text-xs px-2" type="date" {...field} />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -202,7 +212,7 @@ export default function RegisterPage() {
               <FormItem>
                 <FormLabel>Address</FormLabel>
                 <FormControl>
-                  <Textarea placeholder="Your full address" {...field} />
+                  <Textarea className="min-h-[32px] text-xs px-2 py-2" placeholder="Your full address" {...field} />
                 </FormControl>
                 <FormDescription>House, street, city, district, etc.</FormDescription>
                 <FormMessage />
@@ -218,7 +228,7 @@ export default function RegisterPage() {
                 <FormItem>
                   <FormLabel>NID/Birth Certificate</FormLabel>
                   <FormControl>
-                    <Input placeholder="ID number" {...field} />
+                    <Input className="h-8 text-xs px-2" placeholder="ID number" {...field} />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -232,7 +242,7 @@ export default function RegisterPage() {
                 <FormItem>
                   <FormLabel>Guardian&apos;s Name</FormLabel>
                   <FormControl>
-                    <Input placeholder="Guardian's name" {...field} />
+                    <Input className="h-8 text-xs px-2" placeholder="Guardian's name" {...field} />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -247,7 +257,7 @@ export default function RegisterPage() {
                   <FormLabel>Occupation</FormLabel>
                   <FormControl>
                     <select
-                      className="w-full rounded-md border px-3 py-2 text-sm bg-white"
+                      className="h-8 w-full rounded-md border px-2 text-xs bg-white"
                       value={field.value}
                       onChange={field.onChange}
                       onBlur={field.onBlur}
@@ -270,8 +280,8 @@ export default function RegisterPage() {
                   <FormItem>
                     <FormLabel>School/College/University</FormLabel>
                     <FormControl>
-                      <Input placeholder="e.g., Dhaka University" {...field} />
-                    </FormControl>
+                      <Input className="h-6 text-xs px-2 py-1" placeholder="e.g., Dhaka University" {...field} />
+                  </FormControl>
                     <FormMessage />
                   </FormItem>
                 )}
@@ -286,7 +296,7 @@ export default function RegisterPage() {
                   <FormItem>
                     <FormLabel>Organization&apos;s Name</FormLabel>
                     <FormControl>
-                      <Input placeholder="e.g., Techra Softwares" {...field} />
+                      <Input className="h-6 text-xs px-2 py-1" placeholder="e.g., Techra Softwares" {...field} />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -302,7 +312,7 @@ export default function RegisterPage() {
                   <FormLabel>Course Name</FormLabel>
                   <FormControl>
                     <select
-                      className="w-full rounded-md border px-3 py-2 text-sm bg-white"
+                      className="h-8 w-full rounded-md border px-2 text-xs bg-white"
                       value={field.value}
                       onChange={field.onChange}
                       onBlur={field.onBlur}
@@ -330,7 +340,7 @@ export default function RegisterPage() {
                 <FormItem>
                   <FormLabel>Email</FormLabel>
                   <FormControl>
-                    <Input type="email" placeholder="you@example.com" {...field} />
+                    <Input className="h-8 text-xs px-2" type="email" placeholder="you@example.com" {...field} />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -345,6 +355,7 @@ export default function RegisterPage() {
                   <FormLabel>Mobile</FormLabel>
                   <FormControl>
                     <Input
+                      className="h-8 text-xs px-2"
                       type="tel"
                       inputMode="tel"
                       placeholder="01XXXXXXXXX or +8801XXXXXXXXX"
