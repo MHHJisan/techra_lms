@@ -8,6 +8,7 @@ import {
   Users,
   GraduationCap,
   Grid2X2,
+  FileSpreadsheet,
 } from "lucide-react";
 import { SidebarItem } from "./sidebar-item";
 import { useEffect, useState } from "react";
@@ -23,6 +24,7 @@ const translations = {
     allUsers: "All Users",
     teachers: "Teachers",
     students: "Students",
+    registered: "Registered",
   },
   bn: {
     dashboard: "ড্যাশবোর্ড",
@@ -33,6 +35,7 @@ const translations = {
     allUsers: "সকল ব্যবহারকারী",
     teachers: "শিক্ষকবৃন্দ",
     students: "শিক্ষার্থীরা",
+    registered: "রেজিস্ট্রেশন",
   },
 };
 
@@ -92,6 +95,7 @@ export const SidebarRoutes = () => {
     { icon: Users, label: t.teachers, href: "/admin/teachers" },
     { icon: GraduationCap, label: t.students, href: "/admin/students" },
     { icon: Grid2X2, label: t.allCourses, href: "/admin/all-courses" },
+    { icon: FileSpreadsheet, label: t.registered, href: "/admin/registrations" },
   ];
 
   const isTeacher = role === "teacher" || role === "instructor";

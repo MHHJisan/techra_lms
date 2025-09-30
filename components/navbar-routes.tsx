@@ -74,9 +74,14 @@ export const NavbarRoutes = () => {
     <>
       {showPublicBrand && (
         <div className="flex items-center gap-2 sm:gap-4 shrink-0">
-          <Link href="/" className="flex items-center gap-2 sm:gap-4">
-            <Image src="/logo.svg" alt="Techra" width={32} height={32} />
-            <span className="hidden sm:inline text-base md:text-xl font-semibold text-slate-800 tracking-wide md:tracking-wider whitespace-nowrap">
+          <Link
+            href="/"
+            className="group flex items-center gap-2 sm:gap-4 rounded-full px-2.5 py-1.5 bg-gradient-to-r from-rose-500 via-fuchsia-500 to-indigo-500 text-white shadow-sm hover:shadow-md transition"
+          >
+            <span className="inline-flex items-center justify-center rounded-full bg-white/95 p-1 shadow-sm">
+              <Image src="/logo.svg" alt="Techra" width={26} height={26} />
+            </span>
+            <span className="hidden sm:inline text-base md:text-xl font-semibold tracking-wide md:tracking-wider whitespace-nowrap">
               Techra Learning Center
             </span>
           </Link>
@@ -137,7 +142,11 @@ export const NavbarRoutes = () => {
 
         <SignedOut>
           <Link href="/sign-in">
-            <Button size="sm" variant="outline">
+            <Button
+              size="sm"
+              variant="outline"
+              className="border-sky-300 text-sky-700 hover:bg-sky-50"
+            >
               <LogIn className="h-4 w-4 mr-2" />
               Login
             </Button>

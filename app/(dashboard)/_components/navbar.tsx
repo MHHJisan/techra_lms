@@ -10,7 +10,7 @@ export const Navbar = () => {
   const { lang, toggleLang } = useLang();
 
   return (
-    <div className="p-3 md:p-4 border-b w-full flex items-center justify-between bg-white shadow-sm gap-2 flex-wrap">
+    <div className="sticky top-0 z-50 p-3 md:p-4 border-b w-full flex items-center justify-between bg-white/95 backdrop-blur shadow-sm gap-2 flex-wrap">
       <div className="flex items-center gap-2 min-w-0">
         <MobileSidebar />
         <Link href="/" className="flex items-center gap-2 min-w-0">
