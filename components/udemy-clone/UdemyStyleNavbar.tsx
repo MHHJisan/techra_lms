@@ -65,7 +65,7 @@ const Navbar = () => {
           </Link>
           <Link
             href="/cart"
-            className="relative text-gray-600 hover:text-blue-600"
+            className="relative text-gray-600 hover:text-blue-600 hidden md:inline"
             aria-label={lang === "bn" ? "কার্ট দেখুন" : "View cart"}
           >
             <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="h-6 w-6">
@@ -77,7 +77,7 @@ const Navbar = () => {
 
           
                   <SignInButton mode="modal">
-            <button className="hidden rounded-md border border-gray-300 px-3 py-1.5 text-sm font-medium text-gray-700 hover:bg-yellow-500 hover:text-blue-600 hover:font-semibold hover:shadow-sm sm:inline">
+            <button className="inline rounded-md border border-gray-300 px-3 py-1.5 text-sm font-medium text-gray-700 hover:bg-yellow-500 hover:text-blue-600 hover:font-semibold hover:shadow-sm">
               {lang === "bn" ? "লগ ইন/সাইন আপ" : "Login/Signup"}
             </button>
           </SignInButton>

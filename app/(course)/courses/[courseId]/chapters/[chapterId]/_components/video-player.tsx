@@ -55,6 +55,7 @@ export const VideoPlayer = ({
   const [intervalId, setIntervalId] = useState<NodeJS.Timeout | null>(null);
 
   const videoId = useMemo(() => extractYouTubeId(videoUrlOrId) || "", [videoUrlOrId]);
+  const hasVideo = !!videoId;
 
   const sendEvent = useCallback(async (type: string, payload?: Record<string, unknown>) => {
     try {
@@ -110,8 +111,8 @@ export const VideoPlayer = ({
       className="relative z-0 w-full rounded-md overflow-hidden bg-black"
       style={{ paddingTop: "56.25%" }} // 9 / 16 = 0.5625
     >
-      {/* Loading overlay */}
-      {!isReady && !isLocked && (
+      {/* Loading overlay (only if we actually have a video to load) */}
+      {!isReady && !isLocked && hasVideo && (
         <div className="absolute inset-0 z-10 flex items-center justify-center bg-slate-800/60">
           <Loader2 className="h-10 w-10 animate-spin text-secondary" />
         </div>
@@ -125,8 +126,15 @@ export const VideoPlayer = ({
         </div>
       )}
 
+      {/* No valid video available */}
+      {!isLocked && !hasVideo && (
+        <div className="absolute inset-0 z-10 flex items-center justify-center bg-slate-900/70">
+          <p className="text-sm text-white/90">No videos uploaded.</p>
+        </div>
+      )}
+
       {/* Player fills the box */}
-      {!isLocked && videoId && (
+      {!isLocked && hasVideo && (
         <YouTube
           videoId={videoId}
           opts={{

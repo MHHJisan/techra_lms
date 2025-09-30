@@ -134,7 +134,7 @@ const ChapterIdPage = async ({
               />
             </div>
           ) : (
-            <Banner variant="warning" label="Video unavailable." />
+            <Banner variant="warning" label="No videos uploaded." />
           )}
         </div>
 
