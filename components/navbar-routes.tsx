@@ -7,6 +7,7 @@ import { Home, LogIn, GraduationCap, UserIcon, HomeIcon } from "lucide-react";
 import Link from "next/link";
 import { SearchInput } from "./search-input";
 import { useEffect, useState } from "react";
+import Image from "next/image";
 
 function isAbortError(err: unknown): boolean {
   // Browser-style AbortError (DOMException)
@@ -67,16 +68,28 @@ export const NavbarRoutes = () => {
   // const isTeacherPage = pathname?.startsWith("/teacher") ?? false;
   const isStudentPlayerPage = pathname?.startsWith("/courses") ?? false;
   const isSearchPage = pathname === "/search";
+  const showPublicBrand = !ready || role === null;
 
   return (
     <>
+      {showPublicBrand && (
+        <div className="flex items-center gap-2 sm:gap-4 shrink-0">
+          <Link href="/" className="flex items-center gap-2 sm:gap-4">
+            <Image src="/logo.svg" alt="Techra" width={32} height={32} />
+            <span className="hidden sm:inline text-base md:text-xl font-semibold text-slate-800 tracking-wide md:tracking-wider whitespace-nowrap">
+              Techra Learning Center
+            </span>
+          </Link>
+        </div>
+      )}
+
       {isSearchPage && (
         <div className="hidden md:block">
           <SearchInput />
         </div>
       )}
 
-      <div className="flex gap-x-2 ml-auto items-center">
+      <div className="flex gap-x-2 ml-auto items-center shrink-0">
         {/* Show Home only on the student player */}
         {isStudentPlayerPage && (
           <Link href="/">
