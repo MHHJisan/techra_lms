@@ -21,6 +21,24 @@ export const ourFileRouter = {
   }).onUploadComplete(async () => {
     // nothing to persist server-side here; client will PATCH course.imageUrl
   }),
+  // Chapter-level uploads
+  chapterMaterial: f({
+    image: { maxFileSize: "8MB" },
+    pdf: { maxFileSize: "32MB" },
+    blob: { maxFileSize: "32MB" }, // allow slides like ppt/pptx/key/odp
+  }).onUploadComplete(async () => {
+    // client will POST to chapter materials API with the URL
+  }),
+  chapterAssignment: f({
+    pdf: { maxFileSize: "32MB" },
+  }).onUploadComplete(async () => {
+    // client will POST to chapter assignments API with the URL
+  }),
+  chapterQuiz: f({
+    pdf: { maxFileSize: "16MB" },
+  }).onUploadComplete(async () => {
+    // client will POST to chapter quizzes API with the URL
+  }),
 } satisfies FileRouter;
 
 export type OurFileRouter = typeof ourFileRouter;

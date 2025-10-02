@@ -96,6 +96,11 @@ model Chapter {
   userProgress UserProgress[]
   videoEvents  VideoEvent[]
 
+  // New relations for chapter resources
+  materials   ChapterMaterial[]
+  assignments ChapterAssignment[]
+  quizzes     ChapterQuiz[]
+
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
@@ -163,4 +168,57 @@ model User {
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+}
+
+/// This model maps to an existing table that is managed outside Prisma.
+/// Marked as ignored so Prisma will not try to drop or migrate it, avoiding data loss.
+model Registration {
+  id String @id
+
+  @@map("registrations")
+  @@ignore
+}
+
+// New chapter-level resource models
+model ChapterMaterial {
+  id        String   @id @default(uuid())
+  name      String
+  url       String   @db.Text
+  type      String?  // e.g., image, pdf, slide
+
+  chapterId String
+  chapter   Chapter  @relation(fields: [chapterId], references: [id], onDelete: Cascade)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([chapterId])
+}
+
+model ChapterAssignment {
+  id        String   @id @default(uuid())
+  name      String
+  url       String   @db.Text
+
+  chapterId String
+  chapter   Chapter  @relation(fields: [chapterId], references: [id], onDelete: Cascade)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([chapterId])
+}
+
+model ChapterQuiz {
+  id        String   @id @default(uuid())
+  name      String
+  url       String   @db.Text
+
+  chapterId String
+  chapter   Chapter  @relation(fields: [chapterId], references: [id], onDelete: Cascade)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([chapterId])
 }

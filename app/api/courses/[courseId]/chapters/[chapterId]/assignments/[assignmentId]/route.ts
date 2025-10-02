@@ -1,0 +1,29 @@
+import { db } from "@/lib/db";
+import { auth } from "@clerk/nextjs/server";
+import { NextResponse } from "next/server";
+
+export async function DELETE(
+  _req: Request,
+  { params }: { params: { courseId: string; chapterId: string; assignmentId: string } }
+) {
+  try {
+    const { userId } = auth();
+    if (!userId) return new NextResponse("Unauthorized", { status: 401 });
+
+    const courseOwner = await db.course.findFirst({
+      where: { id: params.courseId, user: { clerkId: userId } },
+    });
+    if (!courseOwner) return new NextResponse("Unauthorized", { status: 401 });
+
+    const assignment = await db.chapterAssignment.findFirst({
+      where: { id: params.assignmentId, chapterId: params.chapterId },
+    });
+    if (!assignment) return new NextResponse("Not found", { status: 404 });
+
+    const deleted = await db.chapterAssignment.delete({ where: { id: params.assignmentId } });
+    return NextResponse.json(deleted, { status: 200 });
+  } catch (error) {
+    console.error("[CHAPTER_ASSIGNMENT_DELETE]", error);
+    return new NextResponse("Internal Error", { status: 500 });
+  }
+}

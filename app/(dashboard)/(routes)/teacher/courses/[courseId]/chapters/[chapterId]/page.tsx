@@ -1,13 +1,16 @@
 import { IconBadge } from "@/components/icon-badge";
 import { db } from "@/lib/db";
 import { auth } from "@clerk/nextjs/server";
-import { ArrowLeft, Eye, LayoutDashboard, Video } from "lucide-react";
+import { ArrowLeft, Eye, LayoutDashboard, NotebookText, Video } from "lucide-react";
 import Link from "next/link";
 import { redirect } from "next/navigation";
 import { ChapterTitleForm } from "./_components/chapter-title-form";
 import { ChapterDescriptionForm } from "./_components/chapter-description-form";
 import { ChapterAccessForm } from "./_components/chapter-access-form";
 import { ChapterVideoForm } from "./_components/chapter-video-form";
+import { ChapterMaterialsForm } from "./_components/chapter-materials-form";
+import { ChapterAssignmentsForm } from "./_components/chapter-assignments-form";
+import { ChapterQuizzesForm } from "./_components/chapter-quizzes-form";
 import { Banner } from "@/components/banner";
 import { ChapterActions } from "./_components/chapter-actions";
 
@@ -27,7 +30,11 @@ const ChapterIdPage = async ({
       id: params.chapterId,
       courseId: params.courseId,
     },
-    include: {},
+    include: {
+      materials: true,
+      assignments: true,
+      quizzes: true,
+    },
   });
 
   if (!chapter) {
@@ -96,27 +103,54 @@ const ChapterIdPage = async ({
               chapterId={params.chapterId}
             />
             <div>
-              <div className="flex items-center gap-x-2">
+            <div className="flex items-center gap-x-2">
                 <IconBadge icon={Eye} />
                 <h2 className="text-xl">Access Settings</h2>
               </div>
-            </div>
             <ChapterAccessForm
               initialData={chapter}
               courseId={params.courseId}
               chapterId={params.chapterId}
             />
+            
+              </div>
           </div>
           {/* Right Section - Add a video */}
           <div className="col-span-6">
             <div className="flex items-center gap-x-2">
               <IconBadge icon={Video} />
-              <h2 className="text-l">Add a video</h2>
+              <h2 className="text-l">Chapter Materials</h2>
             </div>
             <ChapterVideoForm
               initialData={chapter}
               chapterId={params.chapterId}
               courseId={params.courseId}
+            />
+            <ChapterMaterialsForm
+              chapterId={params.chapterId}
+              courseId={params.courseId}
+              items={chapter.materials || []}
+            />
+          </div>
+        </div>
+
+        <div className="mt-6 space-y-6">
+          <header className="mb-6">
+            <div className="flex items-center gap-x-2 justify-center">
+              <IconBadge icon={NotebookText} variant="success" size="sm" />
+              <h1 className="text-2xl font-medium">Quizzes & Assignments</h1>
+            </div>
+          </header>
+          <div className="grid grid-cols-2 gap-6 col-span-6 mt-6">
+            <ChapterAssignmentsForm
+              chapterId={params.chapterId}
+              courseId={params.courseId}
+              items={chapter.assignments || []}
+            />
+            <ChapterQuizzesForm
+              chapterId={params.chapterId}
+              courseId={params.courseId}
+              items={chapter.quizzes || []}
             />
           </div>
         </div>
@@ -124,5 +158,4 @@ const ChapterIdPage = async ({
     </>
   );
 };
-
 export default ChapterIdPage;
