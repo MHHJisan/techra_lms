@@ -30,18 +30,18 @@ const ChapterIdPage = async ({
       id: params.chapterId,
       courseId: params.courseId,
     },
-    include: {
-      materials: true,
-      assignments: true,
-      quizzes: true,
-    },
   });
 
   if (!chapter) {
     return redirect("/");
   }
 
-  
+  // Fetch related resources separately
+  const [materials, assignments, quizzes] = await Promise.all([
+    db.chapterMaterial.findMany({ where: { chapterId: params.chapterId } }),
+    db.chapterAssignment.findMany({ where: { chapterId: params.chapterId } }),
+    db.chapterQuiz.findMany({ where: { chapterId: params.chapterId } }),
+  ]);
   const requiredFields = [chapter.title, chapter.description, chapter.videoUrl];
 
   const totalFields = requiredFields.length;
@@ -129,7 +129,7 @@ const ChapterIdPage = async ({
             <ChapterMaterialsForm
               chapterId={params.chapterId}
               courseId={params.courseId}
-              items={chapter.materials || []}
+              items={materials}
             />
           </div>
         </div>
@@ -145,12 +145,12 @@ const ChapterIdPage = async ({
             <ChapterAssignmentsForm
               chapterId={params.chapterId}
               courseId={params.courseId}
-              items={chapter.assignments || []}
+              items={assignments}
             />
             <ChapterQuizzesForm
               chapterId={params.chapterId}
               courseId={params.courseId}
-              items={chapter.quizzes || []}
+              items={quizzes}
             />
           </div>
         </div>
