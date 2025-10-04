@@ -25,6 +25,7 @@ const translations = {
     teachers: "Teachers",
     students: "Students",
     registered: "Registered",
+    applications: "Applications",
   },
   bn: {
     dashboard: "ড্যাশবোর্ড",
@@ -36,6 +37,7 @@ const translations = {
     teachers: "শিক্ষকবৃন্দ",
     students: "শিক্ষার্থীরা",
     registered: "রেজিস্ট্রেশন",
+    applications: "আবেদনসমূহ",
   },
 };
 
@@ -80,7 +82,7 @@ export const SidebarRoutes = () => {
   const t = translations[lang];
 
   const guestRoutes = [
-    { icon: Layout, label: t.dashboard, href: "/" },
+    { icon: Layout, label: t.dashboard, href: "/dashboard" },
     { icon: Compass, label: t.browse, href: "/search" },
   ];
 
@@ -96,6 +98,7 @@ export const SidebarRoutes = () => {
     { icon: GraduationCap, label: t.students, href: "/admin/students" },
     { icon: Grid2X2, label: t.allCourses, href: "/admin/all-courses" },
     { icon: FileSpreadsheet, label: t.registered, href: "/admin/registrations" },
+    { icon: FileSpreadsheet, label: t.applications, href: "/admin/applications" },
   ];
 
   const isTeacher = role === "teacher" || role === "instructor";

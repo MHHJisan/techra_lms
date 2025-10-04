@@ -19,10 +19,17 @@ export const SidebarItem  = (
 
     const pathname = usePathname();
 
-    const isActive = 
-        (pathname === "/" && href === "/")
-        || pathname === href 
-        || (href !== "/" && pathname?.startsWith(`${href}/`));
+    // Normalize to avoid trailing slash discrepancies across browsers
+    const normalize = (s?: string | null) => {
+        if (!s) return "";
+        return s.length > 1 && s.endsWith("/") ? s.slice(0, -1) : s;
+    };
+    const current = normalize(pathname);
+    const target = normalize(href);
+
+    const isActive =
+        current === target ||
+        (target !== "" && current.startsWith(`${target}/`));
     return ( 
         <Link
             href={href}

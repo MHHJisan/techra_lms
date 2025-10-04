@@ -62,6 +62,7 @@ model Course {
   attachments Attachment[]
   purchases   Purchase[]
   videoEvents VideoEvent[]
+  applications Application[]
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -173,6 +174,7 @@ model User {
   userProgress   UserProgress[]  @relation("UserProgress")
   stripeCustomer StripeCustomer?
   videoEvents    VideoEvent[]
+  applications   Application[]
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -185,6 +187,24 @@ model Registration {
 
   @@map("registrations")
   @@ignore
+}
+
+// Applications submitted by students for enrollment
+model Application {
+  id            String   @id @default(uuid())
+  userId        String
+  user          User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  courseId      String
+  course        Course   @relation(fields: [courseId], references: [id], onDelete: Cascade)
+  // "cash" or "bkash"
+  paymentMethod String   @default("bkash")
+  // e.g., pending, approved, rejected
+  status        String   @default("pending")
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  @@index([userId])
+  @@index([courseId])
 }
 
 // New chapter-level resource models

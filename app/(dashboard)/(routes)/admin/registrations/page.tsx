@@ -53,7 +53,43 @@ export default async function AdminRegistrationsPage({ searchParams }: PageProps
       created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
     );
   `);
-  // Upgrade legacy table schema if it existed without the new columns
+  // Upgrade legacy table schema if it existed without the expected columns
+  await db.$executeRawUnsafe(
+    `ALTER TABLE registrations ADD COLUMN IF NOT EXISTS name TEXT NOT NULL DEFAULT ''`
+  );
+  await db.$executeRawUnsafe(
+    `ALTER TABLE registrations ADD COLUMN IF NOT EXISTS father_name TEXT NOT NULL DEFAULT ''`
+  );
+  await db.$executeRawUnsafe(
+    `ALTER TABLE registrations ADD COLUMN IF NOT EXISTS mother_name TEXT NOT NULL DEFAULT ''`
+  );
+  await db.$executeRawUnsafe(
+    `ALTER TABLE registrations ADD COLUMN IF NOT EXISTS address TEXT NOT NULL DEFAULT ''`
+  );
+  await db.$executeRawUnsafe(
+    `ALTER TABLE registrations ADD COLUMN IF NOT EXISTS date_of_birth TEXT NOT NULL DEFAULT ''`
+  );
+  await db.$executeRawUnsafe(
+    `ALTER TABLE registrations ADD COLUMN IF NOT EXISTS nid_or_birth_cert TEXT NOT NULL DEFAULT ''`
+  );
+  await db.$executeRawUnsafe(
+    `ALTER TABLE registrations ADD COLUMN IF NOT EXISTS guardian_name TEXT NOT NULL DEFAULT ''`
+  );
+  await db.$executeRawUnsafe(
+    `ALTER TABLE registrations ADD COLUMN IF NOT EXISTS occupation TEXT NOT NULL DEFAULT ''`
+  );
+  await db.$executeRawUnsafe(
+    `ALTER TABLE registrations ADD COLUMN IF NOT EXISTS email TEXT NOT NULL DEFAULT ''`
+  );
+  await db.$executeRawUnsafe(
+    `ALTER TABLE registrations ADD COLUMN IF NOT EXISTS mobile TEXT NOT NULL DEFAULT ''`
+  );
+  await db.$executeRawUnsafe(
+    `ALTER TABLE registrations ADD COLUMN IF NOT EXISTS course_name TEXT NOT NULL DEFAULT ''`
+  );
+  await db.$executeRawUnsafe(
+    `ALTER TABLE registrations ADD COLUMN IF NOT EXISTS created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()`
+  );
   await db.$executeRawUnsafe(
     `ALTER TABLE registrations ADD COLUMN IF NOT EXISTS student_institution TEXT NULL;`
   );

@@ -23,16 +23,22 @@ export const CourseSidebar = async ({
     return <p>Course data not available.</p>;
   }
 
-  const purchase = userId
-    ? await db.purchase.findUnique({
+  // Resolve internal DB user id from Clerk id, then check purchase with User.id
+  let purchase: { id: string } | null = null;
+  if (userId) {
+    const me = await db.user.findUnique({ where: { clerkId: userId }, select: { id: true } });
+    if (me) {
+      purchase = await db.purchase.findUnique({
         where: {
           userId_courseId: {
-            userId,
+            userId: me.id,
             courseId: course.id,
           },
         },
-      })
-    : null;
+        select: { id: true },
+      });
+    }
+  }
   return (
     <div className="h-full border-r flex flex-col overflow-y-auto shadow-sm">
       <div className="p-8 flex flex-col border-b">

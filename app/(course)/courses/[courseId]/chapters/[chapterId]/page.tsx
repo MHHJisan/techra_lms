@@ -84,11 +84,26 @@ const ChapterIdPage = async ({
     userProgress,
     purchase,
     author,
+    isUnpublished,
   } = await getChapter({
     userId: userId || undefined,
     chapterId: params.chapterId,
     courseId: params.courseId,
   });
+
+  // If the course/chapter is unpublished but the student has purchased, show a placeholder page.
+  if (isUnpublished) {
+    return (
+      <div className="w-full p-6">
+        <div className="max-w-3xl mx-auto rounded-md border bg-white p-6">
+          <h1 className="text-xl font-semibold mb-2">This chapter isn’t published yet</h1>
+          <p className="text-sm text-slate-600">
+            This chapter will be available right after the instructor publishes it. Thanks for your patience.
+          </p>
+        </div>
+      </div>
+    );
+  }
 
   if (!chapter || !course) {
     return redirect("/");
