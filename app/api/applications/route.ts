@@ -10,6 +10,7 @@ export const dynamic = "force-dynamic";
 const BodySchema = z.object({
   courseId: z.string().min(1),
   paymentMethod: z.enum(["cash", "bkash"]).default("bkash"),
+  bkashNumber: z.string().min(6).optional(),
 });
 
 export async function GET(req: Request) {
@@ -32,11 +33,11 @@ export async function GET(req: Request) {
     const app = await db.application.findFirst({
       where: { userId: user.id, courseId },
       orderBy: { createdAt: "desc" },
-      select: { id: true, status: true },
+      select: { id: true, status: true, bkashNumber: true },
     });
 
     return NextResponse.json(
-      { hasPurchase: !!purchase, applicationStatus: app?.status ?? null, applicationId: app?.id ?? null },
+      { hasPurchase: !!purchase, applicationStatus: app?.status ?? null, applicationId: app?.id ?? null, bkashNumber: app?.bkashNumber ?? null },
       { status: 200 }
     );
   } catch (e) {
@@ -56,7 +57,7 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: "Invalid input", issues: parsed.error.flatten() }, { status: 400 });
     }
 
-    const { courseId, paymentMethod } = parsed.data;
+    const { courseId, paymentMethod, bkashNumber } = parsed.data;
 
     // Find our internal user
     const user = await db.user.findUnique({ where: { clerkId } });
@@ -70,12 +71,14 @@ export async function POST(req: Request) {
         userId: user.id,
         courseId: course.id,
         paymentMethod,
+        bkashNumber: paymentMethod === "bkash" ? bkashNumber : null,
         status: "pending",
       },
       select: {
         id: true,
         status: true,
         paymentMethod: true,
+        bkashNumber: true,
         createdAt: true,
       },
     });

@@ -29,30 +29,36 @@ export default async function AdminApplicationsPage() {
       </div>
 
       <div className="overflow-x-auto border rounded-md">
-        <table className="min-w-full text-sm">
+        <table className="min-w-full text-sm table-fixed">
           <thead className="bg-slate-50 text-slate-700">
             <tr>
-              <th className="text-left px-3 py-2">Student</th>
-              <th className="text-left px-3 py-2">Email</th>
-              <th className="text-left px-3 py-2">Course</th>
-              <th className="text-left px-3 py-2">Payment</th>
-              <th className="text-left px-3 py-2">Status</th>
-              <th className="text-left px-3 py-2">Submitted</th>
-              <th className="text-left px-3 py-2">Actions</th>
+              <th className="text-left px-3 py-2 align-middle whitespace-nowrap w-[14%]">Student</th>
+              <th className="text-left px-3 py-2 align-middle whitespace-nowrap w-[18%]">Email</th>
+              <th className="text-left px-3 py-2 align-middle whitespace-nowrap w-[24%]">Course</th>
+              <th className="text-left px-3 py-2 align-middle whitespace-nowrap w-[10%]">Payment</th>
+              <th className="text-left px-3 py-2 align-middle whitespace-nowrap w-[14%]">bKash Number</th>
+              <th className="text-left px-3 py-2 align-middle whitespace-nowrap w-[10%]">Status</th>
+              <th className="text-left px-3 py-2 align-middle whitespace-nowrap w-[14%]">Submitted</th>
+              <th className="text-left px-3 py-2 align-middle whitespace-nowrap w-[10%]">Actions</th>
             </tr>
           </thead>
           <tbody>
             {apps.map((a) => {
               const name = [a.user.firstName, a.user.lastName].filter(Boolean).join(" ") || "—";
               return (
-                <tr key={a.id} className="border-t">
-                  <td className="px-3 py-2">{name}</td>
-                  <td className="px-3 py-2">{a.user.email}</td>
-                  <td className="px-3 py-2">{a.course.title}</td>
-                  <td className="px-3 py-2 capitalize">{a.paymentMethod}</td>
-                  <td className="px-3 py-2 capitalize">{a.status}</td>
-                  <td className="px-3 py-2">{new Date(a.createdAt).toLocaleString()}</td>
-                  <td className="px-3 py-2">
+                <tr key={a.id} className="border-t align-middle">
+                  <td className="px-3 py-2 align-middle whitespace-nowrap">{name}</td>
+                  <td className="px-3 py-2 align-middle whitespace-nowrap">
+                    <span className="block truncate" title={a.user.email}>{a.user.email}</span>
+                  </td>
+                  <td className="px-3 py-2 align-middle">
+                    <span className="block truncate" title={a.course.title}>{a.course.title}</span>
+                  </td>
+                  <td className="px-3 py-2 align-middle capitalize whitespace-nowrap">{a.paymentMethod}</td>
+                  <td className="px-3 py-2 align-middle whitespace-nowrap">{a.bkashNumber || "—"}</td>
+                  <td className="px-3 py-2 align-middle capitalize whitespace-nowrap">{a.status}</td>
+                  <td className="px-3 py-2 align-middle whitespace-nowrap">{new Date(a.createdAt).toLocaleString()}</td>
+                  <td className="px-3 py-2 align-middle">
                     <ApplicationActions id={a.id} status={a.status} />
                   </td>
                 </tr>
@@ -60,7 +66,7 @@ export default async function AdminApplicationsPage() {
             })}
             {apps.length === 0 && (
               <tr>
-                <td className="px-3 py-6 text-center text-slate-500" colSpan={6}>
+                <td className="px-3 py-6 text-center text-slate-500" colSpan={8}>
                   No applications yet
                 </td>
               </tr>
