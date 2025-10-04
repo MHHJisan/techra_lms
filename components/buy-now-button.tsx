@@ -30,10 +30,11 @@ export default function BuyNowButton({ label = "Buy Now", asChild = false, child
       try {
         const res = await fetch(`/api/applications?courseId=${encodeURIComponent(courseId)}`, { cache: "no-store" });
         if (!res.ok) return; // unauth or error: fall back to default behavior
-        const data = (await res.json()) as { hasPurchase: boolean; applicationStatus: null | "pending" | "approved" | "rejected" };
+        type StatusResp = { hasPurchase: boolean; applicationStatus: null | "pending" | "approved" | "rejected" };
+        const data: StatusResp = await res.json();
         if (!ignore) {
           setHasPurchase(Boolean(data?.hasPurchase));
-          setApplicationStatus((data?.applicationStatus as any) ?? null);
+          setApplicationStatus(data?.applicationStatus ?? null);
         }
       } catch {}
     })();
@@ -42,26 +43,26 @@ export default function BuyNowButton({ label = "Buy Now", asChild = false, child
     };
   }, [courseId]);
 
-  const handleTrigger = (e: React.MouseEvent) => {
-    e.preventDefault();
-    e.stopPropagation();
+  const triggerAction = () => {
     if (!courseId) {
-      // No course context: just open payment modal
       setOpen(true);
       return;
     }
     if (hasPurchase || applicationStatus === "approved") {
-      // Direct to course
       window.location.href = `/courses/${courseId}`;
       return;
     }
     if (applicationStatus === "pending") {
-      // Show info modal instead of payment
       setStatusOpen(true);
       return;
     }
-    // Default: open payment modal
     setOpen(true);
+  };
+
+  const handleTrigger = (e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    triggerAction();
   };
 
   return (
@@ -75,11 +76,11 @@ export default function BuyNowButton({ label = "Buy Now", asChild = false, child
               role="button"
               tabIndex={0}
               onClick={handleTrigger}
-              onKeyDown={(e) => {
+              onKeyDown={(e: React.KeyboardEvent<HTMLDivElement>) => {
                 if (e.key === "Enter" || e.key === " ") {
                   e.preventDefault();
                   e.stopPropagation();
-                  handleTrigger(e as any);
+                  triggerAction();
                 }
               }}
             >

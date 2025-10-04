@@ -61,7 +61,7 @@ export default async function DashboardPage({
           <div>
             <CoursesList items={completedCourses} showStatusBadge enableCardModal={false} />
             {completedCourses.length === 0 && (
-              <p className="text-sm text-muted-foreground mt-4">You haven't completed any course.</p>
+              <p className="text-sm text-muted-foreground mt-4">You haven&apos;t completed any course.</p>
             )}
           </div>
         ) : (

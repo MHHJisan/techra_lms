@@ -4,7 +4,6 @@ import { auth } from "@clerk/nextjs/server";
 import { redirect } from "next/navigation";
 import { CourseSidebar } from "./_components/course-sidebar";
 import { CourseNavbar } from "./_components/course-navbar";
-import { getRoleInfo } from "@/lib/auth-roles";
 
 const CourseLayout = async ({
   children,
@@ -14,17 +13,12 @@ const CourseLayout = async ({
   params: { courseId: string };
 }) => {
   const { userId } = auth();
-  // Determine admin/owner privileges (role first, then ADMIN_EMAILS)
-  const { me, isAdmin } = await getRoleInfo(userId ?? null);
 
   // Step 1: get course meta to determine ownership/publish status
   const courseMeta = await db.course.findUnique({
     where: { id: params.courseId },
     select: { id: true, userId: true, isPublished: true },
   });
-
-  const isOwner = !!(userId && courseMeta?.userId && me && courseMeta.userId === me.id);
-  const canBypassPublish = isAdmin || isOwner;
 
   if (!courseMeta) {
     console.log("Course not found with ID:", params.courseId);
@@ -67,11 +61,7 @@ const CourseLayout = async ({
 
   const progressCount = userId ? await getProgress(userId, course.id) : 0;
 
-  // Build teacher display name
-  const teacherName = [course.user?.firstName, course.user?.lastName]
-    .filter(Boolean)
-    .join(" ")
-    .trim() || (course.user?.email?.split("@")[0] ?? "Instructor");
+  // Teacher display name available via course.user, not used here
 
   return (
     <div className="h-full flex">
