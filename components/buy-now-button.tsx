@@ -21,6 +21,7 @@ export default function BuyNowButton({ label = "Buy Now", asChild = false, child
   const [statusOpen, setStatusOpen] = useState(false);
   const [hasPurchase, setHasPurchase] = useState(false);
   const [applicationStatus, setApplicationStatus] = useState<null | "pending" | "approved" | "rejected">(null);
+  const [bkashNumber, setBkashNumber] = useState("");
 
   // Fetch application/purchase status
   useEffect(() => {
@@ -126,11 +127,15 @@ export default function BuyNowButton({ label = "Buy Now", asChild = false, child
               onClick={(e) => {
                 e.stopPropagation();
                 if (!courseId || submitting) return;
+                if (paymentMethod === "bkash" && bkashNumber.trim().length < 6) {
+                  alert("Please enter the bKash number used for payment.");
+                  return;
+                }
                 setSubmitting(true);
                 fetch("/api/applications", {
                   method: "POST",
                   headers: { "Content-Type": "application/json" },
-                  body: JSON.stringify({ courseId, paymentMethod }),
+                  body: JSON.stringify({ courseId, paymentMethod, bkashNumber: paymentMethod === "bkash" ? bkashNumber.trim() : undefined }),
                 })
                   .then(async (r) => {
                     if (!r.ok) throw new Error((await r.json()).error || "Failed to apply");
@@ -184,6 +189,23 @@ export default function BuyNowButton({ label = "Buy Now", asChild = false, child
               </button>
             </div>
           </div>
+          {paymentMethod === "bkash" && (
+            <div className="mt-3">
+              <label htmlFor="bkashNumber" className="block text-xs text-slate-700 mb-1">
+                bKash number used for payment
+              </label>
+              <input
+                id="bkashNumber"
+                type="tel"
+                inputMode="tel"
+                placeholder="01XXXXXXXXX"
+                value={bkashNumber}
+                onChange={(e) => setBkashNumber(e.target.value)}
+                className="w-full rounded-md border px-3 py-2 text-sm"
+              />
+              <p className="mt-1 text-[11px] text-slate-500">We will use this to verify your bKash payment.</p>
+            </div>
+          )}
           {learnMoreHref ? (
             <div className="mt-4 rounded-md border border-slate-200 bg-slate-50 p-3 text-sm text-slate-700">
               <p className="mb-2">To visit the course please click</p>

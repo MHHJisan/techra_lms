@@ -198,6 +198,8 @@ model Application {
   course        Course   @relation(fields: [courseId], references: [id], onDelete: Cascade)
   // "cash" or "bkash"
   paymentMethod String   @default("bkash")
+  // Optional bKash number provided by the student when selecting bKash
+  bkashNumber   String?
   // e.g., pending, approved, rejected
   status        String   @default("pending")
   createdAt     DateTime @default(now())

@@ -30,6 +30,31 @@ export async function GET() {
   }
 }
 
+export async function DELETE(req: Request) {
+  try {
+    const { userId: clerkId } = auth();
+    if (!clerkId) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+
+    const { isAdmin } = await getRoleInfo(clerkId);
+    if (!isAdmin) return NextResponse.json({ error: "Forbidden" }, { status: 403 });
+
+    const body = await req.json().catch(() => ({}));
+    const id = String(body?.id || "").trim();
+    if (!id) return NextResponse.json({ error: "Missing id" }, { status: 400 });
+
+    const existing = await db.application.findUnique({ where: { id }, select: { id: true, userId: true, courseId: true } });
+    if (!existing) return NextResponse.json({ error: "Not found" }, { status: 404 });
+
+    // Also remove any purchase tying the user to the course so it disappears from dashboard
+    await db.purchase.deleteMany({ where: { userId: existing.userId, courseId: existing.courseId } });
+    await db.application.delete({ where: { id: existing.id } });
+    return NextResponse.json({ ok: true }, { status: 200 });
+  } catch (e) {
+    console.error("[ADMIN_APPS_DELETE]", e);
+    return NextResponse.json({ error: "Internal Server Error" }, { status: 500 });
+  }
+}
+
 export async function PATCH(req: Request) {
   try {
     const { userId: clerkId } = auth();
