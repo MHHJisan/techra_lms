@@ -33,13 +33,7 @@ export const CoursesList = ({ items, renderActions, showStatusBadge = false, bui
           const priceNumber = item.price ? Number(item.price as unknown as number) : 0;
           const categoryName = item.category?.name || "Uncategorized";
           const href = buildHref ? buildHref(item) : `/courses/${item.id}`;
-          const deliveryLabel = item.deliveryMode === "ONLINE"
-            ? "Online"
-            : item.deliveryMode === "IN_PERSON"
-            ? "In-person"
-            : item.deliveryMode === "HYBRID"
-            ? "Hybrid"
-            : undefined;
+          // delivery label is derived directly where needed; no local variable required
           const instrName =
             [item.user?.firstName, item.user?.lastName]
               .filter(Boolean)

@@ -151,7 +151,7 @@ export const CourseCard = ({
 
   if (modalEnabled) {
     return (
-      <BuyNowButton asChild learnMoreHref={href || `/courses/${id}`}>
+      <BuyNowButton asChild learnMoreHref={href || `/courses/${id}`} courseId={id}>
         {CardInner}
       </BuyNowButton>
     );

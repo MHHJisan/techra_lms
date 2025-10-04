@@ -38,8 +38,57 @@ export const getChapter = async ({
     const isOwner = !!(userId && courseBasic?.user?.clerkId === userId);
     const canBypassPublish = isAdmin || isOwner;
 
-    // If not allowed and course is not published, deny
-    if (!courseBasic || (!courseBasic.isPublished && !canBypassPublish)) {
+    if (!courseBasic) {
+      throw new Error("Chapter or Course not found");
+    }
+
+    // Compute internal user id and purchase early
+    const userDbId = me?.id ?? null; // internal User.id
+    const purchaseEarly = userDbId
+      ? await db.purchase.findUnique({
+          where: { userId_courseId: { userId: userDbId, courseId } },
+        })
+      : null;
+
+    // If not allowed and course is not published, show placeholder when purchased
+    if (!courseBasic.isPublished && !canBypassPublish) {
+      if (purchaseEarly) {
+        // Build author information as below
+        let authorName = [courseBasic.user?.firstName, courseBasic.user?.lastName]
+          .filter(Boolean)
+          .join(" ")
+          .trim();
+        let authorImageUrl = courseBasic.user?.imageUrl ?? null;
+
+        if (!authorName && courseBasic.user?.clerkId) {
+          try {
+            const { clerkClient } = await import("@clerk/nextjs/server");
+            const clerkUser = await clerkClient.users.getUser(courseBasic.user.clerkId);
+            const cFirst = (clerkUser.firstName as string | null) ?? undefined;
+            const cLast = (clerkUser.lastName as string | null) ?? undefined;
+            const cImage = (clerkUser.imageUrl as string | null) ?? undefined;
+            authorName = [cFirst, cLast].filter(Boolean).join(" ").trim();
+            authorImageUrl = authorImageUrl || cImage || null;
+          } catch {}
+        }
+        if (!authorName) {
+          const email = courseBasic.user?.email || "";
+          const local = email.includes("@") ? email.split("@")[0] : "";
+          const sanitized = local.replace(/^unknown\+user_.+$/, "").trim();
+          authorName = sanitized || "Instructor";
+        }
+        return {
+          chapter: null,
+          course: { price: courseBasic.price, user: courseBasic.user },
+          attachments: [] as Attachment[],
+          nextChapter: null as Chapter | null,
+          userProgress: null,
+          purchase: purchaseEarly,
+          author: { name: authorName, imageUrl: authorImageUrl },
+          isUnpublished: true,
+        };
+      }
+      // No purchase -> deny access
       throw new Error("Chapter or Course not found");
     }
 
@@ -52,6 +101,42 @@ export const getChapter = async ({
     });
 
     if (!chapter) {
+      // Might be an unpublished chapter — allow purchased users to see placeholder
+      if (!canBypassPublish && purchaseEarly) {
+        // Build author (same as above)
+        let authorName = [courseBasic.user?.firstName, courseBasic.user?.lastName]
+          .filter(Boolean)
+          .join(" ")
+          .trim();
+        let authorImageUrl = courseBasic.user?.imageUrl ?? null;
+        if (!authorName && courseBasic.user?.clerkId) {
+          try {
+            const { clerkClient } = await import("@clerk/nextjs/server");
+            const clerkUser = await clerkClient.users.getUser(courseBasic.user.clerkId);
+            const cFirst = (clerkUser.firstName as string | null) ?? undefined;
+            const cLast = (clerkUser.lastName as string | null) ?? undefined;
+            const cImage = (clerkUser.imageUrl as string | null) ?? undefined;
+            authorName = [cFirst, cLast].filter(Boolean).join(" ").trim();
+            authorImageUrl = authorImageUrl || cImage || null;
+          } catch {}
+        }
+        if (!authorName) {
+          const email = courseBasic.user?.email || "";
+          const local = email.includes("@") ? email.split("@")[0] : "";
+          const sanitized = local.replace(/^unknown\+user_.+$/, "").trim();
+          authorName = sanitized || "Instructor";
+        }
+        return {
+          chapter: null,
+          course: { price: courseBasic.price, user: courseBasic.user },
+          attachments: [] as Attachment[],
+          nextChapter: null as Chapter | null,
+          userProgress: null,
+          purchase: purchaseEarly,
+          author: { name: authorName, imageUrl: authorImageUrl },
+          isUnpublished: true,
+        };
+      }
       throw new Error("Chapter or Course not found");
     }
 
@@ -84,10 +169,10 @@ export const getChapter = async ({
       authorName = sanitized || "Instructor";
     }
 
-    const purchase = userId ? await db.purchase.findUnique({
+    const purchase = userDbId ? await db.purchase.findUnique({
       where: {
         userId_courseId: {
-          userId,
+          userId: userDbId,
           courseId,
         },
       },
@@ -119,10 +204,10 @@ export const getChapter = async ({
       });
     }
 
-    const userProgress = userId ? await db.userProgress.findUnique({
+    const userProgress = userDbId ? await db.userProgress.findUnique({
       where: {
         userId_chapterId: {
-          userId,
+          userId: userDbId,
           chapterId,
         },
       },
@@ -141,6 +226,7 @@ export const getChapter = async ({
         name: authorName,
         imageUrl: authorImageUrl,
       },
+      isUnpublished: false,
     };
   } catch (error) {
     console.log("[GET_CHAPTER]", error);
@@ -152,6 +238,7 @@ export const getChapter = async ({
       userProgress: null,
       purchase: null,
       author: null,
+      isUnpublished: false,
     };
   }
 };

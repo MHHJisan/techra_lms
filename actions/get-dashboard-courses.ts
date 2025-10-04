@@ -13,12 +13,18 @@ type DashboardCourses = {
   coursesInProgress: CourseWithProgressWithCategory[];
 };
 export const getDashboardCourses = async (
-  userId: string
+  clerkId: string
 ): Promise<DashboardCourses> => {
   try {
+    // Resolve internal DB user id from Clerk id
+    const me = await db.user.findUnique({ where: { clerkId }, select: { id: true } });
+    if (!me) {
+      return { completedCourses: [], coursesInProgress: [] };
+    }
+
     const purchasedCourses = await db.purchase.findMany({
       where: {
-        userId: userId,
+        userId: me.id,
       },
       select: {
         course: {
@@ -39,7 +45,7 @@ export const getDashboardCourses = async (
     ) as CourseWithProgressWithCategory[];
 
     for (let course of courses) {
-      const progress = await getProgress(userId, course.id);
+      const progress = await getProgress(me.id, course.id);
       course["progress"] = progress;
     }
 

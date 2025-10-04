@@ -113,7 +113,12 @@ export default async function CourseIdPage({ params }: PageProps) {
             />
 
             {/* Delivery Mode (Online / In-person / Hybrid) */}
-            <DeliveryModeForm initialData={{ deliveryMode: (course as any).deliveryMode }} courseId={course.id} />
+            <DeliveryModeForm
+              initialData={{
+                deliveryMode: (course as { deliveryMode?: "ONLINE" | "IN_PERSON" | "HYBRID" | null }).deliveryMode ?? null,
+              }}
+              courseId={course.id}
+            />
           </div>
 
           {/* Right column */}

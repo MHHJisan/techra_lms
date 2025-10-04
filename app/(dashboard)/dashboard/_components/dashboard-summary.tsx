@@ -3,6 +3,7 @@
 import { useLang } from "@/app/providers/LanguageProvider";
 import { CheckCircle, Clock } from "lucide-react";
 import { InfoCard } from "./info-card";
+import Link from "next/link";
 
 type Props = {
   username: string;
@@ -45,17 +46,29 @@ export default function DashboardSummary({
 
       <div className="p-6 space-y-4">
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-          <InfoCard
-            icon={Clock}
-            label={tr.inProgress}
-            numberOfItems={inProgressCount}
-          />
-          <InfoCard
-            icon={CheckCircle}
-            label={tr.completed}
-            numberOfItems={completedCount}
-            variant="success"
-          />
+          <Link
+            href={{ pathname: "/dashboard", query: { filter: "in-progress" } }}
+            className="block rounded-md transition hover:shadow-sm focus:outline-none focus:ring-2 focus:ring-sky-500"
+            aria-label="View courses in progress"
+          >
+            <InfoCard
+              icon={Clock}
+              label={tr.inProgress}
+              numberOfItems={inProgressCount}
+            />
+          </Link>
+          <Link
+            href={{ pathname: "/dashboard", query: { filter: "completed" } }}
+            className="block rounded-md transition hover:shadow-sm focus:outline-none focus:ring-2 focus:ring-sky-500"
+            aria-label="View completed courses"
+          >
+            <InfoCard
+              icon={CheckCircle}
+              label={tr.completed}
+              numberOfItems={completedCount}
+              variant="success"
+            />
+          </Link>
         </div>
       </div>
     </>
