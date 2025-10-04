@@ -10,6 +10,7 @@ type coureWithProgressWithCategory = Course & {
   category: Category | null;
   chapters: { id: string }[];
   progress: number | null;
+  deliveryMode?: "ONLINE" | "IN_PERSON" | "HYBRID" | null;
   user?: {
     firstName: string | null;
     lastName: string | null;

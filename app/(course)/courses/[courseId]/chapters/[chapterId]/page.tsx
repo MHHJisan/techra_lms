@@ -7,9 +7,10 @@ import { VideoPlayer } from "./_components/video-player";
 import { CourseEnrollButton } from "./_components/course-enroll-button";
 import { Separator } from "@/components/ui/separator";
 import { Preview } from "@/components/preview";
-import { File } from "lucide-react";
+import { File, FileQuestion, FileText, ImageIcon } from "lucide-react";
 import Image from "next/image";
 import CourseJsonLd from "@/components/seo/CourseJsonLd";
+import { db } from "@/lib/db";
 
 const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || "http://localhost:3000";
 
@@ -93,6 +94,13 @@ const ChapterIdPage = async ({
     return redirect("/");
   }
   const isLocked = !chapter.isFree && !purchase;
+
+  // Always load chapter-level resources; we will disable links if locked
+  const [materials, assignments, quizzes] = await Promise.all([
+    db.chapterMaterial.findMany({ where: { chapterId: params.chapterId } }),
+    db.chapterAssignment.findMany({ where: { chapterId: params.chapterId } }),
+    db.chapterQuiz.findMany({ where: { chapterId: params.chapterId } }),
+  ]);
   // const completeOnEnd = !!purchase && !userProgress?.isCompleted;
   const videoUrlOrId = chapter.videoUrl || "";
 
@@ -122,9 +130,9 @@ const ChapterIdPage = async ({
         <Banner variant="warning" label="You need to purchase this chapter" />
       )}
       <div className="w-full p-6">
-        <div className="-mx-4 md:-mx-6">
-          {videoUrlOrId ? (
-            <div className="relative w-full aspect-video rounded-md overflow-hidden bg-black">
+        {videoUrlOrId && (
+          <div className="-mx-4 md:-mx-6">
+            <div className="relative w-full aspect-[16/7] rounded-md overflow-hidden bg-black">
               <VideoPlayer
                 chapterId={params.chapterId}
                 courseId={params.courseId}
@@ -133,10 +141,8 @@ const ChapterIdPage = async ({
                 className="absolute inset-0 w-full h-full"
               />
             </div>
-          ) : (
-            <Banner variant="warning" label="No videos uploaded." />
-          )}
-        </div>
+          </div>
+        )}
 
         <div className="mt-4">
           <div className="p-4 flex flex-col md:flex-row items-center justify-between">
@@ -165,7 +171,11 @@ const ChapterIdPage = async ({
           </div>
           <Separator />
           <div>
-            <Preview value={chapter.description!} />
+            {chapter.description ? (
+              <Preview value={chapter.description} />
+            ) : (
+              <p className="text-sm text-slate-600 italic">No description provided.</p>
+            )}
           </div>
           {!!attachments.length && (
             <>
@@ -182,6 +192,94 @@ const ChapterIdPage = async ({
                     <p className="line-clamp-1 ">{attachments.name}</p>
                   </a>
                 ))}
+              </div>
+            </>
+          )}
+
+          {/* Chapter Materials */}
+          {materials.length > 0 && (
+            <>
+              <Separator />
+              <div className="p-4 space-y-2">
+                <h3 className="text-lg font-medium">Materials</h3>
+                {isLocked && (
+                  <p className="text-xs text-slate-500">Unlock this chapter to download materials.</p>
+                )}
+                {materials.map((m) => {
+                  const ItemInner = (
+                    <div className="flex items-center p-3 w-full bg-emerald-50 border border-emerald-100 text-emerald-700 rounded-md">
+                      {m.type === "image" ? (
+                        <ImageIcon className="h-4 w-4 mr-2" />
+                      ) : (
+                        <File className="h-4 w-4 mr-2" />
+                      )}
+                      <p className="text-sm line-clamp-1">{m.name}</p>
+                    </div>
+                  );
+                  return isLocked ? (
+                    <div key={m.id}>{ItemInner}</div>
+                  ) : (
+                    <a key={m.id} href={m.url} target="_blank" className="hover:underline">
+                      {ItemInner}
+                    </a>
+                  );
+                })}
+              </div>
+            </>
+          )}
+
+          {/* Assignments */}
+          {assignments.length > 0 && (
+            <>
+              <Separator />
+              <div className="p-4 space-y-2">
+                <h3 className="text-lg font-medium">Assignments (PDF/Text)</h3>
+                {isLocked && (
+                  <p className="text-xs text-slate-500">Unlock this chapter to download assignments.</p>
+                )}
+                {assignments.map((a) => {
+                  const ItemInner = (
+                    <div className="flex items-center p-3 w-full bg-indigo-50 border border-indigo-100 text-indigo-700 rounded-md">
+                      <FileText className="h-4 w-4 mr-2" />
+                      <p className="text-sm line-clamp-1">{a.name}</p>
+                    </div>
+                  );
+                  return isLocked ? (
+                    <div key={a.id}>{ItemInner}</div>
+                  ) : (
+                    <a key={a.id} href={a.url} target="_blank" className="hover:underline">
+                      {ItemInner}
+                    </a>
+                  );
+                })}
+              </div>
+            </>
+          )}
+
+          {/* Quizzes */}
+          {quizzes.length > 0 && (
+            <>
+              <Separator />
+              <div className="p-4 space-y-2">
+                <h3 className="text-lg font-medium">Quizzes (PDF)</h3>
+                {isLocked && (
+                  <p className="text-xs text-slate-500">Unlock this chapter to view quizzes.</p>
+                )}
+                {quizzes.map((q) => {
+                  const ItemInner = (
+                    <div className="flex items-center p-3 w-full bg-amber-50 border border-amber-100 text-amber-700 rounded-md">
+                      <FileQuestion className="h-4 w-4 mr-2" />
+                      <p className="text-sm line-clamp-1">{q.name}</p>
+                    </div>
+                  );
+                  return isLocked ? (
+                    <div key={q.id}>{ItemInner}</div>
+                  ) : (
+                    <a key={q.id} href={q.url} target="_blank" className="hover:underline">
+                      {ItemInner}
+                    </a>
+                  );
+                })}
               </div>
             </>
           )}

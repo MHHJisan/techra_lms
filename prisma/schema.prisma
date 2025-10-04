@@ -36,6 +36,12 @@ datasource db {
   directUrl = env("DIRECT_URL")
 }
 
+enum DeliveryMode {
+  ONLINE
+  IN_PERSON
+  HYBRID
+}
+
 model Course {
   id     String @id @default(uuid())
   userId String
@@ -46,6 +52,8 @@ model Course {
   imageUrl    String?  @db.Text
   price       Decimal? @db.Decimal(10, 2)
   isPublished Boolean  @default(false)
+
+  deliveryMode DeliveryMode?
 
   categoryId String?
   category   Category? @relation(fields: [categoryId], references: [id])

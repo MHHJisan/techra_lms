@@ -18,6 +18,7 @@ interface CourseCardProps {
   price: number;
   progress: number | null;
   category: string;
+  deliveryMode?: "ONLINE" | "IN_PERSON" | "HYBRID" | null;
   isPublished: boolean;
   showStatusBadge?: boolean;
   rightAction?: ReactNode;
@@ -35,6 +36,7 @@ export const CourseCard = ({
   price,
   progress,
   category,
+  deliveryMode,
   isPublished,
   showStatusBadge = false,
   rightAction,
@@ -44,33 +46,51 @@ export const CourseCard = ({
   modalEnabled = true,
 }: CourseCardProps) => {
   const { lang } = useLang();
-  const learnMoreLabel = lang === "bn" ? "আরও জানুন" : "Learn More";
+  const learnMoreLabel = lang === "bn" ? "আরও জারুন" : "Learn More";
   const currencyLabel = lang === "bn" ? "টাকা/-" : "Taka/-";
   const CardInner = (
     <div className="group hover:shadow-sm transition overflow-hidden border rounded-lg p-2 h-[300px] sm:h-[320px] md:h-[340px] lg:h-[360px] cursor-pointer flex flex-col">
-        <div className="relative w-full aspect-video rounded-md overflow-hidden">
-          <Image fill className="object-cover" alt={title} src={imageUrl} />
-          {showStatusBadge && (
-            <span
-              className={
-                "absolute top-2 right-2 px-2 py-0.5 text-[10px] font-medium rounded " +
-                (isPublished
-                  ? "bg-emerald-100 text-emerald-700 border border-emerald-200"
-                  : "bg-rose-100 text-rose-700 border border-rose-200")
-              }
-            >
-              {isPublished ? "Published" : "Draft"}
-            </span>
-          )}
-        </div>
-        <div className="flex flex-col pt-2 flex-1">
-          <div className="flex items-start justify-between gap-2">
-            <div className="text-lg md:text-base font-medium group-hover:text-sky-700 transiion line-clamp-2 min-h-[36px]">
-              {title}
-            </div>
-            {rightAction ? <div className="shrink-0">{rightAction}</div> : null}
+      <div className="relative w-full aspect-video rounded-md overflow-hidden">
+        <Image fill className="object-cover" alt={title} src={imageUrl} />
+        {showStatusBadge && (
+          <span
+            className={
+              "absolute top-2 right-2 px-2 py-0.5 text-[10px] font-medium rounded " +
+              (isPublished
+                ? "bg-emerald-100 text-emerald-700 border border-emerald-200"
+                : "bg-rose-100 text-rose-700 border border-rose-200")
+            }
+          >
+            {isPublished ? "Published" : "Draft"}
+          </span>
+        )}
+      </div>
+      <div className="flex flex-col pt-2 flex-1">
+        <div className="flex items-start justify-between gap-2">
+          <div className="text-lg md:text-base font-medium group-hover:text-sky-700 transiion line-clamp-2 min-h-[36px]">
+            {title}
           </div>
-          <p className="text-xs text-muted-foregroud">{category}</p>
+          {rightAction ? <div className="shrink-0">{rightAction}</div> : null}
+        </div>
+        <p className="text-xs text-muted-foregroud flex items-center justify-between gap-2">
+          <span className="truncate">{category}</span>
+          <span
+            className={
+              "inline-flex items-center px-2 py-0.5 text-[10px] rounded-full border shrink-0 " +
+              (deliveryMode === "IN_PERSON"
+                ? "bg-yellow-100 text-yellow-700 border-yellow-200"
+                : deliveryMode === "HYBRID"
+                ? "bg-sky-100 text-sky-700 border-sky-200"
+                : "bg-emerald-100 text-emerald-700 border-emerald-200")
+            }
+          >
+            {deliveryMode === "IN_PERSON"
+              ? "In-person"
+              : deliveryMode === "HYBRID"
+              ? "Hybrid"
+              : "Online"}
+          </span>
+        </p>
           <div className="mt-2 mb-1 flex items-center gap-x-2 text-sm md:text-xs">
             <div className="flex items-center gap-x-1 text-slate-500">
               <IconBadge size="sm" icon={BookOpen} />

@@ -3,6 +3,7 @@
 import { cn } from "@/lib/utils";
 import { CheckCircle, Lock, PlayCircle } from "lucide-react";
 import { usePathname, useRouter } from "next/navigation";
+import toast from "react-hot-toast";
 
 interface CourseSidebarItemProps {
   label: string;
@@ -27,6 +28,12 @@ export const CourseSidebarItem = ({
   const isActive = pathName?.includes(id);
 
   const onClick = () => {
+    if (isLocked) {
+      toast("You haven't enrolled to this course, to get all the lectures and course materials please enroll.", {
+        icon: "🔒",
+      });
+      return;
+    }
     router.push(`/courses/${courseId}/chapters/${id}`);
   };
 

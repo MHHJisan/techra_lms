@@ -12,6 +12,7 @@ import { TitleForm } from "./_components/title-form";
 import { DescriptionForm } from "./_components/description-form";
 import { ImageForm } from "./_components/image-form";
 import { CategoryForm } from "./_components/category-form";
+import { DeliveryModeForm } from "./_components/delivery-mode-form";
 import { ChaptersForm } from "./_components/chapters-form";
 import { PriceForm } from "./_components/price-form";
 import { AttachmentForm } from "./_components/attachment-form";
@@ -110,6 +111,9 @@ export default async function CourseIdPage({ params }: PageProps) {
                 value: c.id,
               }))}
             />
+
+            {/* Delivery Mode (Online / In-person / Hybrid) */}
+            <DeliveryModeForm initialData={{ deliveryMode: (course as any).deliveryMode }} courseId={course.id} />
           </div>
 
           {/* Right column */}
@@ -138,7 +142,7 @@ export default async function CourseIdPage({ params }: PageProps) {
               <IconBadge icon={Mail} />
               <h2 className="text-xl">Created By</h2>
             </div>
-            <div className="ml-2 text-slate-700 break-all">
+            <div className="ml-2 mb-2 text-slate-700 break-all">
               {course.user?.email || "—"}
             </div>
           </div>

@@ -16,29 +16,22 @@ const CourseIdPage = async ({ params }: { params: { courseId: string } }) => {
   const isOwner = !!(userId && courseMeta?.userId && me && courseMeta.userId === me.id);
   const canBypassPublish = isAdmin || isOwner;
 
-  if (!courseMeta || (!courseMeta.isPublished && !canBypassPublish)) {
+  if (!courseMeta) {
     return redirect("/");
   }
 
-  // Step 2: fetch full course with proper chapter visibility
-  const course = await db.course.findUnique({
-    where: { id: params.courseId },
-    include: {
-      chapters: {
-        where: canBypassPublish ? {} : { isPublished: true },
-        orderBy: { position: "asc" },
-      },
-    },
-  });
-
-  if (!course || !course.chapters || course.chapters.length === 0) {
-    if (canBypassPublish) {
-      return redirect(`/teacher/courses/${courseMeta.id}`);
-    }
-    return redirect("/");
-  }
-
-  return redirect(`/courses/${course.id}/chapters/${course.chapters[0].id}`);
+  // Do not redirect to a specific chapter. Let the layout render the sidebar
+  // with all chapter names, and show a friendly placeholder here.
+  return (
+    <div className="p-6">
+      <div className="rounded-md border bg-white p-6">
+        <h1 className="text-xl font-semibold mb-2">Course</h1>
+        <p className="text-sm text-slate-600">
+          Select a chapter from the sidebar to view its content.
+        </p>
+      </div>
+    </div>
+  );
 };
 
 export default CourseIdPage;

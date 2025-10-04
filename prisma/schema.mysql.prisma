@@ -12,6 +12,13 @@ datasource db {
 
 // ---- Models (copy from your original MySQL schema) ----
 
+// Delivery modality for a course
+enum DeliveryMode {
+  ONLINE
+  IN_PERSON
+  HYBRID
+}
+
 model Course {
   id          String   @id @default(uuid())
   userId      String
@@ -22,6 +29,9 @@ model Course {
   imageUrl    String? @db.Text
   price       Float?  // we'll convert to Decimal on write to PG
   isPublished Boolean @default(false)
+
+  // How the course is delivered (selected by teacher)
+  deliveryMode DeliveryMode?
 
   categoryId String?
   category   Category? @relation(fields: [categoryId], references: [id])

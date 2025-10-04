@@ -19,6 +19,10 @@ const PatchSchema = z.object({
   // Adjust price type to your schema: number or string.
   price: z.union([z.number(), z.string()]).nullable().optional(),
   isPublished: z.boolean().optional(), // include only if you allow toggling publish here
+  deliveryMode: z
+    .enum(["ONLINE", "IN_PERSON", "HYBRID"]) // Prisma enum as uppercase strings
+    .nullable()
+    .optional(),
 });
 
 // ---------- PATCH: update a course the caller owns ----------
@@ -32,9 +36,12 @@ export async function PATCH(
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    // Ensure the course exists AND is owned by the caller (via relation)
+    // Allow admins to update any course; otherwise require ownership
+    const { isAdmin } = await getRoleInfo(clerkId);
     const existing = await db.course.findFirst({
-      where: { id: params.courseId, user: { clerkId } },
+      where: isAdmin
+        ? { id: params.courseId }
+        : { id: params.courseId, user: { clerkId } },
       select: { id: true },
     });
     if (!existing) {

@@ -2,10 +2,13 @@ import { Category, Course } from "@prisma/client";
 import { ReactNode } from "react";
 import { CourseCard } from "./course-card";
 
+type DeliveryModeValue = "ONLINE" | "IN_PERSON" | "HYBRID";
+
 export type CourseWithProgressCategory = Course & {
   category: Category | null;
   chapters: { id: string }[];
   progress: number | null;
+  deliveryMode?: DeliveryModeValue | null;
   user?: {
     firstName: string | null;
     lastName: string | null;
@@ -30,6 +33,13 @@ export const CoursesList = ({ items, renderActions, showStatusBadge = false, bui
           const priceNumber = item.price ? Number(item.price as unknown as number) : 0;
           const categoryName = item.category?.name || "Uncategorized";
           const href = buildHref ? buildHref(item) : `/courses/${item.id}`;
+          const deliveryLabel = item.deliveryMode === "ONLINE"
+            ? "Online"
+            : item.deliveryMode === "IN_PERSON"
+            ? "In-person"
+            : item.deliveryMode === "HYBRID"
+            ? "Hybrid"
+            : undefined;
           const instrName =
             [item.user?.firstName, item.user?.lastName]
               .filter(Boolean)
@@ -46,6 +56,7 @@ export const CoursesList = ({ items, renderActions, showStatusBadge = false, bui
                 price={priceNumber}
                 progress={item.progress}
                 category={categoryName}
+                deliveryMode={item.deliveryMode ?? null}
                 isPublished={item.isPublished}
                 showStatusBadge={showStatusBadge}
                 rightAction={renderActions ? renderActions(item) : undefined}

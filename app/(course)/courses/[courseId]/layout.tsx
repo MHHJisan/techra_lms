@@ -26,17 +26,26 @@ const CourseLayout = async ({
   const isOwner = !!(userId && courseMeta?.userId && me && courseMeta.userId === me.id);
   const canBypassPublish = isAdmin || isOwner;
 
-  if (!courseMeta || (!courseMeta.isPublished && !canBypassPublish)) {
+  if (!courseMeta) {
     console.log("Course not found with ID:", params.courseId);
     return redirect("/");
   }
 
-  // Step 2: fetch full course with chapters filtered per privilege
+  // Step 2: fetch full course with chapters and author info
   const course = await db.course.findUnique({
     where: { id: params.courseId },
     include: {
+      user: {
+        select: {
+          firstName: true,
+          lastName: true,
+          imageUrl: true,
+          email: true,
+        },
+      },
       chapters: {
-        where: canBypassPublish ? {} : { isPublished: true },
+        // Show chapter names regardless of publish status
+        where: {},
         ...(userId
           ? {
               include: {
@@ -57,6 +66,12 @@ const CourseLayout = async ({
   }
 
   const progressCount = userId ? await getProgress(userId, course.id) : 0;
+
+  // Build teacher display name
+  const teacherName = [course.user?.firstName, course.user?.lastName]
+    .filter(Boolean)
+    .join(" ")
+    .trim() || (course.user?.email?.split("@")[0] ?? "Instructor");
 
   return (
     <div className="h-full flex">
