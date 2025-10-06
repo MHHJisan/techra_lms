@@ -71,6 +71,8 @@ export default function AdminUserActions({
         <option value="teacher">teacher</option>
         <option value="admin">admin</option>
         <option value="student">student</option>
+          <option value="management">management</option> {/* add this */}
+
       </select>
       <Button size="sm" onClick={onSave} disabled={loading}>
         {loading ? "Saving..." : "Save"}

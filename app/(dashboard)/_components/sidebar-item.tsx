@@ -27,9 +27,10 @@ export const SidebarItem  = (
     const current = normalize(pathname);
     const target = normalize(href);
 
-    const isActive =
-        current === target ||
-        (target !== "" && current.startsWith(`${target}/`));
+    // Only exact match should be active to avoid parent (e.g., /management)
+    // being active on child routes (e.g., /management/students)
+    const isActive = current === target;
+
     return ( 
         <Link
             href={href}
@@ -55,4 +56,3 @@ export const SidebarItem  = (
         </Link>
      );
 }
- 

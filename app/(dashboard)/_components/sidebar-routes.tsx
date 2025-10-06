@@ -9,6 +9,8 @@ import {
   GraduationCap,
   Grid2X2,
   FileSpreadsheet,
+  BookOpen,
+  LayoutGrid,
 } from "lucide-react";
 import { SidebarItem } from "./sidebar-item";
 import { useEffect, useState } from "react";
@@ -26,6 +28,9 @@ const translations = {
     students: "Students",
     registered: "Registered",
     applications: "Applications",
+    management: "Management",
+    enrollments: "Enrollments",
+    home: "Home",
   },
   bn: {
     dashboard: "ড্যাশবোর্ড",
@@ -33,11 +38,14 @@ const translations = {
     myCourses: "আমার কোর্সসমূহ",
     analytics: "অ্যানালিটিক্স",
     allCourses: "সমস্ত কোর্স",
-    allUsers: "সকল ব্যবহারকারী",
-    teachers: "শিক্ষকবৃন্দ",
+    allUsers: "সকল ব্যলহারকারী",
+    teachers: "শিক্ষকলৃন্দ",
     students: "শিক্ষার্থীরা",
     registered: "রেজিস্ট্রেশন",
-    applications: "আবেদনসমূহ",
+    applications: "আলেজমূহ",
+    management: "ম্যারেলমেন্ট",
+    enrollments: "এনরোলমেন্ট",
+    home: "হোম",
   },
 };
 
@@ -79,7 +87,7 @@ export const SidebarRoutes = () => {
     );
   }
 
-  const t = translations[lang];
+  const t = translations[lang as keyof typeof translations];
 
   const guestRoutes = [
     { icon: Layout, label: t.dashboard, href: "/dashboard" },
@@ -101,12 +109,21 @@ export const SidebarRoutes = () => {
     { icon: FileSpreadsheet, label: t.applications, href: "/admin/applications" },
   ];
 
-  const isTeacher = role === "teacher" || role === "instructor";
+  const managementRoutes = [
+    { icon: LayoutGrid, label: t.home, href: "/management" },
+    { icon: GraduationCap, label: t.teachers, href: "/management/teachers" },
+    { icon: Users, label: t.students, href: "/management/students" },
+    { icon: BookOpen, label: t.enrollments, href: "/management/enrollments" },
+  ];
 
-  // Prioritize admin sidebar everywhere (including /teacher/* pages),
-  // then teacher sidebar, otherwise guest.
+  const r = (role || "").trim().toLowerCase();
+  const isTeacher = r === "teacher" || r === "instructor";
+  const isManagement = r === "management" || r === "manager";
+
+  // Precedence: admin → management → teacher → guest
   let routes = guestRoutes;
   if (isAdmin) routes = adminRoutes;
+  else if (isManagement) routes = managementRoutes;
   else if (isTeacher) routes = teacherRoutes;
 
   return (

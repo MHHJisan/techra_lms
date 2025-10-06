@@ -5,18 +5,21 @@ export type RoleInfo = {
   me: Awaited<ReturnType<typeof db.user.findUnique>>;
   isAdmin: boolean;
   isTeacher: boolean;
+  isStaff: boolean;
+  isManagement: boolean;
 };
 
 export async function getRoleInfo(userId: string | null): Promise<RoleInfo> {
-  const me = userId ? await db.user.findUnique({ where: { clerkId: userId } }) : null;
+  // Initial values
+  let me = userId ? await db.user.findUnique({ where: { clerkId: userId } }) : null;
 
   const adminEmails = (process.env.ADMIN_EMAILS || "")
     .split(",")
     .map((e) => e.trim().toLowerCase())
     .filter(Boolean);
 
-  const email = me?.email?.toLowerCase();
-  let role = (me?.role ?? "").toLowerCase();
+  let email = me?.email?.toLowerCase();
+  let role = (me?.role ?? "").trim().toLowerCase();
 
   // Fallback to Clerk info if DB is missing
   let clerkEmails: string[] = [];
@@ -24,16 +27,23 @@ export async function getRoleInfo(userId: string | null): Promise<RoleInfo> {
   if (userId) {
     try {
       const cu = await clerkClient.users.getUser(userId);
-      clerkEmails = cu.emailAddresses
-        ?.map((e) => e.emailAddress?.toLowerCase())
-        .filter(Boolean) as string[];
-      const metaRole = (cu.publicMetadata?.role as string | undefined)?.toLowerCase();
-      if (!role && metaRole) role = metaRole;
-      if (!me?.email) {
-        // No DB email, attempt first Clerk email
-        // Note: we do not write to DB here to keep this helper pure
-      }
+      clerkEmails = (cu.emailAddresses || [])
+        .map((e) => (e.emailAddress || "").toLowerCase())
+        .filter(Boolean);
+      const metaRole = (cu.publicMetadata?.role as string | undefined)?.trim().toLowerCase();
       clerkMetaRole = metaRole;
+
+      // If DB user not found by clerkId, try finding by any Clerk email
+      if (!me && clerkEmails.length > 0) {
+        me = await db.user.findFirst({ where: { email: { in: clerkEmails } } });
+        if (me) {
+          email = me.email?.toLowerCase();
+          role = (me.role ?? "").trim().toLowerCase();
+        }
+      }
+
+      // If no DB role present, fall back to Clerk public metadata
+      if (!role && metaRole) role = metaRole;
     } catch {
       // ignore clerk fallback errors
     }
@@ -47,5 +57,9 @@ export async function getRoleInfo(userId: string | null): Promise<RoleInfo> {
   const isTeacher = role === "teacher" || role === "instructor" ||
     (clerkMetaRole === "teacher" || clerkMetaRole === "instructor");
 
-  return { me, isAdmin, isTeacher };
+  const isStaff = role === "staff" || clerkMetaRole === "staff";
+  const isManagement = role === "management" || role === "manager" ||
+    clerkMetaRole === "management" || clerkMetaRole === "manager";
+
+  return { me, isAdmin, isTeacher, isStaff, isManagement };
 }

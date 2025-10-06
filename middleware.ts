@@ -5,7 +5,7 @@ export default clerkMiddleware((auth, req) => {
   const { userId } = auth();
   const { pathname } = req.nextUrl;
 
-  if (pathname.startsWith("/teacher") || pathname.startsWith("/admin")) {
+  if (pathname.startsWith("/teacher") || pathname.startsWith("/admin") || pathname.startsWith("/management")) {
     if (!userId) {
       const url = req.nextUrl.clone();
       url.pathname = "/";
@@ -22,6 +22,7 @@ export const config = {
     "/(api|trpc)(.*)",
     "/teacher/:path*",
     "/admin/:path*",
+    "/management/:path*",
     "/dashboard/:path*",
   ],
 };
