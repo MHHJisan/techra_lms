@@ -2,9 +2,6 @@ import { db } from "@/lib/db"
 import { auth } from "@clerk/nextjs/server"
 import { NextResponse } from "next/server"
 import { getRoleInfo } from "@/lib/auth-roles"
-import { promise } from "zod"
-import { title } from "process"
-import { error } from "console"
 
 export async function PATCH (
     req: Request,
@@ -39,17 +36,6 @@ export async function PATCH (
             return new NextResponse("Not Found", { status: 404 });
         }
 
-        const missing: string[] = [];
-        if (!chapter.title) missing.push("title");
-        if (!chapter.description) missing.push("description");
-        if (!chapter.videoUrl) missing.push("videoUrl");
-        if (missing.length) {
-            return NextResponse.json(
-                { error: "Missing required fields", missing },
-                { status: 400 }
-            );
-        }
-
         //validate any 3 of 5 fields 
         const [materialsCount, assignmentCount] = await Promise.all([
             db.chapterMaterial.count({where: { chapterId: params.chapterId }}),
@@ -68,7 +54,7 @@ export async function PATCH (
             const details = {
                 title: hasTitle,
                 description: hasDescription,
-                video: hasVideoUrl,
+                videoUrl: hasVideoUrl,
                 materials: hasMaterials,
                 assignments: hasAssignments,
                 required: "Any 3 of 5 must be completed",
@@ -87,7 +73,7 @@ export async function PATCH (
 
         return NextResponse.json(publishedChapter)
     }catch (error) {
-        console.log("[CHAPTER_PUBLISH", error) 
+        console.log("[CHAPTER_PUBLISH]", error)
         return new NextResponse("Internal Error", { status: 500 })
     }
 }

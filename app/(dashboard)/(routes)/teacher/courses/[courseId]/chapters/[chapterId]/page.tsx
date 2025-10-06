@@ -42,14 +42,31 @@ const ChapterIdPage = async ({
     db.chapterAssignment.findMany({ where: { chapterId: params.chapterId } }),
     db.chapterQuiz.findMany({ where: { chapterId: params.chapterId } }),
   ]);
-  const requiredFields = [chapter.title, chapter.description, chapter.videoUrl];
+  // const requiredFields = [chapter.title, chapter.description, chapter.videoUrl];
 
-  const totalFields = requiredFields.length;
-  const completedFields = requiredFields.filter(Boolean).length;
+  // const totalFields = requiredFields.length;
+  // const completedFields = requiredFields.filter(Boolean).length;
 
-  const completionText = `(${completedFields}/${totalFields})`;
+  // const completionText = `(${completedFields}/${totalFields})`;
 
-  const isComplete = requiredFields.every(Boolean);
+  // const isComplete = requiredFields.every(Boolean);
+
+  const hasTitle = Boolean(chapter.title && chapter.title.trim());
+  const hasDescription = Boolean(chapter.description && chapter.description.trim());
+  const hasVideo = Boolean(chapter.videoUrl && chapter.videoUrl.trim());
+  const hasMaterials = materials.length > 0;
+  const hasAssignments = assignments.length > 0;
+
+  const completedCount = [
+    hasTitle,
+    hasDescription,
+    hasVideo,
+    hasMaterials,
+    hasAssignments,
+  ].filter(Boolean).length;
+
+  const isComplete = completedCount >= 3;
+  const completionText = `(${Math.min(completedCount, 3)}/3)`;
 
   return (
     <>
