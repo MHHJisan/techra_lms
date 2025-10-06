@@ -2,7 +2,7 @@
 import type { Metadata } from "next";
 import { redirect } from "next/navigation";
 import { auth, clerkClient } from "@clerk/nextjs/server";
-// import Hero from "@/components/udemy-clone/Hero";
+import Hero from "@/components/udemy-clone/Hero";
 import Stats from "@/components/home/Stats";
 import CategorySection from "@/components/udemy-clone/CategorySection";
 import FeaturedCourses from "@/components/udemy-clone/FeaturedCourses";
@@ -73,9 +73,7 @@ export default async function Page({ searchParams }: LoginPageProps) {
       .filter(Boolean);
 
     // 3) Fetch Clerk user once; reuse for admin + role fallback
-    let clerkUser: Awaited<
-      ReturnType<typeof clerkClient.users.getUser>
-    > | null = null;
+    let clerkUser: Awaited<ReturnType<typeof clerkClient.users.getUser>> | null = null;
     try {
       clerkUser = await clerkClient.users.getUser(userId);
     } catch {
@@ -111,47 +109,40 @@ export default async function Page({ searchParams }: LoginPageProps) {
     // 4) Determine admin
     const dbEmail = user?.email?.toLowerCase();
     const clerkEmails =
-      clerkUser?.emailAddresses
-        ?.map((e) => e.emailAddress?.toLowerCase())
-        .filter(Boolean) ?? [];
-    const isAdminFromDbRole = user?.role === "admin";
-    const isAdminFromEmails =
-      (!!dbEmail && adminEmails.includes(dbEmail)) ||
-      clerkEmails.some((e) => adminEmails.includes(e!));
+      clerkUser?.emailAddresses?.map((e) => e.emailAddress?.toLowerCase()).filter(Boolean) ?? [];
+    const isAdminFromDbRole = (user?.role || "").trim().toLowerCase() === "admin";
+    const isAdminFromEmails = (!!dbEmail && adminEmails.includes(dbEmail)) || clerkEmails.some((e) => adminEmails.includes(e!));
     const isAdmin = isAdminFromDbRole || isAdminFromEmails;
 
-    // 5) Determine teacher (DB first, then Clerk publicMetadata.role)
-    const metaRole = (
-      clerkUser?.publicMetadata?.role as string | undefined
-    )?.toLowerCase();
-    const role = (user?.role ?? metaRole ?? "").toLowerCase();
+    // 5) Determine teacher/management/staff (DB first, then Clerk publicMetadata.role)
+    const metaRole = (clerkUser?.publicMetadata?.role as string | undefined)?.trim().toLowerCase();
+    const role = (user?.role ?? metaRole ?? "").trim().toLowerCase();
     const isTeacher = role === "teacher" || role === "instructor";
+    const isManagement = role === "management" || role === "manager";
+    const isStaff = role === "staff";
 
-    // 6) Redirect precedence: admin → teacher → dashboard
+    // 6) Redirect precedence: admin → teacher → management/staff → dashboard
     if (isAdmin) {
       redirect("/admin/teachers");
     }
     if (isTeacher) {
       redirect("/teacher/courses");
     }
+    if (isManagement || isStaff) {
+      redirect("/management");
+    }
     redirect("/dashboard");
   }
 
-
-    // ✅ Normalize lang from the URL (?lang=bn|en)
+  // ✅ Normalize lang from the URL (?lang=bn|en)
   const lang = (searchParams?.lang === "bn" ? "bn" : "en") as "bn" | "en";
-
 
   // Guest view
   return (
     <div className="w-full">
       <UdemyStyleNavbar />
-      <FeaturedCourses
-        categoryId={searchParams?.categoryId}
-        q={searchParams?.q}
-        lang={lang}
-      />
-      {/* <Hero /> */}
+      <Hero />
+      <FeaturedCourses categoryId={searchParams?.categoryId} q={searchParams?.q} lang={lang} />
       <CategorySection />
       <Stats />
       <Testimonials />

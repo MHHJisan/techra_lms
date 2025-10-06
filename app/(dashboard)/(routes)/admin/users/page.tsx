@@ -40,6 +40,9 @@ function roleRowClass(role?: string | null): string {
     case "students":
       return "bg-green-50";
     case "user":
+      return "bg-blue-50";
+    case "management":
+      return "bg-purple-50";
     default:
       return "bg-blue-50";
   }

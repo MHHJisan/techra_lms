@@ -36,15 +36,30 @@ export async function PATCH (
             return new NextResponse("Not Found", { status: 404 });
         }
 
-        const missing: string[] = [];
-        if (!chapter.title) missing.push("title");
-        if (!chapter.description) missing.push("description");
-        if (!chapter.videoUrl) missing.push("videoUrl");
-        if (missing.length) {
-            return NextResponse.json(
-                { error: "Missing required fields", missing },
-                { status: 400 }
-            );
+        //validate any 3 of 5 fields 
+        const [materialsCount, assignmentCount] = await Promise.all([
+            db.chapterMaterial.count({where: { chapterId: params.chapterId }}),
+            db.chapterAssignment.count({where: { chapterId: params.chapterId }})
+        ])
+
+        const hasTitle = Boolean(chapter.title && chapter.title.trim());
+        const hasDescription = Boolean(chapter.description && chapter.description.trim());
+        const hasVideoUrl = Boolean(chapter.videoUrl && chapter.videoUrl.trim());
+        const hasMaterials = materialsCount > 0;
+        const hasAssignments = assignmentCount > 0;
+
+        const completed = [hasTitle, hasDescription, hasVideoUrl, hasMaterials, hasAssignments].filter(Boolean).length >= 3;
+
+        if (!completed) {
+            const details = {
+                title: hasTitle,
+                description: hasDescription,
+                videoUrl: hasVideoUrl,
+                materials: hasMaterials,
+                assignments: hasAssignments,
+                required: "Any 3 of 5 must be completed",
+            };
+            return NextResponse.json({ error: "Incomplete Chapter", details }, { status:400});
         }
 
         const publishedChapter = await db.chapter.update({
@@ -58,7 +73,7 @@ export async function PATCH (
 
         return NextResponse.json(publishedChapter)
     }catch (error) {
-        console.log("[CHAPTER_PUBLISH", error) 
+        console.log("[CHAPTER_PUBLISH]", error)
         return new NextResponse("Internal Error", { status: 500 })
     }
 }
