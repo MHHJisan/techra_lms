@@ -1,33 +1,6 @@
-// This is your Prisma schema file,
-// learn more about it in the docs: https://pris.ly/d/prisma-schema
-
-// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
-// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
-
 generator client {
   provider        = "prisma-client-js"
-  previewFeatures = ["fullTextSearch"]
-}
-
-model VideoEvent {
-  id     String  @id @default(uuid())
-  userId String?
-  user   User?   @relation(fields: [userId], references: [id])
-
-  courseId String
-  course   Course @relation(fields: [courseId], references: [id], onDelete: Cascade)
-
-  chapterId String
-  chapter   Chapter @relation(fields: [chapterId], references: [id], onDelete: Cascade)
-
-  videoId     String // YouTube video ID
-  eventType   String // e.g., "ready", "play", "pause", "ended", "progress"
-  currentTime Float?
-
-  createdAt DateTime @default(now())
-
-  @@index([courseId])
-  @@index([chapterId])
+  previewFeatures = ["fullTextSearchPostgres"]
 }
 
 datasource db {
@@ -36,36 +9,42 @@ datasource db {
   directUrl = env("DIRECT_URL")
 }
 
-enum DeliveryMode {
-  ONLINE
-  IN_PERSON
-  HYBRID
+model VideoEvent {
+  id          String   @id @default(uuid())
+  userId      String?
+  courseId    String
+  chapterId   String
+  videoId     String
+  eventType   String
+  currentTime Float?
+  createdAt   DateTime @default(now())
+  chapter     Chapter  @relation(fields: [chapterId], references: [id], onDelete: Cascade)
+  course      Course   @relation(fields: [courseId], references: [id], onDelete: Cascade)
+  user        User?    @relation(fields: [userId], references: [id])
+
+  @@index([courseId])
+  @@index([chapterId])
 }
 
 model Course {
-  id     String @id @default(uuid())
-  userId String
-  user   User   @relation("UserCourses", fields: [userId], references: [id], onDelete: Cascade)
-
-  title       String   @db.Text
-  description String?  @db.Text
-  imageUrl    String?  @db.Text
-  price       Decimal? @db.Decimal(10, 2)
-  isPublished Boolean  @default(false)
-
+  id           String        @id @default(uuid())
+  userId       String
+  title        String
+  description  String?
+  imageUrl     String?
+  price        Decimal?      @db.Decimal(10, 2)
+  isPublished  Boolean       @default(false)
+  categoryId   String?
+  createdAt    DateTime      @default(now())
+  updatedAt    DateTime      @updatedAt
   deliveryMode DeliveryMode?
-
-  categoryId String?
-  category   Category? @relation(fields: [categoryId], references: [id])
-
-  chapters    Chapter[]
-  attachments Attachment[]
-  purchases   Purchase[]
-  videoEvents VideoEvent[]
   applications Application[]
-
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  attachments  Attachment[]
+  chapters     Chapter[]
+  category     Category?     @relation(fields: [categoryId], references: [id])
+  user         User          @relation("UserCourses", fields: [userId], references: [id], onDelete: Cascade)
+  purchases    Purchase[]
+  videoEvents  VideoEvent[]
 
   @@index([categoryId])
 }
@@ -77,150 +56,188 @@ model Category {
 }
 
 model Attachment {
-  id   String @id @default(uuid())
-  name String
-  url  String @db.Text
-
-  courseId String
-  course   Course @relation(fields: [courseId], references: [id], onDelete: Cascade)
-
+  id        String   @id @default(uuid())
+  name      String
+  url       String
+  courseId  String
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+  course    Course   @relation(fields: [courseId], references: [id], onDelete: Cascade)
 
   @@index([courseId])
 }
 
 model Chapter {
-  id          String  @id @default(uuid())
-  title       String
-  description String? @db.Text
-  videoUrl    String? @db.Text
-  position    Int
-  isPublished Boolean @default(false)
-  isFree      Boolean @default(false)
-
-  courseId String
-  course   Course @relation(fields: [courseId], references: [id], onDelete: Cascade)
-
+  id           String              @id @default(uuid())
+  title        String
+  description  String?
+  videoUrl     String?
+  position     Int
+  isPublished  Boolean             @default(false)
+  isFree       Boolean             @default(false)
+  courseId     String
+  createdAt    DateTime            @default(now())
+  updatedAt    DateTime            @updatedAt
+  course       Course              @relation(fields: [courseId], references: [id], onDelete: Cascade)
+  assignments  ChapterAssignment[]
+  materials    ChapterMaterial[]
+  quizzes      ChapterQuiz[]
   userProgress UserProgress[]
   videoEvents  VideoEvent[]
-
-  // New relations for chapter resources
-  materials   ChapterMaterial[]
-  assignments ChapterAssignment[]
-  quizzes     ChapterQuiz[]
-
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  subChapters  SubChapter[]
 
   @@index([courseId])
 }
 
-// MuxData removed; using YouTube URLs stored directly on Chapter.videoUrl
+model SubChapter {
+  id          String   @id @default(uuid())
+  chapterId   String
+  chapter     Chapter  @relation(fields: [chapterId], references: [id], onDelete: Cascade)
+
+  title       String
+  slug        String   @unique
+  type        String?
+  videoId     String?
+  videoUrl    String?
+  content     String?
+  metadata    Json?
+  position    Int
+  isPublished Boolean  @default(false)
+  assignments SubChapterAssignment[]
+  quizzes     SubChapterQuiz[]
+
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@index([chapterId])
+}
+
+model SubChapterAssignment {
+  id           String    @id @default(uuid())
+  name         String
+  url          String
+  subchapterId String
+  subchapter   SubChapter @relation(fields: [subchapterId], references: [id], onDelete: Cascade)
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
+
+  @@index([subchapterId])
+}
+
+model SubChapterQuiz {
+  id           String    @id @default(uuid())
+  name         String
+  url          String
+  subchapterId String
+  subchapter   SubChapter @relation(fields: [subchapterId], references: [id], onDelete: Cascade)
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
+
+  @@index([subchapterId])
+}
 
 model UserProgress {
-  id     String @id @default(uuid())
-  userId String
-  user   User   @relation("UserProgress", fields: [userId], references: [id])
-
+  id          String   @id @default(uuid())
+  userId      String
   chapterId   String
-  chapter     Chapter @relation(fields: [chapterId], references: [id], onDelete: Cascade)
-  isCompleted Boolean @default(false)
-
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  isCompleted Boolean  @default(false)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  chapter     Chapter  @relation(fields: [chapterId], references: [id], onDelete: Cascade)
+  user        User     @relation("UserProgress", fields: [userId], references: [id])
 
   @@unique([userId, chapterId])
   @@index([chapterId])
 }
 
 model Purchase {
-  id     String @id @default(uuid())
-  userId String
-  user   User   @relation("UserPurchases", fields: [userId], references: [id])
-
-  courseId String
-  course   Course @relation(fields: [courseId], references: [id], onDelete: Cascade)
-
+  id        String   @id @default(uuid())
+  userId    String
+  courseId  String
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+  course    Course   @relation(fields: [courseId], references: [id], onDelete: Cascade)
+  user      User     @relation("UserPurchases", fields: [userId], references: [id])
 
   @@unique([userId, courseId])
   @@index([courseId])
 }
 
 model StripeCustomer {
-  id     String @id @default(uuid())
-  userId String @unique
-  user   User   @relation(fields: [userId], references: [id])
-
-  stripeCustomerId String @unique
-
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt()
+  id               String   @id @default(uuid())
+  userId           String   @unique
+  stripeCustomerId String   @unique
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
+  user             User     @relation(fields: [userId], references: [id])
 }
 
 model User {
-  id        String  @id @default(uuid()) // Primary key
-  clerkId   String  @unique // Clerk's user ID
-  email     String  @unique
-  firstName String?
-  lastName  String?
-  imageUrl  String? @db.Text
-  role      String? @default("user") // Optional role
-
+  id             String          @id @default(uuid())
+  clerkId        String          @unique
+  email          String          @unique
+  firstName      String?
+  lastName       String?
+  imageUrl       String?
+  role           String?         @default("user")
+  createdAt      DateTime        @default(now())
+  updatedAt      DateTime        @updatedAt
+  applications   Application[]
   courses        Course[]        @relation("UserCourses")
   purchases      Purchase[]      @relation("UserPurchases")
-  userProgress   UserProgress[]  @relation("UserProgress")
   stripeCustomer StripeCustomer?
+  userProgress   UserProgress[]  @relation("UserProgress")
   videoEvents    VideoEvent[]
-  applications   Application[]
-
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
 }
 
 /// This model maps to an existing table that is managed outside Prisma.
 /// Marked as ignored so Prisma will not try to drop or migrate it, avoiding data loss.
 model Registration {
-  id String @id
+  id                  String   @id
+  name                String   @default("")
+  father_name         String   @default("")
+  mother_name         String   @default("")
+  address             String   @default("")
+  date_of_birth       String   @default("")
+  nid_or_birth_cert   String   @default("")
+  guardian_name       String   @default("")
+  occupation          String   @default("")
+  email               String   @default("")
+  mobile              String   @default("")
+  course_name         String   @default("")
+  created_at          DateTime @default(now()) @db.Timestamptz(6)
+  student_institution String?
+  organization_name   String?
 
   @@map("registrations")
   @@ignore
 }
 
-// Applications submitted by students for enrollment
 model Application {
   id            String   @id @default(uuid())
   userId        String
-  user          User     @relation(fields: [userId], references: [id], onDelete: Cascade)
   courseId      String
-  course        Course   @relation(fields: [courseId], references: [id], onDelete: Cascade)
-  // "cash" or "bkash"
   paymentMethod String   @default("bkash")
-  // Optional bKash number provided by the student when selecting bKash
-  bkashNumber   String?
-  // e.g., pending, approved, rejected
   status        String   @default("pending")
   createdAt     DateTime @default(now())
   updatedAt     DateTime @updatedAt
+  bkashNumber   String?
+  course        Course   @relation(fields: [courseId], references: [id], onDelete: Cascade)
+  user          User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@index([userId])
   @@index([courseId])
 }
 
-// New chapter-level resource models
 model ChapterMaterial {
   id        String   @id @default(uuid())
   name      String
-  url       String   @db.Text
-  type      String?  // e.g., image, pdf, slide
-
+  url       String
+  type      String?
   chapterId String
-  chapter   Chapter  @relation(fields: [chapterId], references: [id], onDelete: Cascade)
-
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+  chapter   Chapter  @relation(fields: [chapterId], references: [id], onDelete: Cascade)
 
   @@index([chapterId])
 }
@@ -228,13 +245,11 @@ model ChapterMaterial {
 model ChapterAssignment {
   id        String   @id @default(uuid())
   name      String
-  url       String   @db.Text
-
+  url       String
   chapterId String
-  chapter   Chapter  @relation(fields: [chapterId], references: [id], onDelete: Cascade)
-
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+  chapter   Chapter  @relation(fields: [chapterId], references: [id], onDelete: Cascade)
 
   @@index([chapterId])
 }
@@ -242,13 +257,17 @@ model ChapterAssignment {
 model ChapterQuiz {
   id        String   @id @default(uuid())
   name      String
-  url       String   @db.Text
-
+  url       String
   chapterId String
-  chapter   Chapter  @relation(fields: [chapterId], references: [id], onDelete: Cascade)
-
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+  chapter   Chapter  @relation(fields: [chapterId], references: [id], onDelete: Cascade)
 
   @@index([chapterId])
+}
+
+enum DeliveryMode {
+  ONLINE
+  IN_PERSON
+  HYBRID
 }

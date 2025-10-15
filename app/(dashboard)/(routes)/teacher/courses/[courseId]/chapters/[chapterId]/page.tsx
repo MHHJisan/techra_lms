@@ -1,7 +1,7 @@
 import { IconBadge } from "@/components/icon-badge";
 import { db } from "@/lib/db";
 import { auth } from "@clerk/nextjs/server";
-import { ArrowLeft, Eye, LayoutDashboard, NotebookText, Video } from "lucide-react";
+import { ArrowLeft, Eye, LayoutDashboard, NotebookText, Plus, Video } from "lucide-react";
 import Link from "next/link";
 import { redirect } from "next/navigation";
 import { ChapterTitleForm } from "./_components/chapter-title-form";
@@ -13,6 +13,7 @@ import { ChapterAssignmentsForm } from "./_components/chapter-assignments-form";
 import { ChapterQuizzesForm } from "./_components/chapter-quizzes-form";
 import { Banner } from "@/components/banner";
 import { ChapterActions } from "./_components/chapter-actions";
+import { SubchaptersForm } from "./subchapters/_components/subchapters-form";
 
 const ChapterIdPage = async ({
   params,
@@ -94,12 +95,15 @@ const ChapterIdPage = async ({
                   Complete all fields {completionText}
                 </span>
               </div>
-              <ChapterActions
+              <div className="flex items-center gap-2">
+                <ChapterActions
                 disabled={!isComplete}
                 courseId={params.courseId}
                 chapterId={params.chapterId}
                 isPublished={chapter.isPublished}
               />
+              </div>
+              
             </div>
           </div>
         </div>
@@ -128,9 +132,12 @@ const ChapterIdPage = async ({
               initialData={chapter}
               courseId={params.courseId}
               chapterId={params.chapterId}
-            />
+              />
+              
+              
             
               </div>
+            <SubchaptersForm courseId={params.courseId} chapterId={params.chapterId} />
           </div>
           {/* Right Section - Add a video */}
           <div className="col-span-6">
