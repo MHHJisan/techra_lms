@@ -9,9 +9,11 @@ export async function GET(req: Request, { params }: { params: { courseId: string
         const { userId } = auth();
         const _roleInfo = await getRoleInfo(userId ?? null);
         const isInstructor = _roleInfo.isTeacher;
+        const url = new URL(req.url);
+        const includeDrafts = url.searchParams.get("includeDrafts") === "1";
         const where = {
             chapterId: params.chapterId,
-            ...(isInstructor ? {} : { isPublished: true })
+            ...((isInstructor && includeDrafts) ? {} : { isPublished: true })
         };
 
         const items = await prisma.subChapter.findMany({
@@ -35,7 +37,14 @@ export async function POST(req: Request, { params }: { params: { courseId: strin
         //await assertChapterOwner(user, params.courseId, params.chapterId)
 
         const body = await req.json()
-        const { title, slug, type, videoId, videoUrl, content } = body;
+        const { title, slug, type, videoId, videoUrl, content } = body as {
+            title: string;
+            slug?: string;
+            type?: string;
+            videoId?: string | null;
+            videoUrl?: string | null;
+            content?: string | null;
+        };
 
         const last = await prisma.subChapter.findFirst({
             where: {
@@ -52,18 +61,18 @@ export async function POST(req: Request, { params }: { params: { courseId: strin
 
         const position = (last?.position ?? 0) + 1;
 
-        // Note: Ensure your Prisma model is named correctly. This uses subChapter consistently.
+        // Create with required chapter relation; include optional fields only when present
         const created = await prisma.subChapter.create({
             data: {
-                chapterId: params.chapterId,
+                chapter: { connect: { id: params.chapterId } },
                 title,
                 slug: slug ?? title,
-                type,
-                videoId: videoId ?? null,
-                videoUrl,
-                content: content ?? null,
                 position,
-            }
+                ...(typeof type !== "undefined" ? { type } : {}),
+                ...(typeof videoId !== "undefined" ? { videoId: videoId ?? null } : {}),
+                ...(typeof videoUrl !== "undefined" ? { videoUrl: videoUrl ?? null } : {}),
+                ...(typeof content !== "undefined" ? { content: content ?? null } : {}),
+            },
         }); 
         return NextResponse.json(created, { status: 201 });
     } catch (err) {
