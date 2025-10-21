@@ -11,7 +11,9 @@ export default async function SubchapterListPage({ params
     const proto = hdrs.get("x-forwarded-proto") ?? "http";
     const fallbackHost = process.env.VERCEL_URL || process.env.NEXT_PUBLIC_BASE_URL || "localhost:3000";
     const origin = host ? `${proto}://${host}` : `http://${fallbackHost}`;
-    const apiUrl = new URL(`/api/courses/${params.courseId}/chapters/${params.chapterId}/subchapters`, origin).toString();
+    const api = new URL(`/api/courses/${params.courseId}/chapters/${params.chapterId}/subchapters`, origin);
+    api.searchParams.set("includeDrafts", "1");
+    const apiUrl = api.toString();
     type Item = { id: string; title: string; type?: string | null; isPublished?: boolean | null };
     let items: Item[] = [];
     try {

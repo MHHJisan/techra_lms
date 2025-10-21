@@ -45,7 +45,9 @@ export const SubchaptersForm = ({ courseId, chapterId }: SubchaptersFormProps) =
 
   const loadItems = async () => {
     try {
-      const res = await axios.get(`/api/courses/${courseId}/chapters/${chapterId}/subchapters`);
+      const res = await axios.get(
+        `/api/courses/${courseId}/chapters/${chapterId}/subchapters?includeDrafts=1`
+      );
       const data = Array.isArray(res.data) ? res.data : [];
       setItems(data);
     } catch (err) {
