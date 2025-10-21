@@ -12,14 +12,15 @@ export default async function SubchapterListPage({ params
     const fallbackHost = process.env.VERCEL_URL || process.env.NEXT_PUBLIC_BASE_URL || "localhost:3000";
     const origin = host ? `${proto}://${host}` : `http://${fallbackHost}`;
     const apiUrl = new URL(`/api/courses/${params.courseId}/chapters/${params.chapterId}/subchapters`, origin).toString();
-    let items: any[] = [];
+    type Item = { id: string; title: string; type?: string | null; isPublished?: boolean | null };
+    let items: Item[] = [];
     try {
         const res = await fetch(apiUrl, { cache: "no-store" });
         if (!res.ok) {
             items = [];
         } else {
             const data = await res.json();
-            items = Array.isArray(data) ? data : [];
+            items = Array.isArray(data) ? (data as Item[]) : [];
         }
     } catch {
         items = [];
@@ -32,7 +33,7 @@ export default async function SubchapterListPage({ params
                 <SubChapterAdd courseId={params.courseId} chapterId={params.chapterId} />
             </div>
             <ul className="mt-4 space-y-2">
-                {items.map((sc: any) => (
+                {items.map((sc: Item) => (
                     <li key={sc.id} className="border p-3 rounded flex items-center justify-between">
                         <div>
                             <h2 className="font-medium">{sc.title}</h2>

@@ -6,7 +6,7 @@ export async function DELETE(
   { params }: { params: { courseId: string; chapterId: string; subchapterId: string; assignmentId: string } }
 ) {
   try {
-    await (prisma as any).subChapterAssignment.delete({ where: { id: params.assignmentId } });
+    await prisma.subChapterAssignment.delete({ where: { id: params.assignmentId } });
     return NextResponse.json({ ok: true });
   } catch (err) {
     console.error("DELETE subchapter assignment failed", err);

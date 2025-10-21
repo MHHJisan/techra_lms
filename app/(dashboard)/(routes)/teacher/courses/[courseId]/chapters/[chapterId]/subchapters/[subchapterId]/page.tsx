@@ -1,9 +1,8 @@
 import Link from "next/link";
 import { redirect } from "next/navigation";
 import { auth } from "@clerk/nextjs/server";
-import { db } from "@/lib/db";
+import { prisma } from "@/lib/prisma";
 import { ArrowLeft, NotebookText, LayoutDashboard, Video } from "lucide-react";
-import { SubchapterEditForm } from "./_components/subchapter-edit-form";
 import { SubchapterTitleForm } from "./_components/subchapter-title-form";
 import { SubchapterTypeForm } from "./_components/subchapter-type-form";
 import { SubchapterContentForm } from "./_components/subchapter-content-form";
@@ -23,7 +22,7 @@ export default async function SubchapterEditPage({
   if (!userId) return redirect("/");
 
   // Load subchapter to edit
-  const subchapter = await (db as any).subChapter.findFirst({
+  const subchapter = await prisma.subChapter.findFirst({
     where: { id: params.subchapterId, chapterId: params.chapterId },
     select: { id: true, title: true, type: true, content: true, videoUrl: true, videoId: true, isPublished: true },
   });
@@ -32,12 +31,12 @@ export default async function SubchapterEditPage({
 
   // Load related items
   const [assignments, quizzes] = await Promise.all([
-    (db as any).subChapterAssignment.findMany({
+    prisma.subChapterAssignment.findMany({
       where: { subchapterId: params.subchapterId },
       select: { id: true, name: true, url: true },
       orderBy: { createdAt: "desc" },
     }),
-    (db as any).subChapterQuiz.findMany({
+    prisma.subChapterQuiz.findMany({
       where: { subchapterId: params.subchapterId },
       select: { id: true, name: true, url: true },
       orderBy: { createdAt: "desc" },

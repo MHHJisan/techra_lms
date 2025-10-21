@@ -1,5 +1,4 @@
 import { NextResponse } from "next/server";
-import { auth } from "@clerk/nextjs/server";
 import { prisma } from "@/lib/prisma";
 
 export async function POST(
@@ -7,8 +6,7 @@ export async function POST(
   { params }: { params: { courseId: string; chapterId: string; subchapterId: string } }
 ) {
   try {
-    const { userId } = await auth();
-    const item = await (prisma as any).subChapter.update({
+    const item = await prisma.subChapter.update({
       where: {
         id: params.subchapterId,
       },

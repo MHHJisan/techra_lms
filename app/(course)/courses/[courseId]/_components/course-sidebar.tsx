@@ -1,4 +1,5 @@
 import { db } from "@/lib/db";
+import { prisma } from "@/lib/prisma";
 import { auth } from "@clerk/nextjs/server";
 import { Chapter, Course, UserProgress } from "@prisma/client";
 import { CourseSidebarItem } from "./course-sidebar-item";
@@ -43,7 +44,7 @@ export const CourseSidebar = async ({
   // Load subchapters for all chapters to display under each chapter
   const chapterIds = course.chapters.map((c) => c.id);
   const subchapters = chapterIds.length
-    ? await (db as any).subChapter.findMany({
+    ? await prisma.subChapter.findMany({
         where: { chapterId: { in: chapterIds } },
         select: { id: true, title: true, chapterId: true, position: true },
         orderBy: { position: "asc" },

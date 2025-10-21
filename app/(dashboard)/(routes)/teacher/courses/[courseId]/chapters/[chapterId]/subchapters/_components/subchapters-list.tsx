@@ -7,7 +7,7 @@ import {
   Draggable,
   DropResult,
 } from "@hello-pangea/dnd";
-import { Grip, Pencil, UploadCloud, XCircle, CheckCircle } from "lucide-react";
+import { Grip, Pencil, XCircle, CheckCircle } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 

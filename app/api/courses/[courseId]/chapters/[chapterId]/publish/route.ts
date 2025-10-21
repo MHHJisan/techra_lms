@@ -2,7 +2,6 @@ import { db } from "@/lib/db"
 import { auth } from "@clerk/nextjs/server"
 import { NextResponse } from "next/server"
 import { getRoleInfo } from "@/lib/auth-roles"
-import { prisma } from "@/lib/prisma"
 
 //code showed by windsurf is different, that's why didn't add that right now, will have to recheck and work on it later
 

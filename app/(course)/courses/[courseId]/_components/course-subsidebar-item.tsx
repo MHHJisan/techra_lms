@@ -1,7 +1,7 @@
 "use client";
 
 import { cn } from "@/lib/utils";
-import { CheckCircle, Lock, PlayCircle } from "lucide-react";
+import { Lock, PlayCircle } from "lucide-react";
 import { usePathname, useRouter } from "next/navigation";
 import toast from "react-hot-toast";
 

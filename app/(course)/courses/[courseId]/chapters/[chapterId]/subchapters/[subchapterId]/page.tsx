@@ -1,11 +1,11 @@
 import { auth } from "@clerk/nextjs/server";
 import { redirect } from "next/navigation";
 import { db } from "@/lib/db";
+import { prisma } from "@/lib/prisma";
 import { Banner } from "@/components/banner";
 import { Preview } from "@/components/preview";
 import { Separator } from "@/components/ui/separator";
 import { FileQuestion, FileText } from "lucide-react";
-import Image from "next/image";
 import { VideoPlayer } from "../../_components/video-player";
 
 export default async function SubchapterPage({
@@ -23,7 +23,7 @@ export default async function SubchapterPage({
     where: { id: params.chapterId },
     select: { id: true, title: true, isFree: true, isPublished: true },
   });
-  const subchapter = await (db as any).subChapter.findUnique({
+  const subchapter = await prisma.subChapter.findUnique({
     where: { id: params.subchapterId },
     select: { id: true, title: true, content: true, videoUrl: true, isPublished: true },
   });
@@ -58,8 +58,8 @@ export default async function SubchapterPage({
 
   // Load subchapter-specific resources
   const [assignments, quizzes] = await Promise.all([
-    (db as any).subChapterAssignment.findMany({ where: { subchapterId: params.subchapterId } }),
-    (db as any).subChapterQuiz.findMany({ where: { subchapterId: params.subchapterId } }),
+    prisma.subChapterAssignment.findMany({ where: { subchapterId: params.subchapterId } }),
+    prisma.subChapterQuiz.findMany({ where: { subchapterId: params.subchapterId } }),
   ]);
 
   const videoUrlOrId = subchapter.videoUrl || "";
@@ -106,7 +106,7 @@ export default async function SubchapterPage({
                 {isLocked && (
                   <p className="text-xs text-slate-500">Unlock this course to download assignments.</p>
                 )}
-                {assignments.map((a: any) => {
+                {assignments.map((a) => {
                   const ItemInner = (
                     <div className="flex items-center p-3 w-full bg-indigo-50 border border-indigo-100 text-indigo-700 rounded-md">
                       <FileText className="h-4 w-4 mr-2" />
@@ -134,7 +134,7 @@ export default async function SubchapterPage({
                 {isLocked && (
                   <p className="text-xs text-slate-500">Unlock this course to view quizzes.</p>
                 )}
-                {quizzes.map((q: any) => {
+                {quizzes.map((q) => {
                   const ItemInner = (
                     <div className="flex items-center p-3 w-full bg-amber-50 border border-amber-100 text-amber-700 rounded-md">
                       <FileQuestion className="h-4 w-4 mr-2" />

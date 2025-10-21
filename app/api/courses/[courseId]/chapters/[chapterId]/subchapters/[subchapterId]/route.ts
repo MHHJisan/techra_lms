@@ -1,5 +1,4 @@
 import { NextResponse } from "next/server";
-import { auth } from "@clerk/nextjs/server"
 import { prisma } from "@/lib/prisma";
 
 export async function GET(req: Request, { params }: { params: { chapterId: string; subchapterId: string } }) {
@@ -19,7 +18,6 @@ export async function GET(req: Request, { params }: { params: { chapterId: strin
 
 
 export async function PATCH(req: Request, { params }: { params: { chapterId: string; subchapterId: string } }) {
-    const user = await auth()
     const body = await req.json()
     const updated = await prisma.subChapter.update({
         where: {
@@ -40,7 +38,6 @@ export async function PATCH(req: Request, { params }: { params: { chapterId: str
 }
 
 export async function DELETE(req: Request, { params }: { params: { chapterId: string; subchapterId: string } }) {
-    const user = await auth()
     //await assertChapterOwner(user, ...);
     await prisma.subChapter.delete({
         where: {

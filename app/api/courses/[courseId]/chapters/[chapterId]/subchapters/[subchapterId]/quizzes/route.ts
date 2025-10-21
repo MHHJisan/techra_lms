@@ -6,7 +6,7 @@ export async function GET(
   { params }: { params: { courseId: string; chapterId: string; subchapterId: string } }
 ) {
   try {
-    const items = await (prisma as any).subChapterQuiz.findMany({
+    const items = await prisma.subChapterQuiz.findMany({
       where: { subchapterId: params.subchapterId },
       orderBy: { createdAt: "desc" },
       select: { id: true, name: true, url: true },
@@ -28,9 +28,9 @@ export async function POST(
     const url: string = body.url;
     if (!url) return NextResponse.json({ error: "url required" }, { status: 400 });
 
-    const payload: any = { subchapterId: params.subchapterId, url };
-    if (name) payload.name = name;
-    const created = await (prisma as any).subChapterQuiz.create({ data: payload });
+    const created = await prisma.subChapterQuiz.create({
+      data: { subchapterId: params.subchapterId, url, name: name ?? "" },
+    });
     return NextResponse.json(created, { status: 201 });
   } catch (err) {
     console.error("POST subchapter quiz failed", err);

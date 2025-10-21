@@ -1,10 +1,8 @@
 import { NextResponse } from "next/server";
-import { auth } from "@clerk/nextjs/server";
 import { prisma } from "@/lib/prisma";
 
-export async function PUT(req: Request, { params }: { params: { courseId: string; chapterId: string } }) {
+export async function PUT(req: Request) {
   try {
-    const { userId } = auth();
     const body = await req.json();
     const list: Array<{ id: string; position: number }> = body.list || [];
 
@@ -14,7 +12,7 @@ export async function PUT(req: Request, { params }: { params: { courseId: string
 
     await prisma.$transaction(
       list.map((item) =>
-        (prisma as any).subChapter.update({
+        prisma.subChapter.update({
           where: { id: item.id },
           data: { position: item.position },
         })
